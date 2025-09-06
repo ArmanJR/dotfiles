@@ -424,30 +424,30 @@ proj() {
 }
 
 # Git worktree helper
-gwt() {
-  case "$1" in
-    add)
-      if [[ -z "$2" || -z "$3" ]]; then
-        echo "Usage: gwt add <branch> <path>"
-        return 1
-      fi
-      git worktree add "$3" "$2"
-      ;;
-    list|ls)
-      git worktree list
-      ;;
-    remove|rm)
-      if [[ -z "$2" ]]; then
-        echo "Usage: gwt remove <path>"
-        return 1
-      fi
-      git worktree remove "$2"
-      ;;
-    *)
-      echo "Usage: gwt {add|list|remove} [args]"
-      ;;
-  esac
-}
+# gwt() {
+#   case "$1" in
+#     add)
+#       if [[ -z "$2" || -z "$3" ]]; then
+#         echo "Usage: gwt add <branch> <path>"
+#         return 1
+#       fi
+#       git worktree add "$3" "$2"
+#       ;;
+#     list|ls)
+#       git worktree list
+#       ;;
+#     remove|rm)
+#       if [[ -z "$2" ]]; then
+#         echo "Usage: gwt remove <path>"
+#         return 1
+#       fi
+#       git worktree remove "$2"
+#       ;;
+#     *)
+#       echo "Usage: gwt {add|list|remove} [args]"
+#       ;;
+#   esac
+# }
 
 # Docker cleanup
 docker-cleanup() {
