@@ -152,7 +152,6 @@ plugins=(
   zsh-syntax-highlighting
   zsh-history-substring-search
   zsh-completions
-  autojump
   fzf
   colored-man-pages
   command-not-found
@@ -607,11 +606,11 @@ command -v direnv >/dev/null 2>&1 && eval "$(direnv hook zsh)"
 command -v thefuck >/dev/null 2>&1 && eval "$(thefuck --alias)"
 
 # Autojump
-if command -v autojump >/dev/null 2>&1; then
-  [[ -s /usr/share/autojump/autojump.sh ]] && source /usr/share/autojump/autojump.sh
-  [[ -s /usr/share/autojump/autojump.zsh ]] && source /usr/share/autojump/autojump.zsh
-  [[ -s /opt/homebrew/etc/profile.d/autojump.sh ]] && source /opt/homebrew/etc/profile.d/autojump.sh
-fi
+#if command -v autojump >/dev/null 2>&1; then
+#  [[ -s /usr/share/autojump/autojump.sh ]] && source /usr/share/autojump/autojump.sh
+#  [[ -s /usr/share/autojump/autojump.zsh ]] && source /usr/share/autojump/autojump.zsh
+#  [[ -s /opt/homebrew/etc/profile.d/autojump.sh ]] && source /opt/homebrew/etc/profile.d/autojump.sh
+#fi
 
 # AWS CLI completion
 [[ -f /usr/local/bin/aws_zsh_completer.sh ]] && source /usr/local/bin/aws_zsh_completer.sh
