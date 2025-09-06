@@ -746,13 +746,6 @@ if [[ $- == *i* ]] && [[ -z "$INSIDE_EMACS" ]]; then
     uptime_info=$(uptime | sed 's/.*up \([^,]*\).*/\1/')
   fi
   
-  # Get current directory info
-  local pwd_info=$(pwd)
-  local git_branch=""
-  if git rev-parse --git-dir >/dev/null 2>&1; then
-    git_branch=" ($(git branch --show-current 2>/dev/null || echo 'detached'))"
-  fi
-  
   # Try modern info tools first, fallback to custom
   if command -v fastfetch >/dev/null 2>&1; then
     fastfetch --config none --logo none --structure "Title:OS:Kernel:Uptime:Shell:Terminal:CPU:Memory:Disk (/):LocalIP:Users:Date" 2>/dev/null
@@ -761,31 +754,33 @@ if [[ $- == *i* ]] && [[ -z "$INSIDE_EMACS" ]]; then
   else
     # Custom welcome message
     echo
-    printf "${colors[green]}${colors[bold]}🚀 Welcome back, ${colors[yellow]}$USER${colors[green]}!${colors[reset]}\n"
+    printf "${colors[green]}${colors[bold]}Welcome back, ${colors[yellow]}$USER${colors[green]}!${colors[reset]}\n"
     echo
     
-    # System information in a nice format
-    printf "${colors[dim]}┌── System Information ──────────────────────────────────┐${colors[reset]}\n"
-    printf "${colors[dim]}│${colors[reset]} ${colors[blue]}󰌢 Host:${colors[reset]}     ${colors[white]}$hostname${colors[reset]}\n"
-    printf "${colors[dim]}│${colors[reset]} ${colors[blue]} Kernel:${colors[reset]}   ${colors[white]}$kernel${colors[reset]}\n"
-    printf "${colors[dim]}│${colors[reset]} ${colors[blue]} Shell:${colors[reset]}    ${colors[white]}$shell_info${colors[reset]}\n"
+    # Compact system information
+    printf "${colors[blue]}Host:${colors[reset]}     ${colors[white]}$hostname${colors[reset]}\n"
+    printf "${colors[blue]}Kernel:${colors[reset]}   ${colors[white]}$kernel${colors[reset]}\n"
+    printf "${colors[blue]}Shell:${colors[reset]}    ${colors[white]}$shell_info${colors[reset]}\n"
     
     if [[ -n "$uptime_info" ]]; then
-      printf "${colors[dim]}│${colors[reset]} ${colors[blue]}󰅐 Uptime:${colors[reset]}   ${colors[white]}$uptime_info${colors[reset]}\n"
+      printf "${colors[blue]}Uptime:${colors[reset]}   ${colors[white]}$uptime_info${colors[reset]}\n"
     fi
     
-    printf "${colors[dim]}│${colors[reset]} ${colors[blue]}󰃭 Time:${colors[reset]}     ${colors[white]}$current_time${colors[reset]}\n"
-    printf "${colors[dim]}│${colors[reset]} ${colors[blue]}󰸗 Date:${colors[reset]}     ${colors[white]}$current_date${colors[reset]}\n"
-    printf "${colors[dim]}└────────────────────────────────────────────────────────┘${colors[reset]}\n"
+    printf "${colors[blue]}Time:${colors[reset]}     ${colors[white]}$current_time${colors[reset]}\n"
+    printf "${colors[blue]}Date:${colors[reset]}     ${colors[white]}$current_date${colors[reset]}\n"
     
     echo
     
-    # Current location
-    printf "${colors[magenta]}📍 Current Location:${colors[reset]} ${colors[cyan]}$pwd_info${colors[yellow]}$git_branch${colors[reset]}\n"
-    
-    # Quick tips
-    echo
-    printf "${colors[dim]}💡 Quick tips: Use 'proj <name>' to navigate projects, 'fe' to find files, 'fbr' for git branches${colors[reset]}\n"
+    # Random cool info
+    local -a cool_infos=(
+      "The first computer programmer was Ada Lovelace in the 1840s."
+      "A group of flamingos is called a flamboyance."
+      "Octopuses have three hearts and blue blood."
+      "The Eiffel Tower can be 15 cm taller during the summer due to heat expansion."
+      "Honey never spoils—archaeologists have found edible pots from ancient Egypt."
+    )
+    local random_index=$(( $RANDOM % ${#cool_infos[@]} + 1 ))
+    printf "${colors[magenta]}Cool info:${colors[reset]} ${cool_infos[$random_index]}\n"
     
     echo
   fi
