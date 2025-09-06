@@ -719,16 +719,75 @@ typeset -U PATH path
 
 # Only show in interactive shells
 if [[ $- == *i* ]] && [[ -z "$INSIDE_EMACS" ]]; then
-  # System info
+  
+  # Color definitions
+  local -A colors
+  colors[reset]='\033[0m'
+  colors[bold]='\033[1m'
+  colors[dim]='\033[2m'
+  colors[blue]='\033[34m'
+  colors[cyan]='\033[36m'
+  colors[green]='\033[32m'
+  colors[yellow]='\033[33m'
+  colors[magenta]='\033[35m'
+  colors[red]='\033[31m'
+  colors[white]='\033[37m'
+  
+  # System info gathering
+  local hostname=$(hostname -s)
+  local kernel=$(uname -sr)
+  local shell_info="Zsh $ZSH_VERSION"
+  local current_time=$(date '+%H:%M:%S')
+  local current_date=$(date '+%A, %B %d %Y')
+  local uptime_info=""
+  
+  # Get uptime (cross-platform)
+  if command -v uptime >/dev/null 2>&1; then
+    uptime_info=$(uptime | sed 's/.*up \([^,]*\).*/\1/')
+  fi
+  
+  # Get current directory info
+  local pwd_info=$(pwd)
+  local git_branch=""
+  if git rev-parse --git-dir >/dev/null 2>&1; then
+    git_branch=" ($(git branch --show-current 2>/dev/null || echo 'detached'))"
+  fi
+  
+  # Try modern info tools first, fallback to custom
   if command -v fastfetch >/dev/null 2>&1; then
-    fastfetch
+    fastfetch --config none --logo none --structure "Title:OS:Kernel:Uptime:Shell:Terminal:CPU:Memory:Disk (/):LocalIP:Users:Date" 2>/dev/null
   elif command -v neofetch >/dev/null 2>&1; then
-    neofetch --off
+    neofetch --off --disable gpu theme icons --stdout 2>/dev/null | head -10
   else
-    echo "Welcome, $USER! 🚀"
-    echo "System: $(uname -srm)"
-    echo "Shell: Zsh $ZSH_VERSION"
-    echo "Time: $(date '+%Y-%m-%d %H:%M:%S')"
+    # Custom welcome message
+    echo
+    printf "${colors[green]}${colors[bold]}🚀 Welcome back, ${colors[yellow]}$USER${colors[green]}!${colors[reset]}\n"
+    echo
+    
+    # System information in a nice format
+    printf "${colors[dim]}┌── System Information ──────────────────────────────────┐${colors[reset]}\n"
+    printf "${colors[dim]}│${colors[reset]} ${colors[blue]}󰌢 Host:${colors[reset]}     ${colors[white]}$hostname${colors[reset]}\n"
+    printf "${colors[dim]}│${colors[reset]} ${colors[blue]} Kernel:${colors[reset]}   ${colors[white]}$kernel${colors[reset]}\n"
+    printf "${colors[dim]}│${colors[reset]} ${colors[blue]} Shell:${colors[reset]}    ${colors[white]}$shell_info${colors[reset]}\n"
+    
+    if [[ -n "$uptime_info" ]]; then
+      printf "${colors[dim]}│${colors[reset]} ${colors[blue]}󰅐 Uptime:${colors[reset]}   ${colors[white]}$uptime_info${colors[reset]}\n"
+    fi
+    
+    printf "${colors[dim]}│${colors[reset]} ${colors[blue]}󰃭 Time:${colors[reset]}     ${colors[white]}$current_time${colors[reset]}\n"
+    printf "${colors[dim]}│${colors[reset]} ${colors[blue]}󰸗 Date:${colors[reset]}     ${colors[white]}$current_date${colors[reset]}\n"
+    printf "${colors[dim]}└────────────────────────────────────────────────────────┘${colors[reset]}\n"
+    
+    echo
+    
+    # Current location
+    printf "${colors[magenta]}📍 Current Location:${colors[reset]} ${colors[cyan]}$pwd_info${colors[yellow]}$git_branch${colors[reset]}\n"
+    
+    # Quick tips
+    echo
+    printf "${colors[dim]}💡 Quick tips: Use 'proj <name>' to navigate projects, 'fe' to find files, 'fbr' for git branches${colors[reset]}\n"
+    
+    echo
   fi
 fi
 
