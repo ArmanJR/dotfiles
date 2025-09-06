@@ -714,7 +714,7 @@ fi
 typeset -U PATH path
 
 # ===========================================================
-#                    Welcome Message
+#         Welcome Message
 # ===========================================================
 
 # Only show in interactive shells
@@ -755,32 +755,15 @@ if [[ $- == *i* ]] && [[ -z "$INSIDE_EMACS" ]]; then
     # Custom welcome message
     echo
     printf "${colors[green]}${colors[bold]}Welcome back, ${colors[yellow]}$USER${colors[green]}!${colors[reset]}\n"
-    echo
     
-    # Compact system information
-    printf "${colors[blue]}Host:${colors[reset]}     ${colors[white]}$hostname${colors[reset]}\n"
-    printf "${colors[blue]}Kernel:${colors[reset]}   ${colors[white]}$kernel${colors[reset]}\n"
-    printf "${colors[blue]}Shell:${colors[reset]}    ${colors[white]}$shell_info${colors[reset]}\n"
-    
+    # Prepare uptime string if available
+    local uptime_string=""
     if [[ -n "$uptime_info" ]]; then
-      printf "${colors[blue]}Uptime:${colors[reset]}   ${colors[white]}$uptime_info${colors[reset]}\n"
+      uptime_string=" | ${colors[blue]}Uptime:${colors[reset]} ${colors[white]}$uptime_info${colors[reset]}"
     fi
     
-    printf "${colors[blue]}Time:${colors[reset]}     ${colors[white]}$current_time${colors[reset]}\n"
-    printf "${colors[blue]}Date:${colors[reset]}     ${colors[white]}$current_date${colors[reset]}\n"
-    
-    echo
-    
-    # Random cool info
-    local -a cool_infos=(
-      "The first computer programmer was Ada Lovelace in the 1840s."
-      "A group of flamingos is called a flamboyance."
-      "Octopuses have three hearts and blue blood."
-      "The Eiffel Tower can be 15 cm taller during the summer due to heat expansion."
-      "Honey never spoils—archaeologists have found edible pots from ancient Egypt."
-    )
-    local random_index=$(( $RANDOM % ${#cool_infos[@]} + 1 ))
-    printf "${colors[magenta]}Cool info:${colors[reset]} ${cool_infos[$random_index]}\n"
+    # Print all system info on a single line
+    printf "${colors[blue]}Host:${colors[reset]} ${colors[white]}$hostname${colors[reset]} | ${colors[blue]}Kernel:${colors[reset]} ${colors[white]}$kernel${colors[reset]} | ${colors[blue]}Shell:${colors[reset]} ${colors[white]}$shell_info${colors[reset]}${uptime_string} | ${colors[blue]}Now:${colors[reset]} ${colors[white]}$current_date, $current_time${colors[reset]}\n"
     
     echo
   fi
