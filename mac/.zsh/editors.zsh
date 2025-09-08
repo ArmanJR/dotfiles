@@ -1,0 +1,252 @@
+# =============================================================================
+# Editor and Terminal Configuration
+# Neovim (LazyVim), VSCode, and Terminal Tools
+# =============================================================================
+
+# =============================================================================
+# Neovim Configuration
+# =============================================================================
+
+# Neovim aliases
+alias v="nvim"
+alias vi="nvim"
+alias vim="nvim"
+alias nv="nvim"
+
+# LazyVim specific aliases
+alias lv="nvim"
+alias lvim="nvim"
+
+# Neovim functions
+nvim-config() {
+    nvim "$HOME/.config/nvim"
+}
+
+nvim-update() {
+    echo "Updating Neovim plugins..."
+    nvim --headless -c "autocmd User LazyUpdate quitall" -c "Lazy! update"
+}
+
+nvim-health() {
+    nvim -c "checkhealth"
+}
+
+# Quick edit configuration files
+alias nvimrc="nvim ~/.config/nvim/init.lua"
+alias zshrc="nvim ~/.zshrc"
+alias zshconfig="nvim ~/code/dotfiles/mac/.zsh"
+
+# =============================================================================
+# VSCode Configuration
+# =============================================================================
+
+# VSCode aliases (if installed)
+if command -v code >/dev/null 2>&1; then
+    alias c="code"
+    alias c.="code ."
+    alias co="code"
+    
+    # VSCode functions
+    code-extensions() {
+        code --list-extensions --show-versions
+    }
+    
+    code-install-ext() {
+        if [[ -n "$1" ]]; then
+            code --install-extension "$1"
+        else
+            echo "Usage: code-install-ext <extension-id>"
+        fi
+    }
+    
+    code-settings() {
+        code "$HOME/Library/Application Support/Code/User/settings.json"
+    }
+    
+    code-keybindings() {
+        code "$HOME/Library/Application Support/Code/User/keybindings.json"
+    }
+fi
+
+# =============================================================================
+# Terminal Configuration (Ghostty)
+# =============================================================================
+
+# Ghostty terminal configuration
+export TERM="xterm-256color"
+export COLORTERM="truecolor"
+
+# Terminal title function
+set_terminal_title() {
+    local title="$1"
+    if [[ -n "$title" ]]; then
+        echo -ne "\033]0;$title\007"
+    fi
+}
+
+# Change terminal title with current directory
+chpwd() {
+    set_terminal_title "$(basename "$PWD")"
+}
+
+# =============================================================================
+# Font and Color Configuration
+# =============================================================================
+
+# JetBrains Mono Nerd Font configuration
+export FONT_NAME="JetBrainsMono Nerd Font"
+
+# Color schemes for terminal tools
+export BAT_THEME="TwoDark"  # bat (cat replacement)
+export DELTA_PAGER="less -R"  # git delta pager
+export MANPAGER="sh -c 'col -bx | bat -l man -p'"  # colored man pages
+
+# =============================================================================
+# File Managers and Navigation
+# =============================================================================
+
+# Modern replacements for common tools
+if command -v exa >/dev/null 2>&1; then
+    alias ls="exa --icons"
+    alias ll="exa -l --icons --git"
+    alias la="exa -la --icons --git"
+    alias lt="exa -T --icons"
+    alias tree="exa -T --icons"
+elif command -v eza >/dev/null 2>&1; then
+    alias ls="eza --icons"
+    alias ll="eza -l --icons --git"
+    alias la="eza -la --icons --git"
+    alias lt="eza -T --icons"
+    alias tree="eza -T --icons"
+fi
+
+# fd (find replacement)
+if command -v fd >/dev/null 2>&1; then
+    alias find="fd"
+fi
+
+# ripgrep (grep replacement)
+if command -v rg >/dev/null 2>&1; then
+    alias grep="rg"
+    export RIPGREP_CONFIG_PATH="$HOME/.ripgreprc"
+fi
+
+# bat (cat replacement)
+if command -v bat >/dev/null 2>&1; then
+    alias cat="bat --paging=never"
+    alias catt="bat --paging=always"
+fi
+
+# =============================================================================
+# Git Integration
+# =============================================================================
+
+# Git aliases for better workflow
+alias g="git"
+alias ga="git add"
+alias gaa="git add ."
+alias gc="git commit"
+alias gcm="git commit -m"
+alias gca="git commit -am"
+alias gp="git push"
+alias gpl="git pull"
+alias gs="git status"
+alias gd="git diff"
+alias gdc="git diff --cached"
+alias gl="git log --oneline --graph"
+alias gla="git log --oneline --graph --all"
+alias gb="git branch"
+alias gco="git checkout"
+alias gcb="git checkout -b"
+alias gm="git merge"
+alias gr="git rebase"
+alias gst="git stash"
+alias gstp="git stash pop"
+
+# Git functions
+git-clean-branches() {
+    echo "Cleaning up merged branches..."
+    git branch --merged main | grep -v "main\|master" | xargs -n 1 git branch -d
+    echo "Cleaned up merged branches!"
+}
+
+git-recent-branches() {
+    git for-each-ref --count=10 --sort=-committerdate refs/heads/ --format="%(refname:short)"
+}
+
+# =============================================================================
+# Productivity Tools
+# =============================================================================
+
+# FZF (fuzzy finder) configuration
+if command -v fzf >/dev/null 2>&1; then
+    # FZF configuration
+    export FZF_DEFAULT_OPTS="--height 40% --layout=reverse --border --margin=1"
+    export FZF_DEFAULT_COMMAND="fd --type f --strip-cwd-prefix --hidden --follow --exclude .git"
+    export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
+    export FZF_ALT_C_COMMAND="fd --type d --strip-cwd-prefix --hidden --follow --exclude .git"
+    
+    # FZF key bindings and completion
+    source <(fzf --zsh)
+    
+    # Custom FZF functions
+    fzf-cd() {
+        local dir
+        dir=$(fd --type d --strip-cwd-prefix --hidden --follow --exclude .git | fzf +m) && cd "$dir"
+    }
+    
+    fzf-edit() {
+        local file
+        file=$(fd --type f --strip-cwd-prefix --hidden --follow --exclude .git | fzf +m) && nvim "$file"
+    }
+    
+    fzf-git-branch() {
+        local branch
+        branch=$(git branch --all | grep -v HEAD | sed "s/^[[:space:]]*\*[[:space:]]*//" | sed "s/remotes\/origin\///" | sort -u | fzf +m) && git checkout "$branch"
+    }
+    
+    # FZF aliases
+    alias cdf="fzf-cd"
+    alias vf="fzf-edit"
+    alias gbf="fzf-git-branch"
+fi
+
+# Zoxide (better cd)
+if command -v zoxide >/dev/null 2>&1; then
+    eval "$(zoxide init zsh)"
+    alias cd="z"
+    alias cdi="zi"  # Interactive mode
+fi
+
+# =============================================================================
+# Copy/Paste Integration (macOS)
+# =============================================================================
+
+# pbcopy/pbpaste aliases and functions
+alias clip="pbcopy"
+alias paste="pbpaste"
+
+# Copy current directory path
+alias pwd-copy="pwd | pbcopy"
+
+# Copy file contents
+copy-file() {
+    local file="$1"
+    if [[ -f "$file" ]]; then
+        pbcopy < "$file"
+        echo "File contents copied to clipboard: $file"
+    else
+        echo "File not found: $file"
+    fi
+}
+
+# Paste to file
+paste-file() {
+    local file="$1"
+    if [[ -n "$file" ]]; then
+        pbpaste > "$file"
+        echo "Clipboard contents pasted to: $file"
+    else
+        echo "Usage: paste-file <filename>"
+    fi
+}
