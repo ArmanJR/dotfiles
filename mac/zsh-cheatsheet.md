@@ -17,12 +17,12 @@ activate                # Activate venv or .venv
 uv run script.py        # Run with UV
 uvi myproject           # Initialize UV project
 uvs                     # Sync dependencies
-uva requests           # Add package with UV
+uva requests            # Add package with UV
 ```
 
 ## 🐹 Go Development
 ```bash
-gob                     # go build
+gob                    # go build
 gor main.go            # go run
 got                    # go test
 gotv                   # go test -v
@@ -34,7 +34,7 @@ goi                    # go install
 ```bash
 npmi                   # npm install
 npms                   # npm start
-npmr dev              # npm run dev
+npmr dev               # npm run dev
 yi                     # yarn install
 ys                     # yarn start
 pni                    # pnpm install
@@ -43,8 +43,8 @@ pns                    # pnpm start
 
 ## 🐳 Docker
 ```bash
-d ps                   # docker ps
-di                     # docker images
+d ps                  # docker ps
+di                    # docker images
 drmf container_id     # Force remove container
 dspf                  # Force system prune
 dc up -d              # docker compose up detached
@@ -67,17 +67,17 @@ kctx                  # List/switch contexts
 
 ## ☁️ Google Cloud
 ```bash
-gc compute instances list  # gcloud compute instances list
-gcl                       # gcloud compute instances list
-gcs instance_name         # gcloud compute ssh
-gcp-project my-project   # Switch GCP project
-gcp-auth                 # Authenticate with GCloud
-gsutil ls gs://bucket    # List GCS bucket
+gc compute instances list  # compute instances list
+gcl                        # compute instances list
+gcs instance_name          # compute ssh
+gcp-project my-project     # Switch GCP project
+gcp-auth                   # Authenticate with GCloud
+gsutil ls gs://bucket      # List GCS bucket
 ```
 
 ## 🌩️ AWS
 ```bash
-aws-profile prod         # Switch AWS profile
+aws-profile prod        # Switch AWS profile
 aws-whoami              # Get caller identity
 ec2 describe-instances  # AWS EC2 command
 s3 ls                   # AWS S3 list
@@ -217,11 +217,11 @@ man ls                 # Enhanced man pages
 
 ## 🏗️ Project Management
 ```bash
-newproject myapp python # Create Python project
-newproject webapp web   # Create web project
-dev                    # cd ~/Developer
-code                   # cd ~/code
-dotfiles               # cd ~/code/dotfiles
+newproject myapp python  # Create Python project
+newproject webapp web    # Create web project
+dev                      # cd ~/Developer
+code                     # cd ~/code
+dotfiles                 # cd ~/code/dotfiles
 ```
 
 ## 🧹 Cleanup & Maintenance
@@ -250,8 +250,8 @@ ssh-tunnel 8080 localhost 80 server # SSH tunnel
 ## 📈 Monitoring Functions
 ```bash
 docker-monitor         # Container resource usage
-git-stats             # Repository statistics
-git-add-interactive   # Interactive git add with fzf
+git-stats              # Repository statistics
+git-add-interactive    # Interactive git add with fzf
 ```
 
 ## 💡 Utility Functions
@@ -259,18 +259,6 @@ git-add-interactive   # Interactive git add with fzf
 copy-file config.json  # Copy file to clipboard  
 paste-file output.txt  # Paste clipboard to file
 qr "Hello World"       # Generate QR code
-weather               # Current weather
+weather                # Current weather
 ```
 
----
-
-## 🔥 Pro Tips
-
-- Use **Tab completion** extensively - most commands have intelligent autocompletion
-- **FZF Integration**: Many commands work with fuzzy finding (Ctrl+R for history, Ctrl+T for files)
-- **Git Workflow**: Use `qcommit` for quick commits, `git-stats` for repo analysis
-- **Docker**: Use `docker-clean` regularly, `docker-nuke` for complete reset
-- **Focus Mode**: `focus on` blocks distracting websites during work
-- **Quick Navigation**: Use `z` (zoxide) instead of `cd` for smart directory jumping
-
-*Print this page and keep it handy for quick reference!*
