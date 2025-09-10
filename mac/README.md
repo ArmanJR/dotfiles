@@ -12,7 +12,7 @@ Modern, modular zsh configuration optimized for Apple Silicon Macs with Python, 
 ### 2. Install Core Tools
 ```bash
 brew install romkatv/powerlevel10k/powerlevel10k
-brew install fd ripgrep bat exa fzf zoxide nvim git
+brew install fd tree ripgrep bat exa fzf zoxide nvim git
 brew install --cask ghostty font-jetbrains-mono-nerd-font
 ```
 
