@@ -1,0 +1,77 @@
+# ~/.ripgreprc - ripgrep configuration file
+
+# Display settings
+--max-columns=150
+--max-columns-preview
+
+# Smart case searching (case insensitive unless uppercase letters are used)
+--smart-case
+
+# Show line numbers
+--line-number
+
+# Use colors in output (auto-detected by default)
+--colors=line:fg:yellow
+--colors=line:style:bold
+--colors=path:fg:green
+--colors=path:style:bold
+--colors=match:fg:black
+--colors=match:bg:yellow
+--colors=match:style:nobold
+
+# Follow symbolic links
+--follow
+
+# Search hidden files and directories
+--hidden
+
+# Ignore patterns (files and directories to skip)
+--glob=!.git/
+--glob=!node_modules/
+--glob=!.npm/
+--glob=!.yarn/
+--glob=!vendor/
+--glob=!build/
+--glob=!dist/
+--glob=!target/
+--glob=!.next/
+--glob=!.nuxt/
+--glob=!coverage/
+--glob=!.nyc_output/
+--glob=!*.min.js
+--glob=!*.min.css
+--glob=!*.map
+--glob=!*.lock
+--glob=!package-lock.json
+--glob=!yarn.lock
+--glob=!Cargo.lock
+--glob=!.DS_Store
+--glob=!Thumbs.db
+--glob=!*.log
+--glob=!*.tmp
+--glob=!*.temp
+--glob=!*.swp
+--glob=!*.swo
+--glob=!*~
+
+# Binary file handling
+--binary
+
+# Performance settings
+--mmap
+
+# Context lines (show N lines before and after matches)
+# Uncomment and adjust as needed:
+# --context=2
+# --before-context=2
+# --after-context=2
+
+# Sorting options
+# --sort=path
+
+# Additional useful options (uncomment as needed):
+# --no-heading          # Don't group matches by file
+# --vimgrep            # Output in vim-compatible format
+# --with-filename      # Always show filename (useful for single file searches)
+# --no-unicode         # Disable unicode support for better performance
+# --multiline          # Enable multiline matching
