@@ -19,21 +19,16 @@ brew install --cask ghostty font-jetbrains-mono-nerd-font
 ### 3. Setup Configuration
 ```bash
 # Clone or copy dotfiles to ~/code/dotfiles/mac
-git clone <your-repo> ~/code/dotfiles/mac
+git clone https://github.com/armanjr/dotfiles ~/code/dotfiles/
 
 # Backup existing config
 mv ~/.zshrc ~/.zshrc.backup 2>/dev/null || true
 
-# Symlink new config
-ln -sf ~/code/dotfiles/mac/.zshrc ~/.zshrc
+# Copy new config
+cp -R ~/code/dotfiles/mac/* ~/
 
 # Reload shell
 source ~/.zshrc
-```
-
-### 4. Configure Powerlevel10k
-```bash
-p10k configure
 ```
 
 ## Optional Development Tools
@@ -64,29 +59,3 @@ brew install --cask google-cloud-sdk
 ```bash
 brew install jq httpie ncdu dust cheat
 ```
-
-## Features
-
-- **Modular Configuration**: Organized in `.zsh/` directory
-- **Fast Loading**: Optimized for quick shell startup
-- **200+ Aliases**: Comprehensive command shortcuts
-- **Modern Tools**: Integration with fd, ripgrep, bat, fzf
-- **Development Ready**: Python (UV), Go, Node.js, Docker, K8s
-- **Cloud Tools**: GCloud, AWS, Terraform support
-- **Productivity**: Focus mode, Pomodoro timer, project templates
-
-## Customization
-
-- Edit modules in `.zsh/` directory
-- Add private config to `~/.zshrc.local`
-- Use `reload` command to apply changes
-
-## Cheat Sheet
-
-Print `zsh-cheatsheet.md` for quick reference of all available commands.
-
-## Troubleshooting
-
-- Run `brew doctor` if tools aren't found
-- Use `which <command>` to verify installation paths
-- Check `~/.zshrc.local` for local overrides

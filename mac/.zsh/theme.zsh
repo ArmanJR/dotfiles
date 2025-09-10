@@ -80,4 +80,4 @@ typeset -g POWERLEVEL9K_VIRTUALENV_FOREGROUND=blue
 typeset -g POWERLEVEL9K_VIRTUALENV_SHOW_PYTHON_VERSION=false
 
 # Load custom p10k configuration if it exists
-[[ ! -f "${ZDOTDIR:-$HOME}/.p10k.zsh" ]] || source "${ZDOTDIR:-$HOME}/.p10k.zsh"
+[[ ! -f "$HOME/.zsh/.p10k.zsh" ]] || source "$HOME/.zsh/.p10k.zsh"
