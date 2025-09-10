@@ -137,6 +137,83 @@ if command -v bat >/dev/null 2>&1; then
     alias catt="bat --paging=always"
 fi
 
+# catc (copy into clipboard with the filename)
+catc() {
+    if [ -z "$1" ]; then
+        echo "Usage: catc <filename>"
+        return 1
+    fi
+    
+    if [ ! -f "$1" ]; then
+        echo "Error: File '$1' not found"
+        return 1
+    fi
+    
+    {
+        echo "$ cat $1"
+        cat "$1"
+    } | pbcopy
+}
+
+# catingest (runs gitingest then copy into clipboard)
+catingest() {
+    echo "🔄 Running gitingest on current directory with common ignore patterns..."
+
+    # Define common ignore patterns
+    local patterns=(
+        # OS files
+        "*.log" "logs/" "*.tmp" "*.temp" "tmp/" "temp/"
+        ".DS_Store" "Thumbs.db" ".AppleDouble" ".LSOverride" 
+        "ehthumbs.db" "Desktop.ini" "\$RECYCLE.BIN/" ".directory"
+        
+        # Editor/IDE
+        ".vscode/" ".idea/" "*.swp" "*.swo" "*~" "*.iml" "*.iws"
+        "*.sublime-project" "*.sublime-workspace" ".atom/"
+        "*.elc" ".emacs.desktop" ".emacs.desktop.lock" "*.code-workspace"
+        
+        # Environment & config
+        ".env" ".env.local" ".env.*.local" ".local"
+        "config.local.*" "settings.local.*"
+        
+        # Dependencies & build
+        "node_modules/" "vendor/" "packages/"
+        "build/" "dist/" "out/" "target/"
+        
+        # Cache & coverage
+        "coverage/" "*.coverage" ".cache/" "*.cache" ".sass-cache/"
+        
+        # Backup & temporary
+        "*.bak" "*.backup" "*.old"
+        
+        # Security
+        "*.key" "*.pem" "*.p12" "*.pfx" "*.crt" "*.cer" "*.der"
+        
+        # Database
+        "*.sqlite" "*.sqlite3" "*.db"
+        
+        # Generated docs
+        "docs/_build/" "site/"
+        
+        # Runtime
+        "pids/" "*.pid" "*.seed"
+    )
+    
+    local exclude_patterns=$(IFS=','; echo "${patterns[*]}")
+    
+    if gitingest ./ --exclude-pattern "$exclude_patterns"; then
+        if [[ -f "digest.txt" ]]; then
+            cat digest.txt | pbcopy
+            rm digest.txt
+        else
+            echo "❌ Error: digest.txt was not created"
+            return 1
+        fi
+    else
+        echo "❌ Error: gitingest command failed"
+        return 1
+    fi
+}
+
 # =============================================================================
 # Git Integration
 # =============================================================================

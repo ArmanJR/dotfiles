@@ -49,7 +49,7 @@ fi
 
 # Python aliases
 alias py="python3"
-alias pip="python3 -m pip"
+#alias pip="python3 -m pip" # REMOVED - let pyenv manage pip
 alias venv="python3 -m venv"
 alias activate="source venv/bin/activate || source .venv/bin/activate"
 alias deactivate="deactivate"

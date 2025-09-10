@@ -21,7 +21,7 @@ elif [[ -d "$HOME/google-cloud-sdk" ]]; then
 fi
 
 # GCloud environment variables
-export GOOGLE_APPLICATION_CREDENTIALS="$HOME/.config/gcloud/application_default_credentials.json"
+#export GOOGLE_APPLICATION_CREDENTIALS="$HOME/.config/gcloud/application_default_credentials.json"
 export CLOUDSDK_PYTHON="python3"
 
 # GCloud aliases

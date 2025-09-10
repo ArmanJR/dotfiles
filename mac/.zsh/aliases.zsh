@@ -85,10 +85,6 @@ alias docs="cd ~/Documents"
 alias downloads="cd ~/Downloads"
 alias desktop="cd ~/Desktop"
 
-# Project shortcuts
-alias dotfiles="cd ~/code/dotfiles"
-alias config="cd ~/.config"
-
 # Quick server start
 alias serve="python3 -m http.server 8000"
 alias serve-php="php -S localhost:8000"
@@ -290,4 +286,7 @@ alias rl="reload"
 
 # Edit configuration files
 alias ezsh="nvim ~/.zshrc"
-alias ealiases="nvim ~/code/dotfiles/mac/.zsh/aliases.zsh"
+
+# Claude code
+alias claude="/Users/arman/.claude/local/claude"
+alias claudeskip="claude --dangerously-skip-permissions"

@@ -27,7 +27,7 @@ export XDG_CACHE_HOME="$HOME/.cache"
 
 # Zsh configuration directory
 export ZDOTDIR="$HOME/.config/zsh"
-ZSH_CONFIG_DIR="$HOME/code/dotfiles/mac/.zsh"
+ZSH_CONFIG_DIR="$HOME/.zsh"
 
 # =============================================================================
 # Module Loading
@@ -109,3 +109,7 @@ bindkey "^[[1;3D" backward-word
 
 # Performance monitoring output (uncomment if enabled above)
 # zprof
+
+# bun
+export BUN_INSTALL="$HOME/.bun"
+export PATH="$BUN_INSTALL/bin:$PATH"
