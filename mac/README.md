@@ -25,7 +25,7 @@ git clone https://github.com/armanjr/dotfiles ~/code/dotfiles/
 mv ~/.zshrc ~/.zshrc.backup 2>/dev/null || true
 
 # Copy new config
-cp -R ~/code/dotfiles/mac/* ~/
+cp -R ~/code/dotfiles/mac/.zsh ~/code/dotfiles/mac/.zshrc ~/code/dotfiles/mac/.ripgreprc ~/
 
 # Reload shell
 source ~/.zshrc
