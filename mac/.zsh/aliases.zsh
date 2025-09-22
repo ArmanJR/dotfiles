@@ -290,3 +290,6 @@ alias ezsh="nvim ~/.zshrc"
 # Claude code
 alias claude="/Users/arman/.claude/local/claude"
 alias claudeskip="claude --dangerously-skip-permissions"
+
+# Codex 
+alias codexskip="codex --dangerously-bypass-approvals-and-sandbox"
