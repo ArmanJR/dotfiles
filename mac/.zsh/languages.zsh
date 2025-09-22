@@ -67,6 +67,18 @@ function activate() {
 alias venv="python3 -m venv"
 alias venva="source venv/bin/activate || source .venv/bin/activate"
 alias venvd="deactivate"
+function activate() {
+    unalias activate 2>/dev/null
+    unalias deactivate 2>/dev/null
+
+    if [ -f venv/bin/activate ]; then
+        source venv/bin/activate
+    elif [ -f .venv/bin/activate ]; then
+        source .venv/bin/activate
+    else
+        echo "⚠️ No virtual environment found (expected venv/ or .venv/)."
+    fi
+}
 
 # UV shortcuts
 if command -v uv >/dev/null 2>&1; then
