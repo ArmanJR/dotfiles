@@ -14,6 +14,7 @@ Modern, modular zsh configuration optimized for Apple Silicon Macs with Python, 
 brew install romkatv/powerlevel10k/powerlevel10k
 brew install fd tree ripgrep bat exa fzf zoxide nvim git
 brew install --cask ghostty font-jetbrains-mono-nerd-font
+curl --proto '=https' --tlsv1.2 -LsSf https://setup.atuin.sh | sh
 ```
 
 ### 3. Setup Configuration

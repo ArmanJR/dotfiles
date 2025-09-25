@@ -120,3 +120,7 @@ export PATH="$(brew --prefix tcl-tk)/bin:$PATH"
 export LDFLAGS="-L$(brew --prefix tcl-tk)/lib"
 export CPPFLAGS="-I$(brew --prefix tcl-tk)/include"
 export PKG_CONFIG_PATH="$(brew --prefix tcl-tk)/lib/pkgconfig"
+
+# Terminal Tools 
+# atuin 
+eval "$(atuin init zsh)"
