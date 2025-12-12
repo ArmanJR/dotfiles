@@ -1,0 +1,17 @@
+[user]
+	name = Arman
+	email = armanjafarnejad@gmail.com
+
+[init]
+	defaultBranch = main
+
+[core]
+	editor = vim
+	autocrlf = input
+	excludesfile = ~/.gitignore_global
+
+[pull]
+	rebase = false
+
+[push]
+	default = simple

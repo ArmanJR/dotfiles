@@ -676,16 +676,23 @@ install_additional_tools() {
 # Configure Git
 configure_git() {
     log STEP "Configuring Git..."
-    
-    read -p "Enter your Git username: " git_username
-    read -p "Enter your Git email: " git_email
-    
-    git config --global user.name "$git_username"
-    git config --global user.email "$git_email"
-    git config --global init.defaultBranch main
-    git config --global pull.rebase false
-    git config --global core.editor "nvim"
-    
+
+    if [[ ! -d "$DOTFILES_DIR/rpi/git" ]]; then
+        log WARNING "Git configs directory not found. Skipping..."
+        return
+    fi
+
+    # Link git config files
+    if [[ -f "$DOTFILES_DIR/rpi/git/.gitconfig" ]]; then
+        ln -sf "$DOTFILES_DIR/rpi/git/.gitconfig" "$HOME/.gitconfig"
+        log INFO "Linked .gitconfig"
+    fi
+
+    if [[ -f "$DOTFILES_DIR/rpi/git/.gitignore_global" ]]; then
+        ln -sf "$DOTFILES_DIR/rpi/git/.gitignore_global" "$HOME/.gitignore_global"
+        log INFO "Linked .gitignore_global"
+    fi
+
     log SUCCESS "Git configured"
 }
 
@@ -703,7 +710,6 @@ link_dotfiles() {
         ".zshrc"
         ".bashrc"
         ".tmux.conf"
-        ".gitconfig"
         ".vimrc"
     )
     

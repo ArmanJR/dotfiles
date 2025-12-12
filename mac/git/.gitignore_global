@@ -1,0 +1,49 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+
+# Editor and IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.vim/
+*.sublime-workspace
+*.sublime-project
+
+# Environment
+.env
+.env.local
+.env.*.local
+*.log
+
+# Dependencies
+node_modules/
+venv/
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Build outputs
+dist/
+build/
+*.egg-info/
+.next/
+out/
+
+# Misc
+.cache/
+.temp/
+*.bak
