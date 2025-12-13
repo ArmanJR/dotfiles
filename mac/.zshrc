@@ -45,6 +45,7 @@ source_if_exists "$ZSH_CONFIG_DIR/languages.zsh"
 source_if_exists "$ZSH_CONFIG_DIR/cloud-tools.zsh"
 source_if_exists "$ZSH_CONFIG_DIR/dev-tools.zsh"
 source_if_exists "$ZSH_CONFIG_DIR/editors.zsh"
+source_if_exists "$ZSH_CONFIG_DIR/ai-tools.zsh"
 source_if_exists "$ZSH_CONFIG_DIR/aliases.zsh"
 source_if_exists "$ZSH_CONFIG_DIR/functions.zsh"
 
@@ -115,12 +116,10 @@ export BUN_INSTALL="$HOME/.bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
 function gi() { curl -sLw "\n" https://www.toptal.com/developers/gitignore/api/$@ ;}
 
-# Tk Python 
+# Tk Python
 export PATH="$(brew --prefix tcl-tk)/bin:$PATH"
 export LDFLAGS="-L$(brew --prefix tcl-tk)/lib"
 export CPPFLAGS="-I$(brew --prefix tcl-tk)/include"
 export PKG_CONFIG_PATH="$(brew --prefix tcl-tk)/lib/pkgconfig"
 
-# Terminal Tools 
-# atuin 
-eval "$(atuin init zsh)"
+# Added by 

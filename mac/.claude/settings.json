@@ -1,0 +1,16 @@
+{
+  "attribution": {},
+  "permissions": {
+    "allow": ["Bash(npm run lint)", "Bash(npm run test:*)", "Read(~/.zshrc)"],
+    "deny": ["Read(./.env)", "Read(./.env.*)", "Read(./secrets/**)"]
+  },
+  "env": {
+    "CLAUDE_CODE_ENABLE_TELEMETRY": "1",
+    "OTEL_METRICS_EXPORTER": "otlp"
+  },
+  "alwaysThinkingEnabled": true,
+  "statusLine": {
+    "type": "command",
+    "command": "input=$(cat); model=$(echo \"$input\" | jq -r '.model.display_name'); in=$(echo \"$input\" | jq -r '.context_window.total_input_tokens // 0'); out=$(echo \"$input\" | jq -r '.context_window.total_output_tokens // 0'); size=$(echo \"$input\" | jq -r '.context_window.context_window_size // 200000'); total=$((in + out)); pct=$(awk \"BEGIN {printf \\\"%.0f\\\", ($total / $size) * 100}\"); dir=$(echo \"$input\" | jq -r '.workspace.current_dir'); cd \"$dir\" 2>/dev/null && branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null) && [ -n \"$branch\" ] && git_info=\" ($branch)\" || git_info=\"\"; printf '%s%s · %s · %s%%' \"$dir\" \"$git_info\" \"$model\" \"$pct\""
+  }
+}

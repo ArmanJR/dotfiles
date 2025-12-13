@@ -1,9 +1,4 @@
 # =============================================================================
-# Useful Aliases and Shortcuts
-# General productivity aliases for daily development work
-# =============================================================================
-
-# =============================================================================
 # System Navigation
 # =============================================================================
 
@@ -207,12 +202,12 @@ findreplace() {
     local find_text="$1"
     local replace_text="$2"
     local file_pattern="${3:-.}"
-    
+
     if [[ -z "$find_text" || -z "$replace_text" ]]; then
         echo "Usage: findreplace <find> <replace> [file_pattern]"
         return 1
     fi
-    
+
     if command -v rg >/dev/null 2>&1; then
         rg -l "$find_text" "$file_pattern" | xargs sed -i '' "s/$find_text/$replace_text/g"
     else
@@ -224,7 +219,7 @@ findreplace() {
 backup() {
     local source="$1"
     local backup_name="${source}_backup_$(date +%Y%m%d_%H%M%S)"
-    
+
     if [[ -e "$source" ]]; then
         cp -r "$source" "$backup_name"
         echo "Backup created: $backup_name"
@@ -237,9 +232,9 @@ backup() {
 note() {
     local note_dir="$HOME/notes"
     local note_file="$note_dir/$(date +%Y-%m-%d).md"
-    
+
     mkdir -p "$note_dir"
-    
+
     if [[ -n "$1" ]]; then
         echo "$(date +'%H:%M:%S'): $*" >> "$note_file"
     else
@@ -254,30 +249,30 @@ note() {
 # Clean system caches
 cleanup() {
     echo "Cleaning system caches..."
-    
+
     # Clear system caches
     sudo rm -rf /System/Library/Caches/*
     sudo rm -rf /Library/Caches/*
     rm -rf ~/Library/Caches/*
-    
+
     # Clear log files
     sudo rm -rf /var/log/*.log
     rm -rf ~/Library/Logs/*
-    
+
     # Clean Homebrew
     if command -v brew >/dev/null 2>&1; then
         brew cleanup
         brew autoremove
     fi
-    
+
     # Empty trash
     rm -rf ~/.Trash/*
-    
+
     echo "System cleanup complete!"
 }
 
 # =============================================================================
-# Reload Configuration
+# Reload Configurations
 # =============================================================================
 
 # Reload shell configuration
@@ -287,9 +282,4 @@ alias rl="reload"
 # Edit configuration files
 alias ezsh="nvim ~/.zshrc"
 
-# Claude code
-alias claude="/Users/arman/.claude/local/claude"
-alias claudeskip="claude --dangerously-skip-permissions"
-
-# Codex 
-alias codexskip="codex --dangerously-bypass-approvals-and-sandbox"
+alias parp='arp -a | awk '\''BEGIN { c[1]="\033[38;5;250m"; c[2]="\033[38;5;245m"; } { idx=(NR%2)+1; printf "%s%-30s %-20s %-17s\033[0m\n", c[idx], $1, $2, $4 }'\'''
