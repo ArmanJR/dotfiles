@@ -62,7 +62,7 @@ HISTSIZE=50000
 SAVEHIST=50000
 
 # History options
-setopt EXTENDED_HISTORY          # Write the history file in the ':start:elapsed;command' format
+setopt EXTENDED_HISTORY         # Write the history file in the ':start:elapsed;command' format
 setopt INC_APPEND_HISTORY       # Write to the history file immediately, not when the shell exits
 setopt SHARE_HISTORY            # Share history between all sessions
 setopt HIST_EXPIRE_DUPS_FIRST   # Expire duplicate entries first when trimming history
@@ -122,4 +122,4 @@ export LDFLAGS="-L$(brew --prefix tcl-tk)/lib"
 export CPPFLAGS="-I$(brew --prefix tcl-tk)/include"
 export PKG_CONFIG_PATH="$(brew --prefix tcl-tk)/lib/pkgconfig"
 
-# Added by 
+# Added by
