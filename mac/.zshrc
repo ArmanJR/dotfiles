@@ -128,10 +128,12 @@ export BUN_INSTALL="$HOME/.bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
 function gi() { curl -sLw "\n" https://www.toptal.com/developers/gitignore/api/$@ ;}
 
-# Tk Python
-export PATH="$(brew --prefix tcl-tk)/bin:$PATH"
-export LDFLAGS="-L$(brew --prefix tcl-tk)/lib"
-export CPPFLAGS="-I$(brew --prefix tcl-tk)/include"
-export PKG_CONFIG_PATH="$(brew --prefix tcl-tk)/lib/pkgconfig"
+# Tk Python (static path for Apple Silicon)
+if [[ -d "/opt/homebrew/opt/tcl-tk" ]]; then
+    export PATH="/opt/homebrew/opt/tcl-tk/bin:$PATH"
+    export LDFLAGS="-L/opt/homebrew/opt/tcl-tk/lib"
+    export CPPFLAGS="-I/opt/homebrew/opt/tcl-tk/include"
+    export PKG_CONFIG_PATH="/opt/homebrew/opt/tcl-tk/lib/pkgconfig"
+fi
 
 # Added by
