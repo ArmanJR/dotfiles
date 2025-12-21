@@ -24,17 +24,21 @@ if command -v uv >/dev/null 2>&1; then
     fpath=(~/.zsh/completions $fpath)
 fi
 
-# Pyenv configuration (Python version management)
-if command -v pyenv >/dev/null 2>&1; then
+# Pyenv configuration (Python version management) - Lazy loaded
+if [[ -d "$HOME/.pyenv" ]]; then
     export PYENV_ROOT="$HOME/.pyenv"
     export PATH="$PYENV_ROOT/bin:$PATH"
-    eval "$(pyenv init --path)"
-    eval "$(pyenv init -)"
-    
-    # Pyenv virtualenv
-    if [[ -f "$PYENV_ROOT/plugins/pyenv-virtualenv/bin/pyenv-virtualenv-init" ]]; then
-        eval "$(pyenv virtualenv-init -)"
-    fi
+
+    # Lazy load pyenv on first use
+    pyenv() {
+        unfunction pyenv
+        eval "$(command pyenv init --path)"
+        eval "$(command pyenv init -)"
+        if [[ -f "$PYENV_ROOT/plugins/pyenv-virtualenv/bin/pyenv-virtualenv-init" ]]; then
+            eval "$(pyenv virtualenv-init -)"
+        fi
+        pyenv "$@"
+    }
 fi
 
 # Poetry configuration (Python dependency management)
@@ -125,11 +129,20 @@ if command -v fnm >/dev/null 2>&1; then
     source ~/.zsh/cache/fnm.zsh
 fi
 
-# NVM configuration (fallback if fnm not available)
-if ! command -v fnm >/dev/null 2>&1 && [[ -s "$HOME/.nvm/nvm.sh" ]]; then
+# NVM configuration (fallback if fnm not available) - Lazy loaded
+if ! command -v fnm >/dev/null 2>&1 && [[ -d "$HOME/.nvm" ]]; then
     export NVM_DIR="$HOME/.nvm"
-    source "$NVM_DIR/nvm.sh"
-    [[ -s "$NVM_DIR/bash_completion" ]] && source "$NVM_DIR/bash_completion"
+
+    # Lazy load nvm on first use
+    nvm() {
+        unfunction nvm node npm npx 2>/dev/null
+        source "$NVM_DIR/nvm.sh"
+        [[ -s "$NVM_DIR/bash_completion" ]] && source "$NVM_DIR/bash_completion"
+        nvm "$@"
+    }
+    node() { nvm use default >/dev/null && node "$@" }
+    npm() { nvm use default >/dev/null && npm "$@" }
+    npx() { nvm use default >/dev/null && npx "$@" }
 fi
 
 # Yarn configuration
