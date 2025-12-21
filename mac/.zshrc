@@ -54,6 +54,17 @@ source_if_exists "$ZSH_CONFIG_DIR/functions.zsh"
 source_if_exists "$HOME/.zshrc.local"
 
 # =============================================================================
+# Completion System (cached for faster startup)
+# =============================================================================
+
+autoload -Uz compinit
+if [[ -n ~/.zcompdump(#qN.mh+24) ]]; then
+    compinit
+else
+    compinit -C  # Skip security check, use cache
+fi
+
+# =============================================================================
 # Zsh Options
 # =============================================================================
 
