@@ -313,24 +313,13 @@ focus() {
     esac
 }
 
-# Pomodoro timer
+# Pomodoro timer (runs in background)
 pomodoro() {
-    local minutes="${1:-25}"
-    local seconds=$((minutes * 60))
-    
-    echo "🍅 Pomodoro started for $minutes minutes"
-    
-    while [[ $seconds -gt 0 ]]; do
-        printf "\r⏰ %02d:%02d remaining" $((seconds / 60)) $((seconds % 60))
-        sleep 1
-        ((seconds--))
-    done
-    
-    echo -e "\n🎉 Pomodoro complete! Time for a break."
-    osascript -e 'display notification "Pomodoro complete!" with title "Focus Timer"'
-    
-    # Optional: play a sound
-    afplay /System/Library/Sounds/Glass.aiff 2>/dev/null
+    local duration=${1:-25}
+    (sleep $((duration * 60)) && \
+        osascript -e 'display notification "Pomodoro complete!" with title "Focus Timer"' && \
+        afplay /System/Library/Sounds/Glass.aiff 2>/dev/null &)
+    echo "Pomodoro started for ${duration}m (running in background)"
 }
 
 # =============================================================================

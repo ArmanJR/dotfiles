@@ -12,7 +12,7 @@ export CLOUDSDK_PYTHON="python3"
 # Lazy load gcloud SDK on first use
 _init_gcloud() {
     unfunction gcloud gsutil bq 2>/dev/null
-    unalias gc gce gci gcl gcs gcz gcr gck gckl gbq 2>/dev/null
+    unalias gcp gcpe gcpi gcpl gcps gcpz gcpr gcpk gcpkl gbq 2>/dev/null
 
     if [[ -d "$HOMEBREW_PREFIX/Caskroom/google-cloud-sdk" ]]; then
         GCP_PATH="$HOMEBREW_PREFIX/Caskroom/google-cloud-sdk/latest/google-cloud-sdk"
@@ -26,16 +26,16 @@ _init_gcloud() {
     source "$GCP_PATH/path.zsh.inc"
     source "$GCP_PATH/completion.zsh.inc"
 
-    # Set up aliases after loading
-    alias gc="gcloud"
-    alias gce="gcloud compute"
-    alias gci="gcloud compute instances"
-    alias gcl="gcloud compute instances list"
-    alias gcs="gcloud compute ssh"
-    alias gcz="gcloud config configurations list"
-    alias gcr="gcloud container"
-    alias gck="gcloud container clusters"
-    alias gckl="gcloud container clusters list"
+    # Set up aliases after loading (gcp prefix to avoid git conflicts)
+    alias gcp="gcloud"
+    alias gcpe="gcloud compute"
+    alias gcpi="gcloud compute instances"
+    alias gcpl="gcloud compute instances list"
+    alias gcps="gcloud compute ssh"
+    alias gcpz="gcloud config configurations list"
+    alias gcpr="gcloud container"
+    alias gcpk="gcloud container clusters"
+    alias gcpkl="gcloud container clusters list"
     alias gbq="bq"
 }
 
@@ -44,16 +44,16 @@ gcloud() { _init_gcloud && gcloud "$@" }
 gsutil() { _init_gcloud && gsutil "$@" }
 bq() { _init_gcloud && bq "$@" }
 
-# Aliases that trigger lazy load
-alias gc="gcloud"
-alias gce="gcloud compute"
-alias gci="gcloud compute instances"
-alias gcl="gcloud compute instances list"
-alias gcs="gcloud compute ssh"
-alias gcz="gcloud config configurations list"
-alias gcr="gcloud container"
-alias gck="gcloud container clusters"
-alias gckl="gcloud container clusters list"
+# Aliases that trigger lazy load (gcp prefix to avoid git conflicts)
+alias gcp="gcloud"
+alias gcpe="gcloud compute"
+alias gcpi="gcloud compute instances"
+alias gcpl="gcloud compute instances list"
+alias gcps="gcloud compute ssh"
+alias gcpz="gcloud config configurations list"
+alias gcpr="gcloud container"
+alias gcpk="gcloud container clusters"
+alias gcpkl="gcloud container clusters list"
 alias gbq="bq"
 
 # GCloud functions (these will trigger lazy load via gcloud command)
