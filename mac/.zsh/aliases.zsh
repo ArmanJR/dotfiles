@@ -10,14 +10,6 @@ alias .....="cd ../../../.."
 alias ~="cd ~"
 alias -- -="cd -"
 
-# Directory listing (if modern tools aren't available)
-if ! command -v exa >/dev/null 2>&1 && ! command -v eza >/dev/null 2>&1; then
-    alias ls="ls -G"  # Enable colors on macOS
-    alias ll="ls -la"
-    alias la="ls -la"
-    alias l="ls -l"
-fi
-
 # Create directory and cd into it
 mkcd() {
     mkdir -p "$1" && cd "$1"

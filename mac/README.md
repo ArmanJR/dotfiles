@@ -1,62 +1,51 @@
-# macOS Dotfiles Setup
+# macOS Dotfiles
 
-Modern, modular zsh configuration optimized for Apple Silicon Macs with Python, Go, Node.js development.
+Modular zsh configuration for Apple Silicon Macs.
 
-## Quick Setup
+## First-Time Setup
 
-### 1. Install Homebrew
 ```bash
+# 1. Install Homebrew
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-```
+eval "$(/opt/homebrew/bin/brew shellenv)"
 
-### 2. Install Core Tools
-```bash
+# 2. Install core tools
+brew install git
 brew install romkatv/powerlevel10k/powerlevel10k
-brew install fd tree ripgrep bat exa fzf zoxide nvim git
+brew install fd ripgrep bat eza fzf zoxide nvim
 brew install --cask ghostty font-jetbrains-mono-nerd-font
+
+# 3. Install shell history (optional but recommended)
 curl --proto '=https' --tlsv1.2 -LsSf https://setup.atuin.sh | sh
-```
 
-### 3. Setup Configuration
-```bash
-# Clone or copy dotfiles to ~/code/dotfiles/mac
-git clone https://github.com/armanjr/dotfiles ~/code/dotfiles/
+# 4. Clone dotfiles
+git clone https://github.com/ArmanJR/dotfiles ~/code/dotfiles
 
-# Backup existing config
-mv ~/.zshrc ~/.zshrc.backup 2>/dev/null || true
+# 5. Sync all configs
+~/code/dotfiles/mac/sync.sh --all
 
-# Copy new config
-cp -R ~/code/dotfiles/mac/.zsh ~/code/dotfiles/mac/.zshrc ~/code/dotfiles/mac/.ripgreprc ~/
-
-# Reload shell
+# 6. Reload shell
 source ~/.zshrc
 ```
 
-## Optional Development Tools
+## Syncing Dotfiles
 
-### Python Development
+After setup, use `dotsync` to pull and sync:
+
 ```bash
-brew install python uv pyenv
+dotsync --all          # Sync everything
+dotsync --zsh          # .zsh directory
+dotsync --zshrc        # .zshrc file
+dotsync --dotfiles     # git, ripgrep, ghostty configs
+dotsync --claude       # Claude Code settings
+dotsync --vscode       # VSCode settings.json
 ```
 
-### Go Development
-```bash
-brew install go
-```
+## Optional Tools
 
-### Node.js Development
-```bash
-brew install fnm
-fnm install --lts
-```
+These tools are configured if installed:
 
-### Cloud & Container Tools
-```bash
-brew install docker kubernetes-cli terraform
-brew install --cask google-cloud-sdk
-```
-
-### Additional Productivity Tools
-```bash
-brew install jq httpie ncdu dust cheat
-```
+- **Python**: `pyenv`, `uv`, `poetry`
+- **Node.js**: `fnm` (or nvm), `pnpm`, `bun`
+- **Go**: `go`
+- **Containers**: `docker`, `kubectl`

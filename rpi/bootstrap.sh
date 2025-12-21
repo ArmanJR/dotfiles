@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # ============================================================================
 # Raspberry Pi Development Environment Bootstrap Script
-# 
+#
 # Sets up a complete development environment including:
 # - Zsh with Oh My Zsh and plugins
 # - Neovim with LazyVim
@@ -68,23 +68,23 @@ readonly ESSENTIAL_PACKAGES=(
     # Core utilities
     curl wget git vim tmux screen htop btop
     zsh fish bash-completion
-    
+
     # Build essentials
-    build-essential cmake make gcc g++ 
+    build-essential cmake make gcc g++
     python3-dev python3-pip python3-venv
-    
+
     # System utilities
     software-properties-common apt-transport-https
     ca-certificates gnupg lsb-release
-    
+
     # File management
     tree ncdu fd-find ripgrep silversearcher-ag
     unzip zip p7zip-full tar gzip bzip2
-    
+
     # Network tools
     net-tools dnsutils iputils-ping traceroute
     openssh-client openssh-server
-    
+
     # Text processing
     jq yq sed gawk grep
 )
@@ -96,26 +96,26 @@ readonly STANDARD_PACKAGES=(
     golang rustc cargo
     sqlite3 postgresql-client mysql-client
     redis-tools
-    
+
     # Python extras
     python3-setuptools python3-wheel
     pipx virtualenv
-    
+
     # Monitoring & Performance
     iotop iftop nethogs bmon
     sysstat dstat
-    
+
     # Modern CLI tools
-    fzf bat exa zoxide
+    fzf bat eza zoxide
     autojump z
     neofetch fastfetch
-    
+
     # Archive tools
     rar unrar
-    
+
     # Media tools
     ffmpeg imagemagick
-    
+
     # Fonts
     fonts-powerline fonts-firacode
     fonts-dejavu fontconfig
@@ -127,19 +127,19 @@ readonly FULL_PACKAGES=(
     ruby ruby-dev
     php php-cli
     lua5.4
-    
+
     # Database clients
     mongodb-clients
-    
+
     # Additional tools
     ansible terraform
     httpie aria2
     mosh eternal-terminal
-    
+
     # Security tools
     fail2ban ufw
     gnupg2 pass
-    
+
     # System tools
     cockpit cockpit-pcp
     webmin
@@ -151,13 +151,13 @@ readonly PYTHON_PACKAGES=(
     ipython jupyter
     black flake8 pylint mypy
     pytest pytest-cov
-    
+
     # Utilities
     httpie glances
     speedtest-cli
     youtube-dl yt-dlp
     thefuck
-    
+
     # Data science (optional)
     numpy pandas matplotlib
 )
@@ -166,12 +166,12 @@ readonly PYTHON_PACKAGES=(
 readonly NODE_PACKAGES=(
     # Package managers
     pnpm
-    
+
     # Development tools
     nodemon pm2
     eslint prettier
     typescript ts-node
-    
+
     # CLI tools
     gtop blessed-contrib
     tldr how-2
@@ -184,7 +184,7 @@ readonly GO_PACKAGES=(
     github.com/jesseduffield/lazygit@latest
     github.com/jesseduffield/lazydocker@latest
     github.com/golang/tools/gopls@latest
-    
+
     # CLI tools
     github.com/junegunn/fzf@latest
     github.com/gokcehan/lf@latest
@@ -193,10 +193,10 @@ readonly GO_PACKAGES=(
 # Rust packages
 readonly RUST_PACKAGES=(
     # Modern alternatives to Unix tools
-    bat exa ripgrep fd-find
+    bat eza ripgrep fd-find
     procs dust tokei hyperfine
     bottom zoxide starship
-    
+
     # Development tools
     cargo-edit cargo-watch
     cargo-expand cargo-outdated
@@ -212,7 +212,7 @@ log() {
     shift
     local message="$*"
     local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
-    
+
     case $level in
         ERROR)
             echo -e "${RED}[ERROR]${NC} $message" | tee -a "$LOG_FILE"
@@ -267,17 +267,17 @@ check_sudo() {
 # Check system requirements
 check_system() {
     log STEP "Checking system requirements..."
-    
+
     # Check OS
     if [[ "$OS_TYPE" != "Linux" ]]; then
         log ERROR "This script is designed for Linux systems only"
         exit 1
     fi
-    
+
     # Check architecture
     log INFO "Detected architecture: $ARCH"
     log INFO "Detected distribution: $DISTRO $CODENAME"
-    
+
     # Check available space
     local available_space=$(df / | awk 'NR==2 {print $4}')
     if [[ $available_space -lt 1048576 ]]; then  # Less than 1GB
@@ -288,13 +288,13 @@ check_system() {
             exit 1
         fi
     fi
-    
+
     # Check internet connectivity
     if ! ping -c 1 google.com &> /dev/null; then
         log ERROR "No internet connection detected"
         exit 1
     fi
-    
+
     log SUCCESS "System checks passed"
 }
 
@@ -321,9 +321,9 @@ backup_configs() {
         log INFO "Skipping backup as requested"
         return
     fi
-    
+
     log STEP "Backing up existing configurations..."
-    
+
     local files_to_backup=(
         "$HOME/.zshrc"
         "$HOME/.bashrc"
@@ -333,7 +333,7 @@ backup_configs() {
         "$NVIM_CONFIG_DIR"
         "$HOME/.config/fish"
     )
-    
+
     local backup_needed=false
     for file in "${files_to_backup[@]}"; do
         if [[ -e "$file" ]]; then
@@ -341,7 +341,7 @@ backup_configs() {
             break
         fi
     done
-    
+
     if [[ "$backup_needed" == true ]]; then
         mkdir -p "$BACKUP_DIR"
         for file in "${files_to_backup[@]}"; do
@@ -373,9 +373,9 @@ update_system() {
 # Install packages based on mode
 install_packages() {
     log STEP "Installing packages ($INSTALL_MODE mode)..."
-    
+
     local packages=()
-    
+
     case "$INSTALL_MODE" in
         minimal)
             packages=("${ESSENTIAL_PACKAGES[@]}")
@@ -387,24 +387,24 @@ install_packages() {
             packages=("${ESSENTIAL_PACKAGES[@]}" "${STANDARD_PACKAGES[@]}" "${FULL_PACKAGES[@]}")
             ;;
     esac
-    
+
     # Install packages in batches to avoid command line length issues
     local batch_size=10
     local total=${#packages[@]}
-    
+
     for ((i=0; i<$total; i+=batch_size)); do
         local batch=("${packages[@]:i:batch_size}")
         log INFO "Installing batch $((i/batch_size + 1))..."
         sudo apt install -y "${batch[@]}" 2>&1 | tee -a "$LOG_FILE" || true
     done
-    
+
     log SUCCESS "Package installation completed"
 }
 
 # Install Zsh and Oh My Zsh
 install_zsh() {
     log STEP "Setting up Zsh..."
-    
+
     # Install Oh My Zsh
     if [[ ! -d "$OH_MY_ZSH_DIR" ]]; then
         log INFO "Installing Oh My Zsh..."
@@ -415,11 +415,11 @@ install_zsh() {
     else
         log INFO "Oh My Zsh already installed"
     fi
-    
+
     # Install plugins
     local custom_plugins="$OH_MY_ZSH_DIR/custom/plugins"
     mkdir -p "$custom_plugins"
-    
+
     # Plugin list with their repos
     declare -A plugins=(
         ["zsh-autosuggestions"]="https://github.com/zsh-users/zsh-autosuggestions"
@@ -429,7 +429,7 @@ install_zsh() {
         ["fzf-tab"]="https://github.com/Aloxaf/fzf-tab"
         ["zsh-vi-mode"]="https://github.com/jeffreytse/zsh-vi-mode"
     )
-    
+
     for plugin in "${!plugins[@]}"; do
         if [[ ! -d "$custom_plugins/$plugin" ]]; then
             log INFO "Installing $plugin..."
@@ -438,28 +438,28 @@ install_zsh() {
             log INFO "$plugin already installed"
         fi
     done
-    
+
     # Install Powerlevel10k theme
     local custom_themes="$OH_MY_ZSH_DIR/custom/themes"
     mkdir -p "$custom_themes"
-    
+
     if [[ ! -d "$custom_themes/powerlevel10k" ]]; then
         log INFO "Installing Powerlevel10k theme..."
         git clone --depth=1 https://github.com/romkatv/powerlevel10k.git "$custom_themes/powerlevel10k"
     fi
-    
+
     log SUCCESS "Zsh setup completed"
 }
 
 # Install Neovim
 install_neovim() {
     log STEP "Installing Neovim..."
-    
+
     local nvim_path="/usr/local/bin/nvim"
-    
+
     if [[ ! -f "$nvim_path" ]]; then
         cd "$TEMP_DIR"
-        
+
         # Determine download URL based on architecture
         local nvim_url=""
         case "$ARCH" in
@@ -478,13 +478,13 @@ install_neovim() {
                 return 1
                 ;;
         esac
-        
+
         log INFO "Downloading Neovim..."
         wget -q --show-progress "$nvim_url" -O nvim.tar.gz
-        
+
         log INFO "Extracting Neovim..."
         tar xzf nvim.tar.gz
-        
+
         # Find and move the nvim binary
         local nvim_dir=$(find . -name "nvim-linux64" -type d 2>/dev/null | head -1)
         if [[ -n "$nvim_dir" ]]; then
@@ -493,16 +493,16 @@ install_neovim() {
             log ERROR "Could not find Neovim directory"
             return 1
         fi
-        
+
         cd - > /dev/null
         log SUCCESS "Neovim installed"
     else
         log INFO "Neovim already installed"
     fi
-    
+
     # Install Neovim Python support
     pip3 install --user pynvim neovim
-    
+
     # Install LazyVim
     if [[ ! -d "$NVIM_CONFIG_DIR" ]]; then
         log INFO "Installing LazyVim..."
@@ -511,16 +511,16 @@ install_neovim() {
     else
         log INFO "Neovim config already exists"
     fi
-    
+
     log SUCCESS "Neovim setup completed"
 }
 
 # Install Nerd Fonts
 install_fonts() {
     log STEP "Installing Nerd Fonts..."
-    
+
     cd "$TEMP_DIR"
-    
+
     # List of fonts to install
     local fonts=(
         "JetBrainsMono"
@@ -529,12 +529,12 @@ install_fonts() {
         "RobotoMono"
         "SourceCodePro"
     )
-    
+
     for font in "${fonts[@]}"; do
         log INFO "Installing $font Nerd Font..."
-        
+
         local font_url="https://github.com/ryanoasis/nerd-fonts/releases/latest/download/${font}.zip"
-        
+
         if wget -q --show-progress "$font_url" -O "${font}.zip"; then
             unzip -q -o "${font}.zip" -d "$FONTS_DIR"
             rm "${font}.zip"
@@ -543,10 +543,10 @@ install_fonts() {
             log WARNING "Failed to download $font"
         fi
     done
-    
+
     # Update font cache
     fc-cache -fv > /dev/null 2>&1
-    
+
     cd - > /dev/null
     log SUCCESS "Fonts installation completed"
 }
@@ -556,95 +556,95 @@ install_docker() {
     if [[ "$INSTALL_DOCKER" != true ]]; then
         return
     fi
-    
+
     log STEP "Installing Docker..."
-    
+
     if command_exists docker; then
         log INFO "Docker already installed"
         return
     fi
-    
+
     # Add Docker's official GPG key
     curl -fsSL https://download.docker.com/linux/debian/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
-    
+
     # Add Docker repository
     echo \
         "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/debian \
         $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-    
+
     # Install Docker
     sudo apt update
     sudo apt install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
-    
+
     # Add user to docker group
     sudo usermod -aG docker "$USER"
-    
+
     # Install Docker Compose v2
     sudo apt install -y docker-compose-plugin
-    
+
     log SUCCESS "Docker installed (restart required for group changes)"
 }
 
 # Install programming languages
 install_languages() {
     log STEP "Installing programming language tools..."
-    
+
     # Python packages
     if command_exists pip3; then
         log INFO "Installing Python packages..."
         pip3 install --user --upgrade pip setuptools wheel
-        
+
         for package in "${PYTHON_PACKAGES[@]}"; do
             pip3 install --user "$package" || log WARNING "Failed to install $package"
         done
     fi
-    
+
     # Node packages
     if command_exists npm; then
         log INFO "Installing Node.js packages..."
-        
+
         # Set npm prefix for global packages
         npm config set prefix "$HOME/.npm-global"
         export PATH="$HOME/.npm-global/bin:$PATH"
-        
+
         for package in "${NODE_PACKAGES[@]}"; do
             npm install -g "$package" || log WARNING "Failed to install $package"
         done
     fi
-    
+
     # Go packages
     if command_exists go; then
         log INFO "Installing Go packages..."
         export GOPATH="$HOME/.go"
         export PATH="$GOPATH/bin:$PATH"
-        
+
         for package in "${GO_PACKAGES[@]}"; do
             go install "$package" || log WARNING "Failed to install $package"
         done
     fi
-    
+
     # Rust packages
     if command_exists cargo; then
         log INFO "Installing Rust packages..."
-        
+
         for package in "${RUST_PACKAGES[@]}"; do
             cargo install "$package" || log WARNING "Failed to install $package"
         done
     fi
-    
+
     log SUCCESS "Programming languages setup completed"
 }
 
 # Install additional tools
 install_additional_tools() {
     log STEP "Installing additional tools..."
-    
+
     # Install Starship prompt
     if ! command_exists starship; then
         log INFO "Installing Starship prompt..."
         curl -sS https://starship.rs/install.sh | sh -s -- -y
     fi
-    
+
     # Install GitHub CLI
     if ! command_exists gh; then
         log INFO "Installing GitHub CLI..."
@@ -653,7 +653,7 @@ install_additional_tools() {
         sudo apt update
         sudo apt install gh -y
     fi
-    
+
     # Install Terraform
     if ! command_exists terraform && [[ "$INSTALL_MODE" == "full" ]]; then
         log INFO "Installing Terraform..."
@@ -661,7 +661,7 @@ install_additional_tools() {
         echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list
         sudo apt update && sudo apt install terraform -y
     fi
-    
+
     # Install kubectl
     if ! command_exists kubectl; then
         log INFO "Installing kubectl..."
@@ -669,7 +669,7 @@ install_additional_tools() {
         chmod +x kubectl
         sudo mv kubectl /usr/local/bin/
     fi
-    
+
     log SUCCESS "Additional tools installed"
 }
 
@@ -699,12 +699,12 @@ configure_git() {
 # Link dotfiles
 link_dotfiles() {
     log STEP "Setting up dotfiles..."
-    
+
     if [[ ! -d "$DOTFILES_DIR" ]]; then
         log INFO "Dotfiles directory not found. Skipping..."
         return
     fi
-    
+
     # Link common dotfiles
     local dotfiles=(
         ".zshrc"
@@ -712,42 +712,42 @@ link_dotfiles() {
         ".tmux.conf"
         ".vimrc"
     )
-    
+
     for file in "${dotfiles[@]}"; do
         if [[ -f "$DOTFILES_DIR/$file" ]]; then
             ln -sf "$DOTFILES_DIR/$file" "$HOME/$file"
             log INFO "Linked $file"
         fi
     done
-    
+
     # Link Neovim config
     if [[ -d "$DOTFILES_DIR/nvim" ]]; then
         ln -sf "$DOTFILES_DIR/nvim" "$NVIM_CONFIG_DIR"
         log INFO "Linked Neovim config"
     fi
-    
+
     log SUCCESS "Dotfiles linked"
 }
 
 # Final setup
 final_setup() {
     log STEP "Performing final setup..."
-    
+
     # Set Zsh as default shell
     if [[ "$SHELL" != "$(which zsh)" ]]; then
         log INFO "Setting Zsh as default shell..."
         chsh -s "$(which zsh)"
     fi
-    
+
     # Create useful directories
     mkdir -p "$HOME/projects"
     mkdir -p "$HOME/scripts"
     mkdir -p "$HOME/notes"
-    
+
     # Set proper permissions
     chmod 700 "$HOME/.ssh" 2>/dev/null || true
     chmod 600 "$HOME/.ssh/config" 2>/dev/null || true
-    
+
     log SUCCESS "Final setup completed"
 }
 
@@ -823,22 +823,22 @@ main() {
     # Set up error handling
     trap 'error_handler $LINENO $?' ERR
     trap cleanup EXIT
-    
+
     # Show banner
     echo -e "${CYAN}"
     echo "============================================="
     echo "   Raspberry Pi Dev Environment Bootstrap"
     echo "============================================="
     echo -e "${NC}"
-    
+
     # Parse arguments
     parse_arguments "$@"
-    
+
     # Start logging
     log INFO "Bootstrap started at $(date)"
     log INFO "Installation mode: $INSTALL_MODE"
     log INFO "Log file: $LOG_FILE"
-    
+
     # Run setup steps
     check_sudo
     check_system
@@ -855,26 +855,26 @@ main() {
     configure_git
     link_dotfiles
     final_setup
-    
+
     # Success message
     echo -e "${GREEN}"
     echo "============================================="
     echo "   Bootstrap Completed Successfully!"
     echo "============================================="
     echo -e "${NC}"
-    
+
     log SUCCESS "Bootstrap completed at $(date)"
-    
+
     echo ""
     echo "Next steps:"
     echo "1. Log out and log back in (or restart) to apply all changes"
     echo "2. Run 'nvim' to complete Neovim plugin installation"
     echo "3. Configure your terminal to use a Nerd Font"
-    
+
     if [[ "$INSTALL_DOCKER" == true ]]; then
         echo "4. Docker was installed - restart to apply group changes"
     fi
-    
+
     echo ""
     echo "Backup location: $BACKUP_DIR"
     echo "Log file: $LOG_FILE"

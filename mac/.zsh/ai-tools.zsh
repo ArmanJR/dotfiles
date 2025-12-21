@@ -6,11 +6,16 @@
 # Claude Code
 # =============================================================================
 
-# Claude Code binary path
-alias cc="/Users/arman/.claude/local/claude"
+# Claude ignition script - removes all aliases from Claude's Bash commands
+export CLAUDE_ENV_FILE="$HOME/.claude/ignition.sh"
 
-# Skip permission prompts (use with caution)
-alias ccskip="claude --dangerously-skip-permissions"
+# Claude Code aliases
+alias claude='~/.claude/local/claude'
+alias claudeskip='~/.claude/local/claude --dangerously-skip-permissions'
+
+# Short aliases
+alias cc='claude'
+alias ccskip='claudeskip'
 
 # =============================================================================
 # Codex

@@ -84,17 +84,14 @@ export MANPAGER="sh -c 'col -bx | bat -l man -p'"  # colored man pages
 
 # Modern replacements for common tools
 if command -v eza >/dev/null 2>&1; then
+    alias l="eza -lh"
     alias ls="eza"
     alias ll="eza -l --git"
     alias la="eza -la --git"
     alias lt="eza -T"
     alias tree="eza -T"
-elif command -v eza >/dev/null 2>&1; then
-    alias ls="eza"
-    alias ll="eza -l --git"
-    alias la="eza -la --git"
-    alias lt="eza -T"
-    alias tree="eza -T"
+else
+    alias l="ls -lh"
 fi
 
 # fd (find replacement)

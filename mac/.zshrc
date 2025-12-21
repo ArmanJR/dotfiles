@@ -41,6 +41,7 @@ source_if_exists() {
 # Load all configuration modules
 source_if_exists "$ZSH_CONFIG_DIR/homebrew.zsh"
 source_if_exists "$ZSH_CONFIG_DIR/theme.zsh"
+source_if_exists "$ZSH_CONFIG_DIR/history.zsh"
 source_if_exists "$ZSH_CONFIG_DIR/languages.zsh"
 source_if_exists "$ZSH_CONFIG_DIR/cloud-tools.zsh"
 source_if_exists "$ZSH_CONFIG_DIR/dev-tools.zsh"
