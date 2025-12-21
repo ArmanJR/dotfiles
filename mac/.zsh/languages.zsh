@@ -116,9 +116,13 @@ alias gomt="go mod tidy"
 # Node.js Configuration
 # =============================================================================
 
-# Node Version Manager (fnm) - faster alternative to nvm
+# Node Version Manager (fnm) - faster alternative to nvm, cached for faster startup
 if command -v fnm >/dev/null 2>&1; then
-    eval "$(fnm env --use-on-cd)"
+    if [[ ! -f ~/.zsh/cache/fnm.zsh ]] || [[ $(which fnm) -nt ~/.zsh/cache/fnm.zsh ]]; then
+        mkdir -p ~/.zsh/cache
+        fnm env --use-on-cd > ~/.zsh/cache/fnm.zsh
+    fi
+    source ~/.zsh/cache/fnm.zsh
 fi
 
 # NVM configuration (fallback if fnm not available)

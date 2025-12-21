@@ -262,9 +262,13 @@ if command -v fzf >/dev/null 2>&1; then
     alias gbf="fzf-git-branch"
 fi
 
-# Zoxide (better cd)
+# Zoxide (better cd) - cached for faster startup
 if command -v zoxide >/dev/null 2>&1; then
-    eval "$(zoxide init zsh)"
+    if [[ ! -f ~/.zsh/cache/zoxide.zsh ]] || [[ $(which zoxide) -nt ~/.zsh/cache/zoxide.zsh ]]; then
+        mkdir -p ~/.zsh/cache
+        zoxide init zsh > ~/.zsh/cache/zoxide.zsh
+    fi
+    source ~/.zsh/cache/zoxide.zsh
 fi
 
 # =============================================================================
