@@ -39,6 +39,9 @@ _init_gcloud() {
     alias gbq="bq"
 }
 
+# Remove any conflicting aliases before defining lazy-load functions
+unalias gcloud gsutil bq 2>/dev/null
+
 # Wrapper functions that trigger lazy load
 gcloud() { _init_gcloud && gcloud "$@" }
 gsutil() { _init_gcloud && gsutil "$@" }

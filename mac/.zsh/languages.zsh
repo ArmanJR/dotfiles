@@ -130,6 +130,9 @@ if command -v fnm >/dev/null 2>&1; then
 fi
 
 # NVM configuration (fallback if fnm not available) - Lazy loaded
+# Remove any conflicting aliases before potentially defining lazy-load functions
+unalias nvm node npm npx 2>/dev/null
+
 if ! command -v fnm >/dev/null 2>&1 && [[ -d "$HOME/.nvm" ]]; then
     export NVM_DIR="$HOME/.nvm"
 
@@ -168,7 +171,10 @@ alias npmu="npm update"
 alias npms="npm start"
 alias npmt="npm test"
 alias npmr="npm run"
-alias npx="npx --yes"
+# npx alias only if not using nvm lazy-load (which defines npx as a function)
+if ! typeset -f npx > /dev/null; then
+    alias npx="npx --yes"
+fi
 
 # Yarn aliases
 alias yi="yarn install"
