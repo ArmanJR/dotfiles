@@ -82,34 +82,7 @@ export MANPAGER="sh -c 'col -bx | bat -l man -p'"  # colored man pages
 # File Managers and Navigation
 # =============================================================================
 
-# Modern replacements for common tools
-if command -v eza >/dev/null 2>&1; then
-    alias l="eza -lh"
-    alias ls="eza"
-    alias ll="eza -l --git"
-    alias la="eza -la --git"
-    alias lt="eza -T"
-    alias tree="eza -T"
-else
-    alias l="ls -lh"
-fi
-
-# fd (find replacement)
-if command -v fd >/dev/null 2>&1; then
-    alias find="fd"
-fi
-
-# ripgrep (grep replacement)
-if command -v rg >/dev/null 2>&1; then
-    alias grep="rg"
-    export RIPGREP_CONFIG_PATH="$HOME/.ripgreprc"
-fi
-
-# bat (cat replacement)
-if command -v bat >/dev/null 2>&1; then
-    alias cat="bat --paging=never"
-    alias catt="bat --paging=always"
-fi
+# Tool aliases (eza, fd, rg, bat) are defined in aliases.zsh
 
 # catc (copy into clipboard with the filename)
 catc() {
