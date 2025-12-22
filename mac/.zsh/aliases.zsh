@@ -91,7 +91,7 @@ alias ips="ifconfig -a | grep -o 'inet6\? \(addr:\)\?\s\?\(\(\([0-9]\+\.\)\{3\}[
 
 # Quick directory access
 alias dev="cd ~/Developer"
-alias code="cd ~/code"
+alias cde="cd ~/code"
 alias docs="cd ~/Documents"
 alias downloads="cd ~/Downloads"
 alias desktop="cd ~/Desktop"
