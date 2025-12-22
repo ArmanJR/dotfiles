@@ -286,6 +286,16 @@ fi
 
 if [[ "$SYNC_CLAUDE" == true ]]; then
     sync_directory "$MAC_DIR/.claude" "$HOME/.claude" ".claude directory"
+
+    # Run setup script if it exists
+    if [[ -f "$HOME/.claude/setup-claude.sh" ]]; then
+        echo -e "${BLUE}Running Claude setup script...${NC}"
+        bash "$HOME/.claude/setup-claude.sh" || {
+            echo -e "${RED}Error: Failed to run setup-claude.sh${NC}"
+            return 1
+        }
+        echo -e "${GREEN}  ✓ Setup complete${NC}"
+    fi
 fi
 
 if [[ "$SYNC_VSCODE" == true ]]; then

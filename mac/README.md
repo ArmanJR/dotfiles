@@ -40,12 +40,3 @@ dotsync --dotfiles     # git, ripgrep, ghostty configs
 dotsync --claude       # Claude Code settings
 dotsync --vscode       # VSCode settings.json
 ```
-
-## Optional Tools
-
-These tools are configured if installed:
-
-- **Python**: `pyenv`, `uv`, `poetry`
-- **Node.js**: `fnm` (or nvm), `pnpm`, `bun`
-- **Go**: `go`
-- **Containers**: `docker`, `kubectl`

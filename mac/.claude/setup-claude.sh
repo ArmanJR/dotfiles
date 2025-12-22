@@ -59,7 +59,7 @@ cat > "$CCSTATUSLINE_CONFIG_FILE" << 'EOF'
       {
         "id": "5",
         "type": "git-branch",
-        "color": ""
+        "color": "brightBlack"
       },
       {
         "id": "4e187907-f2ae-4182-b9da-a6cb2cc4690c",
@@ -69,7 +69,7 @@ cat > "$CCSTATUSLINE_CONFIG_FILE" << 'EOF'
       {
         "id": "3",
         "type": "context-percentage",
-        "color": "white"
+        "color": "brightBlack"
       }
     ],
     [],
