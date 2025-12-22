@@ -25,9 +25,19 @@ export XDG_CONFIG_HOME="$HOME/.config"
 export XDG_DATA_HOME="$HOME/.local/share"
 export XDG_CACHE_HOME="$HOME/.cache"
 
-# Zsh configuration directory
-export ZDOTDIR="$HOME/.config/zsh"
-ZSH_CONFIG_DIR="$HOME/.zsh"
+# Zsh configuration directory (modules location)
+export ZSH_CONFIG_DIR="$HOME/.zsh"
+
+# =============================================================================
+# Completion System (initialize early for modules that use compdef)
+# =============================================================================
+
+autoload -Uz compinit
+if [[ -n ~/.zcompdump(#qN.mh+24) ]]; then
+    compinit
+else
+    compinit -C  # Skip security check, use cache
+fi
 
 # =============================================================================
 # Module Loading
@@ -52,17 +62,6 @@ source_if_exists "$ZSH_CONFIG_DIR/functions.zsh"
 
 # Load local/private configurations (not tracked in git)
 source_if_exists "$HOME/.zshrc.local"
-
-# =============================================================================
-# Completion System (cached for faster startup)
-# =============================================================================
-
-autoload -Uz compinit
-if [[ -n ~/.zcompdump(#qN.mh+24) ]]; then
-    compinit
-else
-    compinit -C  # Skip security check, use cache
-fi
 
 # =============================================================================
 # Zsh Options

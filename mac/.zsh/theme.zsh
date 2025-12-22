@@ -17,15 +17,20 @@ fi
 
 # Enable Powerlevel10k instant prompt (should stay close to the top of .zshrc)
 # Initialization code that may require console input should go above this block
-if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
-  source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
+# Skip instant prompt in VS Code as it can cause initialization issues
+if [[ -z "$VSCODE_INJECTION" ]] && [[ -z "$TERM_PROGRAM" || "$TERM_PROGRAM" != "vscode" ]]; then
+  if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
+    source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
+  fi
+  # Enable instant prompt for non-VS Code terminals
+  typeset -g POWERLEVEL9K_INSTANT_PROMPT=verbose
+else
+  # Disable instant prompt in VS Code
+  typeset -g POWERLEVEL9K_INSTANT_PROMPT=quiet
 fi
 
 # Powerlevel10k configuration (you can customize this or run `p10k configure`)
 # This is a minimal configuration optimized for development workflow
-
-# Enable instant prompt
-typeset -g POWERLEVEL9K_INSTANT_PROMPT=verbose
 
 # Font settings (JetBrains Mono Nerd Font)
 typeset -g POWERLEVEL9K_MODE='nerdfont-complete'

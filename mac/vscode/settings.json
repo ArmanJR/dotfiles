@@ -297,10 +297,11 @@
   },
   "terminal.integrated.env.osx": {
     "TERM": "xterm-256color",
-    "COLORTERM": "truecolor"
+    "COLORTERM": "truecolor",
+    "TERM_PROGRAM": "vscode"
   },
-  "terminal.integrated.cursorBlinking": true,
-  "terminal.integrated.cursorStyle": "line",
+  "terminal.integrated.cursorBlinking": false,
+  "terminal.integrated.cursorStyle": "block",
   "terminal.integrated.scrollback": 50000,
   "terminal.integrated.enableMultiLinePasteWarning": false,
   "terminal.integrated.commandsToSkipShell": ["language-julia.interrupt"],
