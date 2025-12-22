@@ -15,12 +15,9 @@
   "editor.tabSize": 4,
   "editor.insertSpaces": true,
   "editor.detectIndentation": true,
-  "editor.formatOnSave": true,
+  "editor.formatOnSave": false,
   "editor.formatOnPaste": false,
-  "editor.codeActionsOnSave": {
-    "source.organizeImports": "explicit",
-    "source.fixAll.eslint": "explicit"
-  },
+  "editor.codeActionsOnSave": {},
   "editor.suggestSelection": "first",
   "editor.quickSuggestions": {
     "strings": true,
@@ -48,7 +45,7 @@
 
   // File Management
   "files.autoSave": "afterDelay",
-  "files.autoSaveDelay": 2000,
+  "files.autoSaveDelay": 800,
   "files.trimTrailingWhitespace": true,
   "files.insertFinalNewline": true,
   "files.trimFinalNewlines": true,
@@ -103,11 +100,8 @@
   // Python Formatting & Linting
   "[python]": {
     "editor.defaultFormatter": "ms-python.black-formatter",
-    "editor.formatOnSave": true,
-    "editor.codeActionsOnSave": {
-      "source.organizeImports": "explicit",
-      "source.fixAll": "explicit"
-    },
+    "editor.formatOnSave": false,
+    "editor.codeActionsOnSave": {},
     "editor.tabSize": 4,
     "editor.rulers": [88, 120]
   },
@@ -144,10 +138,8 @@
 
   "[go]": {
     "editor.defaultFormatter": "golang.go",
-    "editor.formatOnSave": true,
-    "editor.codeActionsOnSave": {
-      "source.organizeImports": "explicit"
-    },
+    "editor.formatOnSave": false,
+    "editor.codeActionsOnSave": {},
     "editor.tabSize": 4,
     "editor.insertSpaces": false
   },
