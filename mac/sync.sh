@@ -12,6 +12,7 @@
 #   --dotfiles    Sync other dotfiles (.gitconfig, .gitignore_global, .ripgreprc, ghostty.config)
 #   --claude      Sync .claude directory
 #   --vscode      Sync VSCode settings
+#   --atuin       Sync Atuin config
 #   --all         Sync everything
 #   --help        Show this help message
 
@@ -35,6 +36,7 @@ SYNC_ZSHRC=false
 SYNC_DOTFILES=false
 SYNC_CLAUDE=false
 SYNC_VSCODE=false
+SYNC_ATUIN=false
 
 if [[ $# -eq 0 ]]; then
     echo -e "${RED}Error: No sync target specified${NC}"
@@ -59,12 +61,16 @@ for arg in "$@"; do
         --vscode)
             SYNC_VSCODE=true
             ;;
+        --atuin)
+            SYNC_ATUIN=true
+            ;;
         --all)
             SYNC_ZSH=true
             SYNC_ZSHRC=true
             SYNC_DOTFILES=true
             SYNC_CLAUDE=true
             SYNC_VSCODE=true
+            SYNC_ATUIN=true
             ;;
         --help)
             echo "Dotfiles sync script"
@@ -77,6 +83,7 @@ for arg in "$@"; do
             echo "  --dotfiles    Sync other dotfiles (.gitconfig, .gitignore_global, .ripgreprc, ghostty.config)"
             echo "  --claude      Sync .claude directory"
             echo "  --vscode      Sync VSCode settings"
+            echo "  --atuin       Sync Atuin config"
             echo "  --all         Sync everything"
             echo "  --help        Show this help message"
             exit 0
@@ -265,6 +272,10 @@ if [[ "$SYNC_VSCODE" == true ]]; then
     compare_file "$MAC_DIR/vscode/settings.json" "$VSCODE_TARGET/settings.json" "VSCode settings.json"
 fi
 
+if [[ "$SYNC_ATUIN" == true ]]; then
+    compare_file "$MAC_DIR/.config/atuin/config.toml" "$HOME/.config/atuin/config.toml" "Atuin config.toml"
+fi
+
 # Sync phase
 echo -e "${BLUE}=== Syncing files ===${NC}"
 echo ""
@@ -301,6 +312,10 @@ fi
 if [[ "$SYNC_VSCODE" == true ]]; then
     VSCODE_TARGET="$HOME/Library/Application Support/Code/User"
     sync_file "$MAC_DIR/vscode/settings.json" "$VSCODE_TARGET/settings.json" "VSCode settings.json"
+fi
+
+if [[ "$SYNC_ATUIN" == true ]]; then
+    sync_file "$MAC_DIR/.config/atuin/config.toml" "$HOME/.config/atuin/config.toml" "Atuin config.toml"
 fi
 
 echo ""
