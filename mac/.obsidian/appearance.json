@@ -1,0 +1,11 @@
+{
+  "cssTheme": "Encore",
+  "baseFontSize": 16,
+  "textFontFamily": "Literata",
+  "interfaceFontFamily": "Literata",
+  "baseFontSizeAction": false,
+  "enabledCssSnippets": [
+    "dark-sepia"
+  ],
+  "accentColor": "#bcbf08"
+}
