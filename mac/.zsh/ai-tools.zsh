@@ -10,8 +10,8 @@
 export CLAUDE_ENV_FILE="$HOME/.claude/ignition.sh"
 
 # Claude Code aliases
-alias claude='~/.claude/local/claude'
-alias claudeskip='~/.claude/local/claude --dangerously-skip-permissions'
+alias claude='~/.local/bin/claude'
+alias claudeskip='~/.local/bin/claude --dangerously-skip-permissions'
 
 # Short aliases
 alias cc='claude'
