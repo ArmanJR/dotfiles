@@ -1,8 +1,8 @@
 {
   "git": {
     "inline_blame": {
-      "enabled": false,
-    },
+      "enabled": false
+    }
   },
   "git_panel": {
     "tree_view": false,
@@ -25,7 +25,7 @@
     },
   },
   "prettier": {
-    "allowed": true,
+    "allowed": false,
   },
   "colorize_brackets": false,
   "soft_wrap": "none",
