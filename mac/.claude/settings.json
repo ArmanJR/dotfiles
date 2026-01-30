@@ -106,7 +106,10 @@
   "promptSuggestionEnabled": false,
   "statusLine": {
     "type": "command",
-    "command": "ccstatusline",
+    "command": "~/.claude/statusline.sh",
     "padding": 0
+  },
+  "enabledPlugins": {
+    "safety-net@cc-marketplace": true
   }
 }
