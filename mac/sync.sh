@@ -13,6 +13,7 @@
 #   --claude      Sync .claude directory
 #   --vscode      Sync VSCode settings
 #   --atuin       Sync Atuin config
+#   --zed         Sync Zed config
 #   --all         Sync everything
 #   --help        Show this help message
 
@@ -37,6 +38,7 @@ SYNC_DOTFILES=false
 SYNC_CLAUDE=false
 SYNC_VSCODE=false
 SYNC_ATUIN=false
+SYNC_ZED=false
 
 if [[ $# -eq 0 ]]; then
     echo -e "${RED}Error: No sync target specified${NC}"
@@ -64,6 +66,9 @@ for arg in "$@"; do
         --atuin)
             SYNC_ATUIN=true
             ;;
+        --zed)
+            SYNC_ZED=true
+            ;;
         --all)
             SYNC_ZSH=true
             SYNC_ZSHRC=true
@@ -71,6 +76,7 @@ for arg in "$@"; do
             SYNC_CLAUDE=true
             SYNC_VSCODE=true
             SYNC_ATUIN=true
+            SYNC_ZED=true
             ;;
         --help)
             echo "Dotfiles sync script"
@@ -84,6 +90,7 @@ for arg in "$@"; do
             echo "  --claude      Sync .claude directory"
             echo "  --vscode      Sync VSCode settings"
             echo "  --atuin       Sync Atuin config"
+            echo "  --zed         Sync Zed config"
             echo "  --all         Sync everything"
             echo "  --help        Show this help message"
             exit 0
@@ -276,6 +283,10 @@ if [[ "$SYNC_ATUIN" == true ]]; then
     compare_file "$MAC_DIR/.config/atuin/config.toml" "$HOME/.config/atuin/config.toml" "Atuin config.toml"
 fi
 
+if [[ "$SYNC_ZED" == true ]]; then
+    compare_directory "$MAC_DIR/.config/zed" "$HOME/.config/zed" ".config/zed directory"
+fi
+
 # Sync phase
 echo -e "${BLUE}=== Syncing files ===${NC}"
 echo ""
@@ -316,6 +327,10 @@ fi
 
 if [[ "$SYNC_ATUIN" == true ]]; then
     sync_file "$MAC_DIR/.config/atuin/config.toml" "$HOME/.config/atuin/config.toml" "Atuin config.toml"
+fi
+
+if [[ "$SYNC_ZED" == true ]]; then
+    sync_directory "$MAC_DIR/.config/zed" "$HOME/.config/zed" ".config/zed directory"
 fi
 
 echo ""

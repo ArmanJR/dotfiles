@@ -1,0 +1,70 @@
+{
+  "git": {
+    "inline_blame": {
+      "enabled": false,
+    },
+  },
+  "git_panel": {
+    "tree_view": false,
+  },
+  "project_panel": {
+    "indent_size": 16.0,
+    "hide_gitignore": false,
+  },
+  "tabs": {
+    "file_icons": true,
+    "git_status": true,
+  },
+  "title_bar": {
+    "show_menus": false,
+    "show_branch_icon": false,
+  },
+  "diagnostics": {
+    "inline": {
+      "enabled": false,
+    },
+  },
+  "prettier": {
+    "allowed": true,
+  },
+  "colorize_brackets": false,
+  "soft_wrap": "none",
+  "toolbar": {
+    "code_actions": false,
+    "agent_review": true,
+    "quick_actions": true,
+    "breadcrumbs": true,
+  },
+  "minimap": {
+    "show": "never",
+  },
+  "gutter": {
+    "folds": true,
+    "breakpoints": true,
+    "runnables": true,
+    "line_numbers": true,
+  },
+  "autosave": "on_focus_change",
+  "show_wrap_guides": true,
+  "cursor_shape": "bar",
+  "cursor_blink": false,
+  "ui_font_family": ".ZedSans",
+  "buffer_line_height": "comfortable",
+  "session": {
+    "trust_all_worktrees": true,
+  },
+  "terminal": {
+    "font_size": 12.0,
+    "dock": "right",
+  },
+  "disable_ai": true,
+  "features": {
+    "edit_prediction_provider": "none",
+  },
+  "icon_theme": "Catppuccin Latte",
+  "buffer_font_family": "JetBrains Mono",
+  "theme": "GitHub Dark Dimmed",
+  "base_keymap": "JetBrains",
+  "ui_font_size": 14,
+  "buffer_font_size": 14,
+}
