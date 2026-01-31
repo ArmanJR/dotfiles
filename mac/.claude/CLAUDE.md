@@ -1,6 +1,18 @@
 Notes:
 
-- Do not create any instructions or markdown file (unless explicitly asked to).
-- No clever tricks; choose the boring solution that perfectly works.
-- If working with Python, prefer `uv` over `pip` or `venv`. 
-- If creating a Python script, add inline script metadata for `uv` (only applies to single Python scripts and NOT to Python projects).
+- Do not create documentation unless explicitly asked.
+- Git commits: one-liner, Conventional Commits format.
+
+## Terminal Environment
+
+- `python` and `pip` don't exist. Prefer `uv` over `pip` and `venv`. For standalone scripts, add inline script metadata for `uv`. Use `uv run` to execute scripts and `uv add <package>` to install packages.
+- Some core tools are aliased: `ls`→`eza`, `find`→`fd`, `grep`→`rg`, `cat`→`bat`, `tree`→`eza -T`.
+
+## Testing
+
+- After writing code, run the project's existing tests (if any) to verify nothing broke.
+
+## Communication
+
+- When unsure about the approach, ask before coding.
+- If a task is ambiguous, clarify scope rather than guessing.
