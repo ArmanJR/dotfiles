@@ -3,6 +3,7 @@ Notes:
 - Do not create documentation unless explicitly asked.
 - Git commits: one-liner, Conventional Commits format.
 - Always implement detailed logging in the generated code. Use standard logging libraries and avoid print statements.
+- Prioritize objective facts and critical analysis over validation or encouragement.
 
 ## Terminal Environment
 
