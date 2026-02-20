@@ -1,26 +1,27 @@
 ---
-name: cmt
-description: Commits the current task's changes, checks for residual untracked files, and pushes to remote.
+name: kermit
+description: Commits task changes, handles residual files, and pushes to remote. Triggered exclusively via the explicit "kermit" command.
 ---
 
+**CORE DIRECTIVE:** Execute git operations deterministically. Prioritize repository safety and clean commit history.
+
 **Step 1: Commit Current Task Changes**
-Identify the specific files and folders you modified or created during our current chat session.
-1.  **Sensitive Data Check:** Scan these specific files for secrets (.env, API keys, credentials) or temporary artifacts (node_modules, __pycache__, .DS_Store).
-    * *If unsafe:* Do NOT stage. Stop and alert me.
-    * *If safe:* Proceed.
-2.  **Stage & Commit:** Run `git add <specific_files>`.
-3.  **Message:** Create a descriptive commit message using Conventional Commits format based on the work you just completed.
+1. **Identify Scope:** Use `git status -s` to identify files modified or created during the current task.
+2. **Sensitive Data Scan:** Analyze the diff of these files for secrets (e.g., API keys, tokens, passwords) and temporary artifacts (e.g., `.env`, `__pycache__/`, `node_modules/`, `vendor/`).
+   * *IF UNSAFE:* HALT immediately. Alert the user with the exact file and lines containing the suspected leak. Do not proceed.
+   * *IF SAFE:* Run `git add <specific_files>`.
+3. **Generate Message:** Run `git diff --staged`. Generate a Conventional Commit message based *strictly* on this diff output, not chat history. Commit the files.
 
 **Step 2: Handle Residual/Untracked Changes**
-Run `git status` to identify any remaining modified or untracked files that were *not* part of your current task (the "hanging" changes).
-* **Case A: No residual changes.** Proceed to Step 3.
-* **Case B: Residual changes exist.** Analyze their complexity:
-    * *Minor Changes:* (e.g., small typos, formatting, simple config updates).
-        * Perform **Sensitive Data Check** on these files.
-        * If safe, stage and commit them with a separate message.
-    * *Major Changes:* (e.g., large sets of untracked files, unrelated feature code, deep refactors).
-        * **Do NOT commit.** Leave them in the working tree.
-        * Add a note to your final response listing these files so the user is aware they are still pending.
+Run `git status -s` to identify remaining modifications.
+* **If empty:** Proceed to Step 3.
+* **If residual files exist:** Evaluate based on these strict thresholds:
+   * *Minor (Safe):* < 3 files AND < 50 lines of code total (e.g., typos, formatting). Run the Sensitive Data Scan. If safe, stage and commit with an isolated, descriptive message.
+   * *Major (Unsafe):* >= 3 files OR >= 50 lines of code, or unfamiliar untracked files. DO NOT commit. Leave in the working tree.
 
-**Step 3: Push to Remote**
-Push all new commits to the current branch.
+**Step 3: Remote Push & Cleanup**
+2. **Push:** Run `git push`.
+3. **Error Handling:** If the push fails (e.g., remote ahead, hook failure), HALT and report the exact git error output to the user.
+4. **Report:** Output a concise summary of pushed commits and explicitly list any Major residual files left uncommitted.
+
+Note: Maximize the cleanup of residual files. Default to committing all minor, safe, and unrelated changes. Exclude only major refactors or large-scale untracked files.
