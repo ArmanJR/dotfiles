@@ -1,4 +1,14 @@
 {
+  // lsp
+  "languages": {
+    "Python": {
+      "language_servers": [
+        "ty",
+        "!basedpyright",
+        "..."
+      ]
+    }
+  },
   // monitor customized
   "ui_font_size": 17,
   "buffer_font_size": 16,
