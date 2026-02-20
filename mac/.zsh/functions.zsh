@@ -11,16 +11,16 @@
 newproject() {
     local project_name="$1"
     local project_type="${2:-general}"
-    
+
     if [[ -z "$project_name" ]]; then
         echo "Usage: newproject <name> [type]"
         echo "Types: python, go, node, web, general"
         return 1
     fi
-    
+
     mkdir -p "$project_name"
     cd "$project_name"
-    
+
     case "$project_type" in
         python)
             touch README.md requirements.txt .env .gitignore
@@ -49,9 +49,51 @@ newproject() {
             echo ".DS_Store\n*.log" > .gitignore
             ;;
     esac
-    
+
     git init
+    prek-init "$project_type"
     echo "Project '$project_name' created with type '$project_type'"
+}
+
+# Initialize prek pre-commit hooks in the current repo
+# Usage: prek-init [type]   — type: python | go | general (default)
+# Copies a template .pre-commit-config.yaml if one doesn't exist, then installs the git hook.
+prek-init() {
+    if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+        echo "prek-init: not inside a git repository" >&2
+        return 1
+    fi
+
+    if ! command -v prek >/dev/null 2>&1; then
+        echo "prek-init: prek not found. Install with: uv tool install prek" >&2
+        return 1
+    fi
+
+    local project_type="${1:-general}"
+    local config_dest=".pre-commit-config.yaml"
+    local template_dir="${XDG_CONFIG_HOME:-$HOME/.config}/prek"
+
+    if [[ -f "$config_dest" ]]; then
+        echo "prek-init: $config_dest already exists, skipping template copy"
+    else
+        local template
+        case "$project_type" in
+            python) template="$template_dir/python.yaml" ;;
+            go)     template="$template_dir/go.yaml" ;;
+            *)      template="$template_dir/default.yaml" ;;
+        esac
+
+        if [[ ! -f "$template" ]]; then
+            echo "prek-init: template not found at $template" >&2
+            return 1
+        fi
+
+        cp "$template" "$config_dest"
+        echo "prek-init: copied $template -> $config_dest"
+    fi
+
+    prek install --install-hooks
+    echo "prek-init: hooks installed"
 }
 
 # Quick commit function
@@ -61,10 +103,10 @@ qcommit() {
         echo "Usage: qcommit <commit message>"
         return 1
     fi
-    
+
     git add .
     git commit -m "$message"
-    
+
     # Ask if user wants to push
     echo -n "Push to remote? (y/N): "
     read -r response
@@ -81,10 +123,10 @@ qcommit() {
 devserver() {
     local port="${1:-3000}"
     local dir="${2:-.}"
-    
+
     echo "Starting development server on port $port..."
     echo "Serving directory: $dir"
-    
+
     if command -v live-server >/dev/null 2>&1; then
         live-server --port="$port" --open="$dir"
     elif command -v python3 >/dev/null 2>&1; then
@@ -97,14 +139,14 @@ devserver() {
 # Port checker and killer
 port() {
     local port_num="$1"
-    
+
     if [[ -z "$port_num" ]]; then
         echo "Usage: port <port_number>"
         return 1
     fi
-    
+
     local pid=$(lsof -ti tcp:"$port_num")
-    
+
     if [[ -n "$pid" ]]; then
         echo "Port $port_num is in use by PID $pid"
         ps -p "$pid" -o pid,ppid,comm
@@ -127,12 +169,12 @@ port() {
 smartfind() {
     local query="$1"
     local path="${2:-.}"
-    
+
     if [[ -z "$query" ]]; then
         echo "Usage: smartfind <search_term> [path]"
         return 1
     fi
-    
+
     if command -v fd >/dev/null 2>&1; then
         fd "$query" "$path"
     else
@@ -143,9 +185,9 @@ smartfind() {
 # Duplicate file finder
 finddupes() {
     local directory="${1:-.}"
-    
+
     echo "Finding duplicate files in: $directory"
-    
+
     if command -v fdupes >/dev/null 2>&1; then
         fdupes -r "$directory"
     else
@@ -157,7 +199,7 @@ finddupes() {
 usage() {
     local path="${1:-.}"
     local depth="${2:-1}"
-    
+
     if command -v ncdu >/dev/null 2>&1; then
         ncdu "$path"
     elif command -v dust >/dev/null 2>&1; then
@@ -174,7 +216,7 @@ usage() {
 # Network connectivity test
 nettest() {
     local hosts=("8.8.8.8" "1.1.1.1" "google.com" "github.com")
-    
+
     for host in "${hosts[@]}"; do
         if ping -c 1 -W 1000 "$host" >/dev/null 2>&1; then
             echo "✅ $host - Connected"
@@ -199,16 +241,16 @@ speedtest() {
 resources() {
     echo "=== CPU Usage ==="
     top -l 1 -n 10 | grep "CPU usage"
-    
+
     echo -e "\n=== Memory Usage ==="
     vm_stat | head -n 10
-    
+
     echo -e "\n=== Disk Usage ==="
     df -h | head -n 5
-    
+
     echo -e "\n=== Network Connections ==="
     netstat -an | grep ESTABLISHED | wc -l | awk '{print $1 " established connections"}'
-    
+
     echo -e "\n=== Load Average ==="
     uptime
 }
@@ -222,7 +264,7 @@ docker-nuke() {
     echo "⚠️  This will remove ALL Docker containers, images, and volumes!"
     echo -n "Are you sure? Type 'yes' to continue: "
     read -r response
-    
+
     if [[ "$response" == "yes" ]]; then
         docker stop $(docker ps -aq) 2>/dev/null
         docker rm $(docker ps -aq) 2>/dev/null
@@ -255,16 +297,16 @@ git-stats() {
         echo "Not a git repository"
         return 1
     fi
-    
+
     echo "=== Repository Statistics ==="
     echo "Branch: $(git branch --show-current)"
     echo "Total commits: $(git rev-list --all --count)"
     echo "Contributors: $(git log --format='%aN' | sort -u | wc -l)"
     echo "Files tracked: $(git ls-files | wc -l)"
-    
+
     echo -e "\n=== Recent Activity ==="
     git log --oneline -10
-    
+
     echo -e "\n=== Top Contributors ==="
     git log --format='%aN' | sort | uniq -c | sort -nr | head -5
 }
@@ -288,7 +330,7 @@ focus() {
     local hosts_file="/etc/hosts"
     local focus_marker="# FOCUS MODE"
     local sites=("reddit.com" "twitter.com" "facebook.com" "youtube.com" "instagram.com")
-    
+
     case "$mode" in
         on)
             echo "Enabling focus mode..."
@@ -333,7 +375,7 @@ cheat() {
         echo "Usage: cheat <tool/command>"
         return 1
     fi
-    
+
     if command -v cheat >/dev/null 2>&1; then
         command cheat "$tool"
     else

@@ -14,6 +14,7 @@
 #   --vscode      Sync VSCode settings
 #   --atuin       Sync Atuin config
 #   --zed         Sync Zed config
+#   --prek        Sync prek hook templates
 #   --all         Sync everything
 #   --help        Show this help message
 
@@ -39,6 +40,7 @@ SYNC_CLAUDE=false
 SYNC_VSCODE=false
 SYNC_ATUIN=false
 SYNC_ZED=false
+SYNC_PREK=false
 
 if [[ $# -eq 0 ]]; then
     echo -e "${RED}Error: No sync target specified${NC}"
@@ -69,6 +71,9 @@ for arg in "$@"; do
         --zed)
             SYNC_ZED=true
             ;;
+        --prek)
+            SYNC_PREK=true
+            ;;
         --all)
             SYNC_ZSH=true
             SYNC_ZSHRC=true
@@ -77,6 +82,7 @@ for arg in "$@"; do
             SYNC_VSCODE=true
             SYNC_ATUIN=true
             SYNC_ZED=true
+            SYNC_PREK=true
             ;;
         --help)
             echo "Dotfiles sync script"
@@ -91,6 +97,7 @@ for arg in "$@"; do
             echo "  --vscode      Sync VSCode settings"
             echo "  --atuin       Sync Atuin config"
             echo "  --zed         Sync Zed config"
+            echo "  --prek        Sync prek hook templates"
             echo "  --all         Sync everything"
             echo "  --help        Show this help message"
             exit 0
@@ -287,6 +294,10 @@ if [[ "$SYNC_ZED" == true ]]; then
     compare_directory "$MAC_DIR/.config/zed" "$HOME/.config/zed" ".config/zed directory"
 fi
 
+if [[ "$SYNC_PREK" == true ]]; then
+    compare_directory "$MAC_DIR/.config/prek" "$HOME/.config/prek" ".config/prek directory"
+fi
+
 # Sync phase
 echo -e "${BLUE}=== Syncing files ===${NC}"
 echo ""
@@ -331,6 +342,10 @@ fi
 
 if [[ "$SYNC_ZED" == true ]]; then
     sync_directory "$MAC_DIR/.config/zed" "$HOME/.config/zed" ".config/zed directory"
+fi
+
+if [[ "$SYNC_PREK" == true ]]; then
+    sync_directory "$MAC_DIR/.config/prek" "$HOME/.config/prek" ".config/prek directory"
 fi
 
 echo ""

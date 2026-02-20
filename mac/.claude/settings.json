@@ -103,7 +103,13 @@
       "Bash(ip addr)",
       "Bash(dig:*)",
       "Bash(nslookup:*)",
-      "Bash(host:*)"
+      "Bash(host:*)",
+      "Bash(prek run:*)",
+      "Bash(prek run --all-files)",
+      "Bash(prek run --last-commit)",
+      "Bash(prek install:*)",
+      "Bash(prek validate-config)",
+      "Bash(prek autoupdate)"
     ]
   },
   "alwaysThinkingEnabled": true,

@@ -1,0 +1,42 @@
+repos:
+  - repo: builtin
+    hooks:
+      - id: trailing-whitespace
+        args: ['--markdown-linebreak-ext=md,markdown']
+      - id: end-of-file-fixer
+      - id: check-merge-conflict
+      - id: detect-private-key
+      - id: no-commit-to-branch
+        args: ['--branch=main', '--branch=master']
+      - id: check-added-large-files
+        args: ['--maxkb=5000']
+      - id: check-case-conflict
+      - id: check-json
+      - id: check-toml
+      - id: check-yaml
+      - id: mixed-line-ending
+        args: ['--fix=lf']
+
+  # golangci-lint v2 — lint + autofix on changed files only
+  - repo: https://github.com/golangci/golangci-lint
+    rev: v2.3.1
+    hooks:
+      - id: golangci-lint
+        args: ['--fix']
+
+  # Local system hooks — require Go toolchain installed
+  - repo: local
+    hooks:
+      - id: go-mod-tidy
+        name: go mod tidy
+        entry: bash -c 'go mod tidy && git add go.mod go.sum'
+        language: system
+        files: ^(go\.mod|go\.sum|.*\.go)$
+        pass_filenames: false
+
+      - id: go-vet
+        name: go vet
+        entry: go vet ./...
+        language: system
+        types: [go]
+        pass_filenames: false
