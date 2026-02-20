@@ -16,6 +16,7 @@
 #   --zed         Sync Zed config
 #   --prek        Sync prek hook templates
 #   --all         Sync everything
+#   --dry-run     Show what would change without applying anything
 #   --help        Show this help message
 
 set -e  # Exit on error
@@ -31,6 +32,9 @@ NC='\033[0m' # No Color
 
 DOTFILES_DIR="$HOME/code/dotfiles"
 MAC_DIR="$DOTFILES_DIR/mac"
+BACKUP_BASE="$HOME/.dotfiles.backups"
+BACKUP_DIR="$BACKUP_BASE/sync-$(date +%Y%m%d-%H%M%S)"
+BACKUP_CREATED=false
 
 # Parse arguments
 SYNC_ZSH=false
@@ -41,6 +45,7 @@ SYNC_VSCODE=false
 SYNC_ATUIN=false
 SYNC_ZED=false
 SYNC_PREK=false
+DRY_RUN=false
 
 if [[ $# -eq 0 ]]; then
     echo -e "${RED}Error: No sync target specified${NC}"
@@ -84,6 +89,9 @@ for arg in "$@"; do
             SYNC_ZED=true
             SYNC_PREK=true
             ;;
+        --dry-run)
+            DRY_RUN=true
+            ;;
         --help)
             echo "Dotfiles sync script"
             echo ""
@@ -99,6 +107,7 @@ for arg in "$@"; do
             echo "  --zed         Sync Zed config"
             echo "  --prek        Sync prek hook templates"
             echo "  --all         Sync everything"
+            echo "  --dry-run     Show what would change without applying anything"
             echo "  --help        Show this help message"
             exit 0
             ;;
@@ -134,7 +143,6 @@ compare_directory() {
 
     local new_files=()
     local modified_files=()
-    local deleted_files=()
     local unchanged_files=()
 
     echo -e "${MAGENTA}Checking $display_name...${NC}"
@@ -156,20 +164,8 @@ compare_directory() {
         fi
     done < <(find "$source_dir" -type f -print0)
 
-    # Check for deleted files
-    if [[ -d "$target_dir" ]]; then
-        while IFS= read -r -d '' target_file; do
-            relative_path="${target_file#$target_dir/}"
-            source_file="$source_dir/$relative_path"
-
-            if [[ ! -e "$source_file" ]]; then
-                deleted_files+=("$relative_path")
-            fi
-        done < <(find "$target_dir" -type f -print0)
-    fi
-
     # Display changes
-    if [[ ${#new_files[@]} -eq 0 && ${#modified_files[@]} -eq 0 && ${#deleted_files[@]} -eq 0 ]]; then
+    if [[ ${#new_files[@]} -eq 0 && ${#modified_files[@]} -eq 0 ]]; then
         echo -e "${GREEN}  No changes${NC}"
     else
         if [[ ${#new_files[@]} -gt 0 ]]; then
@@ -190,13 +186,6 @@ compare_directory() {
                 if [[ $diff_lines -gt 15 ]]; then
                     echo -e "${CYAN}      ... (${diff_lines} total lines changed, showing first 15)${NC}"
                 fi
-            done
-        fi
-
-        if [[ ${#deleted_files[@]} -gt 0 ]]; then
-            echo -e "${RED}  Files to be deleted (${#deleted_files[@]}):${NC}"
-            for file in "${deleted_files[@]}"; do
-                echo -e "    ${RED}- $file${NC}"
             done
         fi
     fi
@@ -228,6 +217,20 @@ compare_file() {
     echo ""
 }
 
+# Backup a target file if it exists and differs from the source
+backup_if_changed() {
+    local source_file="$1"
+    local target_file="$2"
+
+    if [[ -e "$target_file" ]] && ! cmp -s "$source_file" "$target_file"; then
+        local relative_path="${target_file#$HOME/}"
+        local backup_dest="$BACKUP_DIR/$relative_path"
+        mkdir -p "$(dirname "$backup_dest")"
+        cp "$target_file" "$backup_dest"
+        BACKUP_CREATED=true
+    fi
+}
+
 # Function to sync directory
 sync_directory() {
     local source_dir="$1"
@@ -236,7 +239,14 @@ sync_directory() {
 
     echo -e "${BLUE}Syncing $display_name to $target_dir...${NC}"
     mkdir -p "$target_dir"
-    rsync -a --delete "$source_dir/" "$target_dir/" || {
+
+    # Backup modified files before overwriting
+    while IFS= read -r -d '' source_file; do
+        relative_path="${source_file#$source_dir/}"
+        backup_if_changed "$source_file" "$target_dir/$relative_path"
+    done < <(find "$source_dir" -type f -print0)
+
+    rsync -a "$source_dir/" "$target_dir/" || {
         echo -e "${RED}Error: Failed to sync $display_name${NC}"
         return 1
     }
@@ -251,6 +261,7 @@ sync_file() {
 
     echo -e "${BLUE}Syncing $display_name to $target_file...${NC}"
     mkdir -p "$(dirname "$target_file")"
+    backup_if_changed "$source_file" "$target_file"
     cp "$source_file" "$target_file" || {
         echo -e "${RED}Error: Failed to sync $display_name${NC}"
         return 1
@@ -296,6 +307,11 @@ fi
 
 if [[ "$SYNC_PREK" == true ]]; then
     compare_directory "$MAC_DIR/.config/prek" "$HOME/.config/prek" ".config/prek directory"
+fi
+
+if [[ "$DRY_RUN" == true ]]; then
+    echo -e "${YELLOW}Dry run — no files were changed.${NC}"
+    exit 0
 fi
 
 # Sync phase
@@ -350,3 +366,6 @@ fi
 
 echo ""
 echo -e "${GREEN}✓ Dotfiles synced successfully!${NC}"
+if [[ "$BACKUP_CREATED" == true ]]; then
+    echo -e "${CYAN}  Backup saved to $BACKUP_DIR${NC}"
+fi
