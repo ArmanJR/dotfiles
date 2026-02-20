@@ -1,6 +1,11 @@
 {
   "attribution": {},
   "permissions": {
+    "deny": [
+      "Read(./.env)",
+      "Read(./.claudeignore)",
+      "Read(./.claudeignore/**)"
+    ],
     "allow": [
       "Bash(npm run lint)",
       "Bash(npm run test:*)",
