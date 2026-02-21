@@ -7,7 +7,7 @@ Notes:
 
 ## Terminal Environment
 
-- `python` and `pip` don't exist. Prefer `uv` for Python package and project manager. For standalone scripts, add inline script metadata for `uv`. Use `uv run` to execute scripts and `uv add <package>` to install packages.
+- `python` and `pip` don't exist. Prefer `uv` for Python package and project management. For standalone scripts, add inline script metadata for `uv`. Use `uv run` to execute scripts and `uv add <package>` to install packages.
 - Some core tools are aliased: `ls`→`eza`, `find`→`fd`, `grep`→`rg`, `cat`→`bat`, `tree`→`eza -T`.
 
 ## Testing
