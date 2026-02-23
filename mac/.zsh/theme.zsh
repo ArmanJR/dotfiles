@@ -5,14 +5,17 @@
 # Install powerlevel10k if not already installed
 P10K_PATH="$HOMEBREW_PREFIX/share/powerlevel10k/powerlevel10k.zsh-theme"
 P10K_FALLBACK_PATH="$HOME/.oh-my-zsh/custom/themes/powerlevel10k/powerlevel10k.zsh-theme"
+P10K_LOCAL_PATH="$HOME/powerlevel10k/powerlevel10k.zsh-theme"
 
-# Source powerlevel10k from homebrew installation first, then fallback to oh-my-zsh
+# Source powerlevel10k from homebrew installation first, then fallback to oh-my-zsh, then local clone
 if [[ -f "$P10K_PATH" ]]; then
     source "$P10K_PATH"
 elif [[ -f "$P10K_FALLBACK_PATH" ]]; then
     source "$P10K_FALLBACK_PATH"
+elif [[ -f "$P10K_LOCAL_PATH" ]]; then
+    source "$P10K_LOCAL_PATH"
 else
-    echo "⚠️  Powerlevel10k not found. Install with: brew install romkatv/powerlevel10k/powerlevel10k"
+    echo "⚠️  Powerlevel10k not found. Install with: brew install romkatv/powerlevel10k/powerlevel10k or git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ~/powerlevel10k"
 fi
 
 # Enable Powerlevel10k instant prompt (should stay close to the top of .zshrc)
