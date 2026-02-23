@@ -18,4 +18,6 @@ if git rev-parse --git-dir > /dev/null 2>&1; then
     [ -n "$BRANCH" ] && GIT_BRANCH=" • $BRANCH"
 fi
 
-echo "$DIR$GIT_BRANCH • $MODEL • ${PERCENT_USED} %"
+MACHINE=$(hostname -s)
+
+echo "$MACHINE • $DIR$GIT_BRANCH • $MODEL • ${PERCENT_USED} %"
