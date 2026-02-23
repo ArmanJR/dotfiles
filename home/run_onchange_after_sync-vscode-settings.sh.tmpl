@@ -1,0 +1,16 @@
+{{ if and .has_gui (not .is_server) -}}
+#!/bin/bash
+# settings.json hash: {{ include "vscode/settings.json" | sha256sum }}
+# keybindings.json hash: {{ include "vscode/keybindings.json" | sha256sum }}
+
+{{ if eq .chezmoi.os "darwin" -}}
+VSCODE_DIR="$HOME/Library/Application Support/Code/User"
+{{ else -}}
+VSCODE_DIR="$HOME/.config/Code/User"
+{{ end -}}
+
+[ -d "$VSCODE_DIR" ] || { echo "VSCode dir not found, skipping"; exit 0; }
+cp {{ joinPath .chezmoi.sourceDir "vscode/settings.json" | quote }} "$VSCODE_DIR/settings.json"
+cp {{ joinPath .chezmoi.sourceDir "vscode/keybindings.json" | quote }} "$VSCODE_DIR/keybindings.json"
+echo "VSCode settings synced"
+{{ end -}}

@@ -1,0 +1,9 @@
+# Source the main zprofile from home directory first
+if [[ -f "$HOME/.zprofile" ]]; then
+  source "$HOME/.zprofile"
+fi
+
+{{ if eq .chezmoi.os "darwin" -}}
+# Added by OrbStack: command-line tools and integration
+source ~/.orbstack/shell/init.zsh 2>/dev/null || :
+{{ end -}}

@@ -1,0 +1,22 @@
+README.md
+LICENSE
+rpi/
+vscode/
+
+# Skip homebrew.zsh on Linux (apt world)
+{{ if ne .chezmoi.os "darwin" }}
+.zsh/homebrew.zsh
+{{ end }}
+
+# macOS-only apps
+{{ if ne .chezmoi.os "darwin" }}
+.config/ghostty/
+.config/zed/
+{{ end }}
+
+# GUI-only configs
+{{ if not .has_gui }}
+.obsidian/
+.config/ghostty/
+.config/zed/
+{{ end }}

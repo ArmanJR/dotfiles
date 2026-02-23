@@ -1,0 +1,99 @@
+/* Dark Sepia Scholar - warm dark theme for comfortable reading */
+
+body.theme-dark {
+  /* Dim Paper - low contrast warm dark */
+  --background-primary: #1A1816;
+  --background-secondary: #211F1C;
+  --background-modifier-border: #332F2A;
+
+  /* Soft gray-cream text */
+  --text-normal: #B8B0A4;
+  --text-muted: #8A847A;
+  --text-faint: #635E56;
+
+  /* Faded amber accent */
+  --color-accent: #9A8568;
+  --interactive-accent: #9A8568;
+
+  /* Warm selection highlight */
+  --text-selection: rgba(154, 133, 104, 0.35);
+  --text-highlight-bg: rgba(154, 133, 104, 0.35);
+
+  /* Warm title/heading colors */
+  --inline-title-color: #C9C0B4;
+  --h1-color: #C9C0B4;
+  --h2-color: #C9C0B4;
+  --h3-color: #C9C0B4;
+}
+
+/* Typography improvements for 27" monitor */
+.markdown-preview-view,
+.markdown-source-view {
+  line-height: 1.85;
+  letter-spacing: 0.25px;
+  word-spacing: 0.05em;
+}
+
+/* Consistent width for both edit and reading mode */
+.markdown-source-view.is-readable-line-width .cm-contentContainer,
+.markdown-source-view .cm-sizer {
+  max-width: 80ch !important;
+  margin: 0 auto !important;
+}
+
+/* Reading view - match edit mode width */
+.markdown-preview-view .markdown-preview-sizer {
+  max-width: 80ch !important;
+  margin: 0 auto !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+.markdown-preview-view {
+  padding: 0 !important;
+}
+
+.markdown-preview-view > .markdown-preview-sizer {
+  width: 100% !important;
+  max-width: 80ch !important;
+}
+
+/* Hide inline metadata/properties in reading mode */
+.markdown-preview-view .metadata-container,
+.markdown-preview-view .frontmatter-container,
+.markdown-reading-view .metadata-container {
+  display: none !important;
+}
+
+/* Hide backlinks and info panels in reading view */
+.workspace-leaf-content[data-mode="preview"] .backlinks,
+.markdown-reading-view .backlinks,
+.markdown-preview-view .inline-embed,
+.view-content > .backlink-pane,
+.mod-footer,
+.markdown-preview-sizer + div {
+  display: none !important;
+}
+
+/* Generous paragraph spacing */
+.markdown-preview-view p {
+  margin-bottom: 1em;
+}
+
+/* Dim headings */
+.markdown-preview-view h1,
+.markdown-preview-view h2,
+.markdown-preview-view h3 {
+  color: #C9C0B4;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
+}
+
+/* Softer links */
+.markdown-preview-view a {
+  color: #9A8568;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}

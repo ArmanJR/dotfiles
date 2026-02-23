@@ -1,0 +1,10 @@
+{{ if and .has_gui (not .is_server) -}}
+#!/bin/bash
+# extensions.txt hash: {{ include "vscode/extensions.txt" | sha256sum }}
+command -v code &>/dev/null || { echo "code CLI not found, skipping"; exit 0; }
+while IFS= read -r ext || [ -n "$ext" ]; do
+    [[ -z "$ext" || "$ext" =~ ^# ]] && continue
+    code --install-extension "$ext" --force 2>/dev/null || true
+done < {{ joinPath .chezmoi.sourceDir "vscode/extensions.txt" | quote }}
+echo "VSCode extensions installed"
+{{ end -}}

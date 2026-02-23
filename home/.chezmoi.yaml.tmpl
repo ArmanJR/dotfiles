@@ -1,0 +1,21 @@
+{{- $is_server := false -}}
+{{- $has_gui := true -}}
+{{- $machine_type := "personal" -}}
+{{- if stdinIsATTY -}}
+{{-   $is_server = promptBoolOnce . "is_server" "Is this a headless server" -}}
+{{-   if $is_server -}}
+{{-     $has_gui = false -}}
+{{-   else -}}
+{{-     $has_gui = promptBoolOnce . "has_gui" "Does this machine have a GUI/desktop" -}}
+{{-   end -}}
+{{-   $machine_type = promptChoiceOnce . "machine_type" "Machine type" (list "personal" "work" "server") -}}
+{{- else -}}
+{{-   $is_server = true -}}
+{{-   $has_gui = false -}}
+{{-   $machine_type = "server" -}}
+{{- end -}}
+
+data:
+  is_server: {{ $is_server }}
+  has_gui: {{ $has_gui }}
+  machine_type: {{ $machine_type | quote }}

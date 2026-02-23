@@ -1,0 +1,138 @@
+#!/usr/bin/env zsh
+
+# =============================================================================
+# .zshrc Configuration
+# Optimized for Python, Go, Node.js development with productivity tools
+# =============================================================================
+
+# Performance monitoring (uncomment to debug startup time)
+# zmodload zsh/zprof
+
+# =============================================================================
+# Environment Setup
+# =============================================================================
+
+# Set default editor to nvim
+export EDITOR="nvim"
+export VISUAL="nvim"
+
+# Language environment
+export LANG=en_US.UTF-8
+export LC_ALL=en_US.UTF-8
+
+# XDG Base Directory Specification
+export XDG_CONFIG_HOME="$HOME/.config"
+export XDG_DATA_HOME="$HOME/.local/share"
+export XDG_CACHE_HOME="$HOME/.cache"
+
+# Zsh configuration directory (modules location)
+export ZSH_CONFIG_DIR="$HOME/.zsh"
+
+# =============================================================================
+# Completion System (initialize early for modules that use compdef)
+# =============================================================================
+
+autoload -Uz compinit
+if [[ -n ~/.zcompdump(#qN.mh+24) ]]; then
+    compinit
+else
+    compinit -C  # Skip security check, use cache
+fi
+
+# =============================================================================
+# Module Loading
+# =============================================================================
+
+# Function to safely source files
+source_if_exists() {
+    [[ -f "$1" ]] && source "$1"
+}
+
+# Load all configuration modules
+source_if_exists "$ZSH_CONFIG_DIR/homebrew.zsh"
+source_if_exists "$ZSH_CONFIG_DIR/theme.zsh"
+source_if_exists "$ZSH_CONFIG_DIR/history.zsh"
+source_if_exists "$ZSH_CONFIG_DIR/languages.zsh"
+source_if_exists "$ZSH_CONFIG_DIR/cloud-tools.zsh"
+source_if_exists "$ZSH_CONFIG_DIR/dev-tools.zsh"
+source_if_exists "$ZSH_CONFIG_DIR/editors.zsh"
+source_if_exists "$ZSH_CONFIG_DIR/ai-tools.zsh"
+source_if_exists "$ZSH_CONFIG_DIR/aliases.zsh"
+source_if_exists "$ZSH_CONFIG_DIR/functions.zsh"
+
+# Load local/private configurations (not tracked in git)
+source_if_exists "$HOME/.zshrc.local"
+
+# =============================================================================
+# Zsh Options
+# =============================================================================
+
+# History settings (only if Atuin is not available - Atuin handles history)
+if ! command -v atuin >/dev/null 2>&1; then
+    HISTFILE=~/.zsh_history
+    HISTSIZE=50000
+    SAVEHIST=50000
+    setopt EXTENDED_HISTORY
+    setopt INC_APPEND_HISTORY
+    setopt SHARE_HISTORY
+    setopt HIST_EXPIRE_DUPS_FIRST
+    setopt HIST_IGNORE_DUPS
+    setopt HIST_IGNORE_ALL_DUPS
+    setopt HIST_FIND_NO_DUPS
+    setopt HIST_IGNORE_SPACE
+    setopt HIST_SAVE_NO_DUPS
+    setopt HIST_REDUCE_BLANKS
+    setopt HIST_VERIFY
+fi
+
+# Directory options
+setopt AUTO_PUSHD              # Push directories onto the stack automatically
+setopt PUSHD_IGNORE_DUPS       # Don't push duplicate directories
+setopt PUSHD_SILENT            # Don't print the directory stack after pushd/popd
+
+# Completion options
+setopt AUTO_MENU               # Show completion menu on successive tab press
+setopt COMPLETE_IN_WORD        # Allow completion from within a word/phrase
+setopt ALWAYS_TO_END           # Move cursor to end of word after completion
+setopt PATH_DIRS               # Perform path search even on command names with slashes
+
+# Other useful options
+setopt INTERACTIVE_COMMENTS    # Allow comments even in interactive shells
+setopt MULTIOS                 # Write to multiple descriptors
+setopt EXTENDED_GLOB           # Use extended globbing syntax
+setopt GLOB_DOTS               # Include dotfiles in globbing
+
+# =============================================================================
+# Key Bindings
+# =============================================================================
+
+# Use emacs key bindings
+bindkey -e
+
+# Better history search
+bindkey '^R' history-incremental-search-backward
+bindkey '^S' history-incremental-search-forward
+bindkey '^P' history-search-backward
+bindkey '^N' history-search-forward
+
+# Word movement (Option + arrow keys)
+bindkey "^[[1;3C" forward-word
+bindkey "^[[1;3D" backward-word
+
+# Performance monitoring output (uncomment if enabled above)
+# zprof
+
+# bun
+export BUN_INSTALL="$HOME/.bun"
+export PATH="$BUN_INSTALL/bin:$PATH"
+function gi() { curl -sLw "\n" https://www.toptal.com/developers/gitignore/api/$@ ;}
+
+{{ if eq .chezmoi.os "darwin" -}}
+# Tk Python (static path for Apple Silicon)
+if [[ -d "/opt/homebrew/opt/tcl-tk" ]]; then
+    export PATH="/opt/homebrew/opt/tcl-tk/bin:$PATH"
+    export LDFLAGS="-L/opt/homebrew/opt/tcl-tk/lib"
+    export CPPFLAGS="-I/opt/homebrew/opt/tcl-tk/include"
+    export PKG_CONFIG_PATH="/opt/homebrew/opt/tcl-tk/lib/pkgconfig"
+fi
+{{ end -}}
