@@ -5,6 +5,14 @@
 # Optimized for Python, Go, Node.js development with productivity tools
 # =============================================================================
 
+# Enable Powerlevel10k instant prompt. Must be at the very top of .zshrc,
+# before any output or initialization that touches the terminal.
+if [[ -z "$VSCODE_INJECTION" ]] && [[ "$TERM_PROGRAM" != "vscode" ]]; then
+  if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
+    source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
+  fi
+fi
+
 # Performance monitoring (uncomment to debug startup time)
 # zmodload zsh/zprof
 
