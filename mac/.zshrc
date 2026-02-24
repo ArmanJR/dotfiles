@@ -117,6 +117,11 @@ setopt GLOB_DOTS               # Include dotfiles in globbing
 # Use emacs key bindings
 bindkey -e
 
+# Explicit backspace bindings — handles SSH terminal type mismatches
+# where ^? (DEL/127) or ^H (BS/8) may not be pre-bound correctly
+bindkey '^?' backward-delete-char
+bindkey '^H' backward-delete-char
+
 # Better history search
 bindkey '^R' history-incremental-search-backward
 bindkey '^S' history-incremental-search-forward
