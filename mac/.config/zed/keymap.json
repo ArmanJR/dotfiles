@@ -1,0 +1,20 @@
+[
+  {
+    "context": "Editor",
+    "bindings": {
+      "cmd+g": "editor::CopyPermalinkToLine"
+    }
+  },
+  {
+    "context": "(Workspace && !Terminal)",
+    "bindings": {
+      "cmd-n": "workspace::NewFile"
+    }
+  },
+  {
+    "context": "ProjectPanel",
+    "bindings": {
+      "cmd-n": "project_panel::NewFile"
+    }
+  }
+]
