@@ -92,7 +92,10 @@ prek-init() {
         echo "prek-init: copied $template -> $config_dest"
     fi
 
-    prek install --install-hooks
+    if ! prek install --install-hooks; then
+        echo "prek-init: hook installation failed" >&2
+        return 1
+    fi
     echo "prek-init: hooks installed"
 }
 
@@ -266,13 +269,25 @@ docker-nuke() {
     read -r response
 
     if [[ "$response" == "yes" ]]; then
-        docker stop $(docker ps -aq) 2>/dev/null
-        docker rm $(docker ps -aq) 2>/dev/null
-        docker rmi $(docker images -q) 2>/dev/null
-        docker volume rm $(docker volume ls -q) 2>/dev/null
-        docker network rm $(docker network ls -q) 2>/dev/null
+        local -a ids
+
+        ids=("${(@f)$(docker ps -aq)}")
+        (( ${#ids} )) && docker stop "${ids[@]}"
+
+        ids=("${(@f)$(docker ps -aq)}")
+        (( ${#ids} )) && docker rm "${ids[@]}"
+
+        ids=("${(@f)$(docker images -q)}")
+        (( ${#ids} )) && docker rmi "${ids[@]}"
+
+        ids=("${(@f)$(docker volume ls -q)}")
+        (( ${#ids} )) && docker volume rm "${ids[@]}"
+
+        ids=("${(@f)$(docker network ls -q)}")
+        (( ${#ids} )) && docker network rm "${ids[@]}"
+
         docker system prune -af
-        echo "🧹 Docker cleanup complete!"
+        echo "Docker cleanup complete!"
     else
         echo "Cancelled"
     fi

@@ -48,12 +48,24 @@ docker-clean() {
 }
 
 docker-stop-all() {
-    docker stop $(docker ps -q) 2>/dev/null || echo "No running containers to stop"
+    local -a ids
+    ids=("${(@f)$(docker ps -q)}")
+    if (( ${#ids} )); then
+        docker stop "${ids[@]}"
+    else
+        echo "No running containers to stop"
+    fi
 }
 
 docker-remove-all() {
     docker-stop-all
-    docker rm $(docker ps -aq) 2>/dev/null || echo "No containers to remove"
+    local -a ids
+    ids=("${(@f)$(docker ps -aq)}")
+    if (( ${#ids} )); then
+        docker rm "${ids[@]}"
+    else
+        echo "No containers to remove"
+    fi
 }
 
 docker-logs() {

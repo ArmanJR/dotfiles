@@ -214,20 +214,40 @@ qr() {
 # =============================================================================
 
 # Find and replace in files
+# Usage: findreplace [-n] <find> <replace> [path]
+#   -n  dry-run: show matching files and lines without modifying anything
 findreplace() {
+    local dry_run=0
+    if [[ "$1" == "-n" || "$1" == "--dry-run" ]]; then
+        dry_run=1
+        shift
+    fi
+
     local find_text="$1"
     local replace_text="$2"
-    local file_pattern="${3:-.}"
+    local search_path="${3:-.}"
 
     if [[ -z "$find_text" || -z "$replace_text" ]]; then
-        echo "Usage: findreplace <find> <replace> [file_pattern]"
+        echo "Usage: findreplace [-n|--dry-run] <find> <replace> [path]"
         return 1
     fi
 
-    if command -v rg >/dev/null 2>&1; then
-        rg -l "$find_text" "$file_pattern" | xargs sed -i '' "s/$find_text/$replace_text/g"
+    # Escape BRE special chars and the sed delimiter (/) in the find pattern
+    local escaped_find
+    escaped_find=$(printf '%s' "$find_text" | sed 's/[[\.*^$\/]/\\&/g')
+
+    # Escape & \ and / in the replacement string
+    local escaped_replace
+    escaped_replace=$(printf '%s' "$replace_text" | sed 's/[&\/\\]/\\&/g')
+
+    if (( dry_run )); then
+        rg -l --fixed-strings "$find_text" "$search_path" | while IFS= read -r file; do
+            echo "[dry-run] $file"
+            rg -n --fixed-strings "$find_text" "$file"
+        done
     else
-        grep -r -l "$find_text" "$file_pattern" | xargs sed -i '' "s/$find_text/$replace_text/g"
+        rg -l --fixed-strings "$find_text" "$search_path" \
+            | xargs sed -i '' "s/$escaped_find/$escaped_replace/g"
     fi
 }
 
@@ -262,29 +282,34 @@ note() {
 # Cleanup Functions
 # =============================================================================
 
-# Clean system caches
+# Clean user and app caches
 cleanup() {
-    echo "Cleaning system caches..."
+    echo "This will delete:"
+    echo "  /Library/Caches/*          (requires sudo)"
+    echo "  ~/Library/Caches/*"
+    echo "  ~/Library/Logs/*"
+    echo "  /var/log/*.log             (requires sudo)"
+    echo "  ~/.Trash/*"
+    echo "  Homebrew caches (if installed)"
+    echo ""
+    printf "Proceed? [y/N] "
+    read -r reply
+    [[ "$reply" =~ ^[Yy]$ ]] || { echo "Aborted."; return 1; }
 
-    # Clear system caches
-    sudo rm -rf /System/Library/Caches/*
     sudo rm -rf /Library/Caches/*
     rm -rf ~/Library/Caches/*
 
-    # Clear log files
     sudo rm -rf /var/log/*.log
     rm -rf ~/Library/Logs/*
 
-    # Clean Homebrew
     if command -v brew >/dev/null 2>&1; then
         brew cleanup
         brew autoremove
     fi
 
-    # Empty trash
     rm -rf ~/.Trash/*
 
-    echo "System cleanup complete!"
+    echo "Cleanup complete."
 }
 
 # =============================================================================
