@@ -3,7 +3,8 @@
   "env": {
     "CLAUDE_CODE_MAX_OUTPUT_TOKENS": "64000",
     "CLAUDE_CODE_DISABLE_AUTO_MEMORY": "1",
-    "CLAUDE_CODE_DISABLE_FEEDBACK_SURVEY": "1"
+    "CLAUDE_CODE_DISABLE_FEEDBACK_SURVEY": "1",
+    "ENABLE_LSP_TOOL": "1"
   },
   "permissions": {
     "deny": [
@@ -127,6 +128,9 @@
     "padding": 0
   },
   "enabledPlugins": {
-    "safety-net@cc-marketplace": true
+    "safety-net@cc-marketplace": true,
+    "pyright-lsp@claude-plugins-official": true,
+    "typescript-lsp@claude-plugins-official": true,
+    "gopls-lsp@claude-plugins-official": true
   }
 }
