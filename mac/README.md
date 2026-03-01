@@ -42,6 +42,10 @@ sync.sh --prek         # prek hook templates
 sync.sh --dry-run      # Preview changes without applying
 ```
 
+## Notes
+
+- Shell scripts synced via `--claude` (e.g. `statusline.sh`) must be marked executable in git (`100755`) so `rsync -a` preserves the `+x` bit. Fix with: `git update-index --chmod=+x <file>`.
+
 ## What's Managed
 
 | Path | Flag |
