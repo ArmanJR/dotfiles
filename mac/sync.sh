@@ -11,6 +11,7 @@
 #   --zshrc       Sync .zshrc file
 #   --dotfiles    Sync other dotfiles (.gitconfig, .gitignore_global, .ripgreprc, ghostty.config)
 #   --claude      Sync .claude directory
+#   --init        Sync everything and run all setup scripts (for new devices)
 #   --vscode      Sync VSCode settings
 #   --atuin       Sync Atuin config
 #   --zed         Sync Zed config
@@ -46,6 +47,7 @@ SYNC_ATUIN=false
 SYNC_ZED=false
 SYNC_PREK=false
 DRY_RUN=false
+CLAUDE_INIT=false
 
 if [[ $# -eq 0 ]]; then
     echo -e "${RED}Error: No sync target specified${NC}"
@@ -66,6 +68,17 @@ for arg in "$@"; do
             ;;
         --claude)
             SYNC_CLAUDE=true
+            ;;
+        --init)
+            SYNC_ZSH=true
+            SYNC_ZSHRC=true
+            SYNC_DOTFILES=true
+            SYNC_CLAUDE=true
+            SYNC_VSCODE=true
+            SYNC_ATUIN=true
+            SYNC_ZED=true
+            SYNC_PREK=true
+            CLAUDE_INIT=true
             ;;
         --vscode)
             SYNC_VSCODE=true
@@ -107,6 +120,7 @@ for arg in "$@"; do
             echo "  --zed         Sync Zed config"
             echo "  --prek        Sync prek hook templates"
             echo "  --all         Sync everything"
+            echo "  --init        Sync everything and run all setup scripts (for new devices)"
             echo "  --dry-run     Show what would change without applying anything"
             echo "  --help        Show this help message"
             exit 0
@@ -336,8 +350,8 @@ fi
 if [[ "$SYNC_CLAUDE" == true ]]; then
     sync_directory "$MAC_DIR/.claude" "$HOME/.claude" ".claude directory"
 
-    # Run setup script if it exists
-    if [[ -f "$HOME/.claude/setup-claude.sh" ]]; then
+    # Run setup script only on initial setup
+    if [[ "$CLAUDE_INIT" == true ]] && [[ -f "$HOME/.claude/setup-claude.sh" ]]; then
         echo -e "${BLUE}Running Claude setup script...${NC}"
         bash "$HOME/.claude/setup-claude.sh" || {
             echo -e "${RED}Error: Failed to run setup-claude.sh${NC}"
