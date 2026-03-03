@@ -148,9 +148,10 @@ if ! command -v fnm >/dev/null 2>&1 && [[ -d "$HOME/.nvm" ]]; then
     npx() { nvm use default >/dev/null && npx "$@" }
 fi
 
-# Yarn configuration
+# Yarn configuration (guard against cmdtest's yarn on Debian/Ubuntu)
 if command -v yarn >/dev/null 2>&1; then
-    export PATH="$(yarn global bin):$PATH"
+    _yarn_bin=$(yarn global bin 2>/dev/null) && export PATH="$_yarn_bin:$PATH"
+    unset _yarn_bin
 fi
 
 # pnpm configuration

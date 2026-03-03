@@ -211,7 +211,13 @@ if command -v fzf >/dev/null 2>&1; then
     export FZF_ALT_C_COMMAND="fd --type d --strip-cwd-prefix --hidden --follow --exclude .git"
 
     # FZF key bindings and completion
-    source <(fzf --zsh)
+    # fzf --zsh was added in 0.48.0; fall back to system files for older versions
+    if fzf --zsh >/dev/null 2>&1; then
+        source <(fzf --zsh)
+    elif [[ -f /usr/share/doc/fzf/examples/key-bindings.zsh ]]; then
+        source /usr/share/doc/fzf/examples/key-bindings.zsh
+        source /usr/share/doc/fzf/examples/completion.zsh 2>/dev/null
+    fi
 
     # Custom FZF functions
     fzf-cd() {
