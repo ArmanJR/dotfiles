@@ -45,6 +45,7 @@ sync.sh --dry-run      # Preview changes without applying
 ## Notes
 
 - Shell scripts synced via `--claude` (e.g. `statusline.sh`) must be marked executable in git (`100755`) so `rsync -a` preserves the `+x` bit. Fix with: `git update-index --chmod=+x <file>`.
+- Claude needs an external repo for safety net: `claude plugin marketplace add kenryu42/cc-marketplace && claude plugin install safety-net@cc-marketplace`
 
 ## What's Managed
 
