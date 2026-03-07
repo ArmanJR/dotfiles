@@ -327,3 +327,10 @@ alias ezsh="nvim ~/.zshrc"
 alias dotsync="$HOME/code/dotfiles/mac/sync.sh"
 
 alias parp='arp -a | awk '\''BEGIN { c[1]="\033[38;5;250m"; c[2]="\033[38;5;245m"; } { idx=(NR%2)+1; printf "%s%-30s %-20s %-17s\033[0m\n", c[idx], $1, $2, $4 }'\'''
+
+# =============================================================================
+# Media Download
+# =============================================================================
+
+alias ytmp4='/Users/arman/yt-dlp_macos -P . -o "%(title)s.%(ext)s" -f "bv*+ba/b" --merge-output-format mp4'
+alias ytmp3='/Users/arman/yt-dlp_macos -P . -o "%(title)s.%(ext)s" -x --audio-format mp3 --audio-quality 0'
