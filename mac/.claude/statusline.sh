@@ -19,5 +19,12 @@ if git rev-parse --git-dir > /dev/null 2>&1; then
 fi
 
 MACHINE=$(hostname -s)
+EMAIL=$(jq -r '.oauthAccount.emailAddress // empty' ~/.claude.json 2>/dev/null)
+ACCT="${EMAIL:0:2}"
+case "$ACCT" in
+    da) ACCT="da (chrome)" ;;
+    th) ACCT="th (firefox)" ;;
+    su) ACCT="su (safari)" ;;
+esac
 
-echo "$MACHINE • $DIR$GIT_BRANCH • $MODEL • ${PERCENT_USED} %"
+echo "$MACHINE • $DIR$GIT_BRANCH • $MODEL • ${PERCENT_USED} %${ACCT:+ • $ACCT}"
