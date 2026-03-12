@@ -143,6 +143,3 @@ export PATH="$ANDROID_HOME/platform-tools:$ANDROID_HOME/emulator:$ANDROID_HOME/c
 
 # opencode
 export PATH="$HOME/.opencode/bin:$PATH"
-
-# Claude Code LSP
-export ENABLE_LSP_TOOL=1

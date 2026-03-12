@@ -256,7 +256,7 @@ resources() {
     df -h | head -n 5
 
     echo -e "\n=== Network Connections ==="
-    netstat -an | grep ESTABLISHED | wc -l | awk '{print $1 " established connections"}'
+    lsof -i -nP 2>/dev/null | grep ESTABLISHED | wc -l | awk '{print $1 " established connections"}'
 
     echo -e "\n=== Load Average ==="
     uptime
