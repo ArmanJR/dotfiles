@@ -1,10 +1,3 @@
-# OPENSPEC:START
-# OpenSpec shell completions configuration
-fpath=("/Users/arman/.zsh/completions" $fpath)
-autoload -Uz compinit
-compinit
-# OPENSPEC:END
-
 #!/usr/bin/env zsh
 
 # =============================================================================
@@ -39,6 +32,7 @@ export ZSH_CONFIG_DIR="$HOME/.zsh"
 # Completion System (initialize early for modules that use compdef)
 # =============================================================================
 
+fpath=("$HOME/.zsh/completions" $fpath)
 autoload -Uz compinit
 if [[ -n ~/.zcompdump(#qN.mh+24) ]]; then
     compinit
