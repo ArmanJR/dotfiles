@@ -17,6 +17,7 @@
 #   --zed         Sync Zed config
 #   --prek        Sync prek hook templates
 #   --all         Sync everything
+#   --agentic     Non-interactive mode for AI agents (outputs diffs and apply instructions)
 #   --dry-run     Show what would change without applying anything
 #   --help        Show this help message
 
@@ -51,6 +52,7 @@ SYNC_ATUIN=false
 SYNC_ZED=false
 SYNC_PREK=false
 DRY_RUN=false
+AGENTIC=false
 CLAUDE_INIT=false
 
 if [[ $# -eq 0 ]]; then
@@ -106,6 +108,9 @@ for arg in "$@"; do
             SYNC_ZED=true
             SYNC_PREK=true
             ;;
+        --agentic)
+            AGENTIC=true
+            ;;
         --dry-run)
             DRY_RUN=true
             ;;
@@ -125,6 +130,7 @@ for arg in "$@"; do
             echo "  --prek        Sync prek hook templates"
             echo "  --all         Sync everything"
             echo "  --init        Sync everything and run all setup scripts (for new devices)"
+            echo "  --agentic     Non-interactive mode for AI agents (outputs diffs and apply instructions)"
             echo "  --dry-run     Show what would change without applying anything"
             echo "  --help        Show this help message"
             exit 0
@@ -267,6 +273,67 @@ review_changes() {
     echo "$selected"
 }
 
+# Non-interactive output for AI agents — prints diffs and apply instructions
+agentic_output() {
+    local total_changes
+    total_changes=$(wc -l < "$CHANGES_MANIFEST" | tr -d ' ')
+
+    cat <<'AGENT_PREAMBLE'
+<dotfiles-sync>
+
+You are helping the user sync their dotfiles from the repo to the local system.
+The repo has been pulled and the changes below were detected.
+
+## Instructions
+
+1. Present each changed file to the user one at a time.
+2. For modified files, show the diff and briefly explain what changed.
+   For new files, briefly describe what the file contains.
+3. Ask the user: "Apply this change?"
+4. If approved and the file is modified (not new), run the backup command first, then the apply command.
+5. If approved and the file is new, run just the apply command.
+6. If the user declines, skip to the next file.
+7. After reviewing all files, print a summary listing applied and skipped files.
+
+AGENT_PREAMBLE
+
+    echo "Backup directory for this session: $BACKUP_DIR"
+    echo ""
+    echo "## Changes ($total_changes file(s))"
+
+    local file_num=0
+    while IFS='|' read -r source_file target_file status display_name; do
+        ((file_num++))
+        echo ""
+        echo "---"
+        echo "### $file_num. $display_name ($status)"
+        echo ""
+
+        if [[ "$status" == "new" ]]; then
+            echo 'NEW FILE — contents:'
+            echo '```'
+            cat "$source_file"
+            echo '```'
+        else
+            echo '```diff'
+            diff -u "$target_file" "$source_file" || true
+            echo '```'
+        fi
+
+        echo ""
+
+        if [[ "$status" == "modified" ]]; then
+            local relative_path="${target_file#$HOME/}"
+            local backup_dest="$BACKUP_DIR/$relative_path"
+            echo "Backup: mkdir -p \"$(dirname "$backup_dest")\" && cp \"$target_file\" \"$backup_dest\""
+        fi
+        echo "Apply: mkdir -p \"$(dirname "$target_file")\" && cp \"$source_file\" \"$target_file\""
+    done < "$CHANGES_MANIFEST"
+
+    echo ""
+    echo "</dotfiles-sync>"
+}
+
 # Sync selected files from the manifest
 sync_selected() {
     local selection_file="$1"
@@ -354,6 +421,12 @@ if [[ "$DRY_RUN" == true ]]; then
     done < "$CHANGES_MANIFEST"
     echo ""
     echo -e "${YELLOW}Dry run — no files were changed.${NC}"
+    exit 0
+fi
+
+# === Agentic mode: print diffs and instructions for AI agent ===
+if [[ "$AGENTIC" == true ]]; then
+    agentic_output
     exit 0
 fi
 
