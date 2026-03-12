@@ -1,17 +1,16 @@
+# OPENSPEC:START
+# OpenSpec shell completions configuration
+fpath=("/Users/arman/.zsh/completions" $fpath)
+autoload -Uz compinit
+compinit
+# OPENSPEC:END
+
 #!/usr/bin/env zsh
 
 # =============================================================================
 # macOS Apple Silicon .zshrc Configuration
 # Optimized for Python, Go, Node.js development with productivity tools
 # =============================================================================
-
-# Enable Powerlevel10k instant prompt. Must be at the very top of .zshrc,
-# before any output or initialization that touches the terminal.
-if [[ -z "$VSCODE_INJECTION" ]] && [[ "$TERM_PROGRAM" != "vscode" ]]; then
-  if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
-    source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
-  fi
-fi
 
 # Performance monitoring (uncomment to debug startup time)
 # zmodload zsh/zprof
@@ -117,11 +116,6 @@ setopt GLOB_DOTS               # Include dotfiles in globbing
 # Use emacs key bindings
 bindkey -e
 
-# Explicit backspace bindings — handles SSH terminal type mismatches
-# where ^? (DEL/127) or ^H (BS/8) may not be pre-bound correctly
-bindkey '^?' backward-delete-char
-bindkey '^H' backward-delete-char
-
 # Better history search
 bindkey '^R' history-incremental-search-backward
 bindkey '^S' history-incremental-search-forward
@@ -148,4 +142,22 @@ if [[ -d "/opt/homebrew/opt/tcl-tk" ]]; then
     export PKG_CONFIG_PATH="/opt/homebrew/opt/tcl-tk/lib/pkgconfig"
 fi
 
+# Android SDK
+export ANDROID_HOME="$HOME/Library/Android/sdk"
+export ANDROID_AVD_HOME="/Volumes/Eeraj/Android/avd"
+export PATH="$ANDROID_HOME/platform-tools:$ANDROID_HOME/emulator:$ANDROID_HOME/cmdline-tools/latest/bin:$PATH"
+
+# nvm - add default node to PATH without slow nvm.sh sourcing
+export NVM_DIR="$HOME/.nvm"
+_nvm_default=$(cat "$NVM_DIR/alias/default" 2>/dev/null)
+_nvm_dir=$(ls -d "$NVM_DIR/versions/node/v${_nvm_default}"* 2>/dev/null | sort -V | tail -1)
+[[ -d "$_nvm_dir/bin" ]] && export PATH="$_nvm_dir/bin:$PATH"
+unset _nvm_default _nvm_dir
+
 # Added by
+
+# opencode
+export PATH=/Users/arman/.opencode/bin:$PATH
+
+# Claude Code LSP
+export ENABLE_LSP_TOOL=1
