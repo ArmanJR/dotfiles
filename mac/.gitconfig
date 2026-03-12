@@ -2,7 +2,7 @@
 	defaultBranch = main
 
 [core]
-	editor = vim
+	editor = zed --wait
 	autocrlf = input
 	excludesfile = ~/.gitignore_global
 
