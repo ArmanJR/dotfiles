@@ -123,11 +123,6 @@ bindkey "^[[1;3D" backward-word
 # Performance monitoring output (uncomment if enabled above)
 # zprof
 
-# bun
-export BUN_INSTALL="$HOME/.bun"
-export PATH="$BUN_INSTALL/bin:$PATH"
-function gi() { curl -sLw "\n" https://www.toptal.com/developers/gitignore/api/$@ ;}
-
 # Tk Python (static path for Apple Silicon)
 if [[ -d "/opt/homebrew/opt/tcl-tk" ]]; then
     export PATH="/opt/homebrew/opt/tcl-tk/bin:$PATH"
@@ -141,17 +136,8 @@ export ANDROID_HOME="$HOME/Library/Android/sdk"
 export ANDROID_AVD_HOME="/Volumes/Eeraj/Android/avd"
 export PATH="$ANDROID_HOME/platform-tools:$ANDROID_HOME/emulator:$ANDROID_HOME/cmdline-tools/latest/bin:$PATH"
 
-# nvm - add default node to PATH without slow nvm.sh sourcing
-export NVM_DIR="$HOME/.nvm"
-_nvm_default=$(cat "$NVM_DIR/alias/default" 2>/dev/null)
-_nvm_dir=$(ls -d "$NVM_DIR/versions/node/v${_nvm_default}"* 2>/dev/null | sort -V | tail -1)
-[[ -d "$_nvm_dir/bin" ]] && export PATH="$_nvm_dir/bin:$PATH"
-unset _nvm_default _nvm_dir
-
-# Added by
-
 # opencode
-export PATH=/Users/arman/.opencode/bin:$PATH
+export PATH="$HOME/.opencode/bin:$PATH"
 
 # Claude Code LSP
 export ENABLE_LSP_TOOL=1

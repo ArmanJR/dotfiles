@@ -129,23 +129,26 @@ if command -v fnm >/dev/null 2>&1; then
     source ~/.zsh/cache/fnm.zsh
 fi
 
-# NVM configuration (fallback if fnm not available) - Lazy loaded
+# NVM configuration (fallback if fnm not available)
 # Remove any conflicting aliases before potentially defining lazy-load functions
 unalias nvm node npm npx 2>/dev/null
 
 if ! command -v fnm >/dev/null 2>&1 && [[ -d "$HOME/.nvm" ]]; then
     export NVM_DIR="$HOME/.nvm"
 
-    # Lazy load nvm on first use
+    # Add default node to PATH immediately (avoids slow nvm.sh sourcing)
+    _nvm_default=$(cat "$NVM_DIR/alias/default" 2>/dev/null)
+    _nvm_dir=$(ls -d "$NVM_DIR/versions/node/v${_nvm_default}"* 2>/dev/null | sort -V | tail -1)
+    [[ -d "$_nvm_dir/bin" ]] && export PATH="$_nvm_dir/bin:$PATH"
+    unset _nvm_default _nvm_dir
+
+    # Lazy load nvm command itself (for nvm use, nvm install, etc.)
     nvm() {
-        unfunction nvm node npm npx 2>/dev/null
+        unfunction nvm 2>/dev/null
         source "$NVM_DIR/nvm.sh"
         [[ -s "$NVM_DIR/bash_completion" ]] && source "$NVM_DIR/bash_completion"
         nvm "$@"
     }
-    node() { nvm use default >/dev/null && node "$@" }
-    npm() { nvm use default >/dev/null && npm "$@" }
-    npx() { nvm use default >/dev/null && npx "$@" }
 fi
 
 # Yarn configuration (guard against cmdtest's yarn on Debian/Ubuntu)

@@ -99,6 +99,10 @@ prek-init() {
     echo "prek-init: hooks installed"
 }
 
+# Generate .gitignore from gitignore.io templates
+# Usage: gi python,node,macos
+gi() { curl -sLw "\n" "https://www.toptal.com/developers/gitignore/api/$*" }
+
 # Quick commit function
 qcommit() {
     local message="$*"
