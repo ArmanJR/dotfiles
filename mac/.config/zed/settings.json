@@ -63,6 +63,7 @@
     "runnables": true,
     "line_numbers": true,
   },
+  "soft_wrap": "editor_width",
   "autosave": "on_focus_change",
   "show_wrap_guides": true,
   "cursor_shape": "bar",
