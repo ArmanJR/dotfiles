@@ -170,7 +170,7 @@ collect_directory_changes() {
         elif ! cmp -s "$source_file" "$target_file"; then
             echo "${source_file}|${target_file}|modified|${display_prefix}/${relative_path}" >> "$CHANGES_MANIFEST"
         fi
-    done < <(find "$source_dir" -type f -print0)
+    done < <(/usr/bin/find "$source_dir" -type f -print0)
 }
 
 # Collect changes for a single file into the manifest
