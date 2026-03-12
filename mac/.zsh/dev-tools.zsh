@@ -236,12 +236,11 @@ fi
 
 # Process monitoring
 alias psg="ps aux | grep"
-alias topcpu="ps aux --sort=-%cpu | head"
-alias topmem="ps aux --sort=-%mem | head"
+alias topcpu="ps aux -r | head"
+alias topmem="ps aux -m | head"
 
 # Network tools
 alias ports="lsof -i -P -n | grep LISTEN"
-alias netstat="netstat -tuln"
 
 # System info
 alias sysinfo="system_profiler SPSoftwareDataType SPHardwareDataType"
