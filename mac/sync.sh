@@ -37,6 +37,10 @@ BACKUP_BASE="$HOME/.dotfiles.backups"
 BACKUP_DIR="$BACKUP_BASE/sync-$(date +%Y%m%d-%H%M%S)"
 BACKUP_CREATED=false
 
+# Manifest for tracking changes: source_path|target_path|status|display_name
+CHANGES_MANIFEST=$(mktemp)
+trap 'rm -f "$CHANGES_MANIFEST"' EXIT
+
 # Parse arguments
 SYNC_ZSH=false
 SYNC_ZSHRC=false
@@ -149,86 +153,37 @@ git pull origin main || {
 
 echo ""
 
-# Function to compare and display changes for a directory
-compare_directory() {
+# Collect changes for a directory into the manifest
+collect_directory_changes() {
     local source_dir="$1"
     local target_dir="$2"
-    local display_name="$3"
+    local display_prefix="$3"
 
-    local new_files=()
-    local modified_files=()
-    local unchanged_files=()
-
-    echo -e "${MAGENTA}Checking $display_name...${NC}"
-
-    # Create target directory if it doesn't exist
     mkdir -p "$target_dir"
 
-    # Check for new and modified files
     while IFS= read -r -d '' source_file; do
         relative_path="${source_file#$source_dir/}"
         target_file="$target_dir/$relative_path"
 
         if [[ ! -e "$target_file" ]]; then
-            new_files+=("$relative_path")
+            echo "${source_file}|${target_file}|new|${display_prefix}/${relative_path}" >> "$CHANGES_MANIFEST"
         elif ! cmp -s "$source_file" "$target_file"; then
-            modified_files+=("$relative_path")
-        else
-            unchanged_files+=("$relative_path")
+            echo "${source_file}|${target_file}|modified|${display_prefix}/${relative_path}" >> "$CHANGES_MANIFEST"
         fi
     done < <(find "$source_dir" -type f -print0)
-
-    # Display changes
-    if [[ ${#new_files[@]} -eq 0 && ${#modified_files[@]} -eq 0 ]]; then
-        echo -e "${GREEN}  No changes${NC}"
-    else
-        if [[ ${#new_files[@]} -gt 0 ]]; then
-            echo -e "${GREEN}  New files (${#new_files[@]}):${NC}"
-            for file in "${new_files[@]}"; do
-                echo -e "    ${GREEN}+ $file${NC}"
-            done
-        fi
-
-        if [[ ${#modified_files[@]} -gt 0 ]]; then
-            echo -e "${YELLOW}  Modified files (${#modified_files[@]}):${NC}"
-            for file in "${modified_files[@]}"; do
-                echo -e "    ${YELLOW}~ $file${NC}"
-                echo -e "${CYAN}      Changes:${NC}"
-                diff -u "$target_dir/$file" "$source_dir/$file" | tail -n +3 | head -n 15 | sed 's/^/      /' || true
-
-                diff_lines=$(diff -u "$target_dir/$file" "$source_dir/$file" | tail -n +3 | wc -l | tr -d ' ')
-                if [[ $diff_lines -gt 15 ]]; then
-                    echo -e "${CYAN}      ... (${diff_lines} total lines changed, showing first 15)${NC}"
-                fi
-            done
-        fi
-    fi
-    echo ""
 }
 
-# Function to compare and display changes for a single file
-compare_file() {
+# Collect changes for a single file into the manifest
+collect_file_changes() {
     local source_file="$1"
     local target_file="$2"
     local display_name="$3"
 
-    echo -e "${MAGENTA}Checking $display_name...${NC}"
-
     if [[ ! -e "$target_file" ]]; then
-        echo -e "${GREEN}  New file${NC}"
+        echo "${source_file}|${target_file}|new|${display_name}" >> "$CHANGES_MANIFEST"
     elif ! cmp -s "$source_file" "$target_file"; then
-        echo -e "${YELLOW}  Modified${NC}"
-        echo -e "${CYAN}    Changes:${NC}"
-        diff -u "$target_file" "$source_file" | tail -n +3 | head -n 15 | sed 's/^/    /' || true
-
-        diff_lines=$(diff -u "$target_file" "$source_file" | tail -n +3 | wc -l | tr -d ' ')
-        if [[ $diff_lines -gt 15 ]]; then
-            echo -e "${CYAN}    ... (${diff_lines} total lines changed, showing first 15)${NC}"
-        fi
-    else
-        echo -e "${GREEN}  No changes${NC}"
+        echo "${source_file}|${target_file}|modified|${display_name}" >> "$CHANGES_MANIFEST"
     fi
-    echo ""
 }
 
 # Backup a target file if it exists and differs from the source
@@ -245,141 +200,177 @@ backup_if_changed() {
     fi
 }
 
-# Function to sync directory
-sync_directory() {
-    local source_dir="$1"
-    local target_dir="$2"
-    local display_name="$3"
+# Interactive review with fzf — returns path to temp file with selected entries
+review_changes() {
+    local selected
+    selected=$(mktemp)
 
-    echo -e "${BLUE}Syncing $display_name to $target_dir...${NC}"
-    mkdir -p "$target_dir"
+    local preview_cmd='
+        IFS="|" read -r src tgt ftype name <<< {}
+        if [[ "$ftype" == "new" ]]; then
+            echo "NEW FILE: $name"
+            echo "---"
+            bat --color=always --style=plain "$src" 2>/dev/null || cat "$src"
+        else
+            echo "MODIFIED: $name"
+            echo "---"
+            diff -u "$tgt" "$src" | bat --color=always -l diff --style=plain 2>/dev/null || diff -u "$tgt" "$src"
+        fi
+    '
 
-    # Backup modified files before overwriting
-    while IFS= read -r -d '' source_file; do
-        relative_path="${source_file#$source_dir/}"
-        backup_if_changed "$source_file" "$target_dir/$relative_path"
-    done < <(find "$source_dir" -type f -print0)
+    local header
+    header="Tab: toggle | Ctrl-A: select all | Ctrl-D: deselect all | Enter: sync selected | Esc: cancel"
 
-    rsync -a "$source_dir/" "$target_dir/" || {
-        echo -e "${RED}Error: Failed to sync $display_name${NC}"
-        return 1
-    }
-    echo -e "${GREEN}  ✓ Synced${NC}"
+    # Track whether selections are active (ctrl-d clears this)
+    local has_selections
+    has_selections=$(mktemp)
+    echo "1" > "$has_selections"
+
+    local fzf_exit=0
+    cat "$CHANGES_MANIFEST" | fzf \
+        --multi \
+        --bind 'start:select-all' \
+        --bind 'ctrl-a:select-all+execute-silent(echo 1 > '"$has_selections"')' \
+        --bind 'ctrl-d:deselect-all+execute-silent(: > '"$has_selections"')' \
+        --bind 'tab:toggle+execute-silent(echo 1 > '"$has_selections"')' \
+        --with-nth=4 \
+        --delimiter='|' \
+        --preview "$preview_cmd" \
+        --preview-window='right:65%:wrap' \
+        --border=rounded \
+        --border-label=" Dotfiles Review " \
+        --header "$header" \
+        --header-first \
+        --marker='✓ ' \
+        --marker-multi-line='╻ │ ╹ ' \
+        --color='marker:green,fg:gray,selected-fg:white:bold' \
+        --ansi \
+        > "$selected" || fzf_exit=$?
+
+    # Esc/Ctrl-C
+    if [[ "$fzf_exit" -ne 0 ]]; then
+        rm -f "$selected" "$has_selections"
+        echo ""
+        echo -e "${YELLOW}Cancelled — no files synced.${NC}"
+        exit 0
+    fi
+
+    # Ctrl-D (deselect all) then Enter — flag file is empty
+    if [[ ! -s "$has_selections" ]] || [[ ! -s "$selected" ]]; then
+        rm -f "$selected" "$has_selections"
+        echo ""
+        echo -e "${YELLOW}No files selected — nothing to sync.${NC}"
+        exit 0
+    fi
+
+    rm -f "$has_selections"
+    echo "$selected"
 }
 
-# Function to sync file
-sync_file() {
-    local source_file="$1"
-    local target_file="$2"
-    local display_name="$3"
+# Sync selected files from the manifest
+sync_selected() {
+    local selection_file="$1"
+    local count=0
 
-    echo -e "${BLUE}Syncing $display_name to $target_file...${NC}"
-    mkdir -p "$(dirname "$target_file")"
-    backup_if_changed "$source_file" "$target_file"
-    cp "$source_file" "$target_file" || {
-        echo -e "${RED}Error: Failed to sync $display_name${NC}"
-        return 1
-    }
-    echo -e "${GREEN}  ✓ Synced${NC}"
+    echo -e "${BLUE}=== Syncing selected files ===${NC}"
+    echo ""
+
+    while IFS='|' read -r source_file target_file status display_name; do
+        mkdir -p "$(dirname "$target_file")"
+        backup_if_changed "$source_file" "$target_file"
+        cp "$source_file" "$target_file"
+
+        if [[ "$status" == "new" ]]; then
+            echo -e "  ${GREEN}+ $display_name${NC}"
+        else
+            echo -e "  ${YELLOW}~ $display_name${NC}"
+        fi
+        ((count++))
+    done < "$selection_file"
+
+    rm -f "$selection_file"
+
+    echo ""
+    echo -e "${GREEN}Synced $count file(s).${NC}"
 }
 
-# Compare phase
-echo -e "${BLUE}=== Comparing files ===${NC}"
+# === Collect phase ===
+echo -e "${BLUE}=== Checking for changes ===${NC}"
 echo ""
 
 if [[ "$SYNC_ZSH" == true ]]; then
-    compare_directory "$MAC_DIR/.zsh" "$HOME/.zsh" ".zsh directory"
+    collect_directory_changes "$MAC_DIR/.zsh" "$HOME/.zsh" ".zsh"
 fi
 
 if [[ "$SYNC_ZSHRC" == true ]]; then
-    compare_file "$MAC_DIR/.zshrc" "$HOME/.zshrc" ".zshrc"
+    collect_file_changes "$MAC_DIR/.zshrc" "$HOME/.zshrc" ".zshrc"
 fi
 
 if [[ "$SYNC_DOTFILES" == true ]]; then
-    compare_file "$MAC_DIR/.gitconfig" "$HOME/.gitconfig" ".gitconfig"
-    compare_file "$MAC_DIR/.gitignore_global" "$HOME/.gitignore_global" ".gitignore_global"
-    compare_file "$MAC_DIR/.ripgreprc" "$HOME/.ripgreprc" ".ripgreprc"
-    compare_file "$MAC_DIR/ghostty.config" "$HOME/.config/ghostty/config" "ghostty.config"
+    collect_file_changes "$MAC_DIR/.gitconfig" "$HOME/.gitconfig" ".gitconfig"
+    collect_file_changes "$MAC_DIR/.gitignore_global" "$HOME/.gitignore_global" ".gitignore_global"
+    collect_file_changes "$MAC_DIR/.ripgreprc" "$HOME/.ripgreprc" ".ripgreprc"
+    collect_file_changes "$MAC_DIR/ghostty.config" "$HOME/.config/ghostty/config" "ghostty.config"
 fi
 
 if [[ "$SYNC_CLAUDE" == true ]]; then
-    compare_directory "$MAC_DIR/.claude" "$HOME/.claude" ".claude directory"
+    collect_directory_changes "$MAC_DIR/.claude" "$HOME/.claude" ".claude"
 fi
 
 if [[ "$SYNC_VSCODE" == true ]]; then
     VSCODE_TARGET="$HOME/Library/Application Support/Code/User"
-    compare_file "$MAC_DIR/vscode/settings.json" "$VSCODE_TARGET/settings.json" "VSCode settings.json"
+    collect_file_changes "$MAC_DIR/vscode/settings.json" "$VSCODE_TARGET/settings.json" "vscode/settings.json"
 fi
 
 if [[ "$SYNC_ATUIN" == true ]]; then
-    compare_file "$MAC_DIR/.config/atuin/config.toml" "$HOME/.config/atuin/config.toml" "Atuin config.toml"
+    collect_file_changes "$MAC_DIR/.config/atuin/config.toml" "$HOME/.config/atuin/config.toml" "atuin/config.toml"
 fi
 
 if [[ "$SYNC_ZED" == true ]]; then
-    compare_directory "$MAC_DIR/.config/zed" "$HOME/.config/zed" ".config/zed directory"
+    collect_directory_changes "$MAC_DIR/.config/zed" "$HOME/.config/zed" ".config/zed"
 fi
 
 if [[ "$SYNC_PREK" == true ]]; then
-    compare_directory "$MAC_DIR/.config/prek" "$HOME/.config/prek" ".config/prek directory"
+    collect_directory_changes "$MAC_DIR/.config/prek" "$HOME/.config/prek" ".config/prek"
 fi
 
+# Check if there are any changes
+if [[ ! -s "$CHANGES_MANIFEST" ]]; then
+    echo -e "${GREEN}No changes detected — everything is up to date.${NC}"
+    exit 0
+fi
+
+# === Dry-run: print manifest and exit ===
 if [[ "$DRY_RUN" == true ]]; then
+    echo -e "${BLUE}Changed files:${NC}"
+    while IFS='|' read -r _ _ status display_name; do
+        if [[ "$status" == "new" ]]; then
+            echo -e "  ${GREEN}+ $display_name (new)${NC}"
+        else
+            echo -e "  ${YELLOW}~ $display_name (modified)${NC}"
+        fi
+    done < "$CHANGES_MANIFEST"
+    echo ""
     echo -e "${YELLOW}Dry run — no files were changed.${NC}"
     exit 0
 fi
 
-# Sync phase
-echo -e "${BLUE}=== Syncing files ===${NC}"
-echo ""
+# === Review + sync phase ===
+SELECTION_FILE=$(review_changes)
+sync_selected "$SELECTION_FILE"
 
-if [[ "$SYNC_ZSH" == true ]]; then
-    sync_directory "$MAC_DIR/.zsh" "$HOME/.zsh" ".zsh directory"
-fi
-
-if [[ "$SYNC_ZSHRC" == true ]]; then
-    sync_file "$MAC_DIR/.zshrc" "$HOME/.zshrc" ".zshrc"
-fi
-
-if [[ "$SYNC_DOTFILES" == true ]]; then
-    sync_file "$MAC_DIR/.gitconfig" "$HOME/.gitconfig" ".gitconfig"
-    sync_file "$MAC_DIR/.gitignore_global" "$HOME/.gitignore_global" ".gitignore_global"
-    sync_file "$MAC_DIR/.ripgreprc" "$HOME/.ripgreprc" ".ripgreprc"
-    sync_file "$MAC_DIR/ghostty.config" "$HOME/.config/ghostty/config" "ghostty.config"
-fi
-
-if [[ "$SYNC_CLAUDE" == true ]]; then
-    sync_directory "$MAC_DIR/.claude" "$HOME/.claude" ".claude directory"
-
-    # Run setup script only on initial setup
-    if [[ "$CLAUDE_INIT" == true ]] && [[ -f "$HOME/.claude/setup-claude.sh" ]]; then
-        echo -e "${BLUE}Running Claude setup script...${NC}"
-        bash "$HOME/.claude/setup-claude.sh" || {
-            echo -e "${RED}Error: Failed to run setup-claude.sh${NC}"
-            return 1
-        }
-        echo -e "${GREEN}  ✓ Setup complete${NC}"
-    fi
-fi
-
-if [[ "$SYNC_VSCODE" == true ]]; then
-    VSCODE_TARGET="$HOME/Library/Application Support/Code/User"
-    sync_file "$MAC_DIR/vscode/settings.json" "$VSCODE_TARGET/settings.json" "VSCode settings.json"
-fi
-
-if [[ "$SYNC_ATUIN" == true ]]; then
-    sync_file "$MAC_DIR/.config/atuin/config.toml" "$HOME/.config/atuin/config.toml" "Atuin config.toml"
-fi
-
-if [[ "$SYNC_ZED" == true ]]; then
-    sync_directory "$MAC_DIR/.config/zed" "$HOME/.config/zed" ".config/zed directory"
-fi
-
-if [[ "$SYNC_PREK" == true ]]; then
-    sync_directory "$MAC_DIR/.config/prek" "$HOME/.config/prek" ".config/prek directory"
+# Post-sync tasks
+if [[ "$CLAUDE_INIT" == true ]] && [[ -f "$HOME/.claude/setup-claude.sh" ]]; then
+    echo -e "${BLUE}Running Claude setup script...${NC}"
+    bash "$HOME/.claude/setup-claude.sh" || {
+        echo -e "${RED}Error: Failed to run setup-claude.sh${NC}"
+        exit 1
+    }
+    echo -e "${GREEN}  Setup complete${NC}"
 fi
 
 echo ""
-echo -e "${GREEN}✓ Dotfiles synced successfully!${NC}"
+echo -e "${GREEN}Dotfiles synced successfully!${NC}"
 if [[ "$BACKUP_CREATED" == true ]]; then
     echo -e "${CYAN}  Backup saved to $BACKUP_DIR${NC}"
 fi
