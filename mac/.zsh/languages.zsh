@@ -164,6 +164,8 @@ fi
 if [[ -d "$HOME/.bun" ]]; then
     export BUN_INSTALL="$HOME/.bun"
     export PATH="$BUN_INSTALL/bin:$PATH"
+    # Bun completions
+    [[ -s "$BUN_INSTALL/_bun" ]] && source "$BUN_INSTALL/_bun"
 fi
 
 # Node.js aliases
@@ -207,6 +209,23 @@ fi
 alias jl="jupyter lab"
 alias jn="jupyter notebook"
 alias jc="jupyter console"
+
+# =============================================================================
+# Rust Configuration
+# =============================================================================
+
+# Cargo binaries (env sourced in .zshenv, PATH additions here as fallback)
+if [[ -d "$HOME/.cargo/bin" ]]; then
+    export PATH="$HOME/.cargo/bin:$PATH"
+fi
+
+# Rust aliases
+alias cr="cargo run"
+alias cb="cargo build"
+alias ct="cargo test"
+alias cck="cargo check"
+alias cf="cargo fmt"
+alias cl="cargo clippy"
 
 # =============================================================================
 # Language-agnostic Development Tools
