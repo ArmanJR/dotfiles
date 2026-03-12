@@ -1,5 +1,10 @@
 #!/usr/bin/env zsh
 
+# Powerlevel10k instant prompt — must be at the very top before any output
+if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
+    source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
+fi
+
 # =============================================================================
 # macOS Apple Silicon .zshrc Configuration
 # Optimized for Python, Go, Node.js development with productivity tools
