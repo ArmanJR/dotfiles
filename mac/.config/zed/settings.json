@@ -13,9 +13,10 @@
   "ui_font_size": 17,
   "buffer_font_size": 16,
   "terminal": {
+    "font_weight": 350.0,
     "font_family": "JetBrainsMono Nerd Font",
     "font_size": 14.0,
-    "dock": "right",
+    "dock": "bottom",
   },
   // global
   "git": {
@@ -27,7 +28,22 @@
     "tree_view": false,
   },
   "project_panel": {
-    "indent_size": 16.0,
+    "sort_mode": "directories_first",
+    "hide_hidden": false,
+    "hide_root": false,
+    "sticky_scroll": true,
+    "diagnostic_badges": false,
+    "bold_folder_labels": false,
+    "starts_open": true,
+    "auto_reveal_entries": true,
+    "git_status": true,
+    "folder_icons": true,
+    "file_icons": true,
+    "entry_spacing": "comfortable",
+    "default_width": 240.0,
+    "dock": "right",
+    "button": true,
+    "indent_size": 18.0,
     "hide_gitignore": false,
   },
   "tabs": {
@@ -76,6 +92,14 @@
   "disable_ai": true,
   "features": {
     "edit_prediction_provider": "none",
+  },
+  "agent": {
+    "dock": "left",
+    "favorite_models": [],
+    "profiles": {
+      
+    },
+    "model_parameters": []
   },
   "icon_theme": "Catppuccin Latte",
   "buffer_font_family": "JetBrains Mono",
