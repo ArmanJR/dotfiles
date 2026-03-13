@@ -17,9 +17,9 @@ fi
 # Environment Setup
 # =============================================================================
 
-# Set default editor to nvim
-export EDITOR="nvim"
-export VISUAL="nvim"
+# Set default editor
+export EDITOR="zed"
+export VISUAL="zed"
 
 # Language environment
 export LANG=en_US.UTF-8
