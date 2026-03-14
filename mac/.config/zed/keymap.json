@@ -16,5 +16,10 @@
     "bindings": {
       "cmd-n": "project_panel::NewFile"
     }
+  },
+  {
+    "bindings": {
+      "alt-escape": "workspace::CloseItemInAllPanes"
+    }
   }
 ]

@@ -18,8 +18,8 @@ fi
 # =============================================================================
 
 # Set default editor
-export EDITOR="zed"
-export VISUAL="zed"
+export EDITOR="zed --wait"
+export VISUAL="zed --wait"
 
 # Language environment
 export LANG=en_US.UTF-8
