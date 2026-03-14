@@ -61,12 +61,14 @@ exec zsh
 
 ## Syncing
 
-`sync.sh` compares repo files against their target locations, shows a diff via `fzf`, and applies selected changes with backups.
+`sync.sh` pulls the latest repo, compares files against their targets, shows diffs via `fzf`, and applies selected changes with backups.
 
 ```
 sync.sh --all          # Sync all configs (no setup scripts)
 sync.sh --init         # Sync all + run setup scripts (first-time)
 sync.sh --dry-run      # Preview changes without applying
+sync.sh --agentic      # Non-interactive JSON manifest for AI agents
+sync.sh --apply PATH --ids 1,3  # Apply specific changes from a manifest
 ```
 
 Individual targets:
@@ -74,8 +76,8 @@ Individual targets:
 | Flag | What it syncs |
 |------|---------------|
 | `--zsh` | `~/.zsh/` |
-| `--zshrc` | `~/.zshrc`, `~/.zshenv`, `~/.zprofile` |
-| `--dotfiles` | `~/.gitconfig`, `~/.gitignore_global`, `~/.ripgreprc`, `~/.config/ghostty/config` |
+| `--zshrc` | `~/.zshrc` |
+| `--dotfiles` | `~/.zshenv`, `~/.zprofile`, `~/.gitconfig`, `~/.gitignore_global`, `~/.ripgreprc`, `ghostty.config` |
 | `--claude` | `~/.claude/` |
 | `--vscode` | `~/Library/Application Support/Code/User/settings.json` |
 | `--atuin` | `~/.config/atuin/config.toml` |
