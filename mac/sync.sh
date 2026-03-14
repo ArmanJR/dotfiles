@@ -127,11 +127,11 @@ review_changes() {
         if [[ "$ftype" == "new" ]]; then
             echo "NEW FILE: $name"
             echo "---"
-            bat --color=always --style=plain "$src" 2>/dev/null || cat "$src"
+            (bat --color=always --style=plain "$src" 2>/dev/null || batcat --color=always --style=plain "$src" 2>/dev/null || cat "$src")
         else
             echo "MODIFIED: $name"
             echo "---"
-            diff -u "$tgt" "$src" | bat --color=always -l diff --style=plain 2>/dev/null || diff -u "$tgt" "$src"
+            diff -u "$tgt" "$src" | (bat --color=always -l diff --style=plain 2>/dev/null || batcat --color=always -l diff --style=plain 2>/dev/null || cat)
         fi
     '
 
@@ -186,11 +186,6 @@ review_changes() {
 
 # Non-interactive JSON output for AI agents — writes manifest file, outputs JSON to stdout
 agentic_output() {
-    if ! command -v jq &>/dev/null; then
-        echo -e "${RED}Error: jq is required for --agentic mode. Install with: brew install jq${NC}" >&2
-        exit 1
-    fi
-
     local manifest_file
     manifest_file=$(mktemp /tmp/dotfiles-sync-XXXXXX)
     cp "$CHANGES_MANIFEST" "$manifest_file"
@@ -423,6 +418,33 @@ while [[ $# -gt 0 ]]; do
     esac
     shift
 done
+
+# === Dependency checks ===
+missing=()
+if ! command -v git &>/dev/null; then
+    missing+=("git")
+fi
+if [[ "$AGENTIC" == true ]] && ! command -v jq &>/dev/null; then
+    missing+=("jq")
+fi
+if [[ "$AGENTIC" != true ]] && [[ -z "$APPLY_MANIFEST" ]] && [[ "$DRY_RUN" != true ]]; then
+    if ! command -v fzf &>/dev/null; then
+        missing+=("fzf (>= 0.58)")
+    else
+        fzf_ver=$(fzf --version | awk '{print $1}')
+        fzf_major=$(echo "$fzf_ver" | cut -d. -f1)
+        fzf_minor=$(echo "$fzf_ver" | cut -d. -f2)
+        if [[ "$fzf_major" -eq 0 ]] && [[ "$fzf_minor" -lt 58 ]]; then
+            echo -e "${RED}Error: fzf >= 0.58 required (found $fzf_ver)${NC}" >&2
+            echo "Update with: git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf && ~/.fzf/install" >&2
+            exit 1
+        fi
+    fi
+fi
+if [[ ${#missing[@]} -gt 0 ]]; then
+    echo -e "${RED}Error: Missing required dependencies: ${missing[*]}${NC}" >&2
+    exit 1
+fi
 
 # === Apply mode: read manifest and apply selected IDs ===
 if [[ -n "$APPLY_MANIFEST" ]]; then
