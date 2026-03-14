@@ -63,7 +63,6 @@
     "allowed": false,
   },
   "colorize_brackets": false,
-  "soft_wrap": "none",
   "toolbar": {
     "code_actions": false,
     "agent_review": true,
@@ -96,9 +95,7 @@
   "agent": {
     "dock": "left",
     "favorite_models": [],
-    "profiles": {
-      
-    },
+    "profiles": {},
     "model_parameters": []
   },
   "icon_theme": "Catppuccin Latte",

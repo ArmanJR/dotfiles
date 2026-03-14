@@ -17,7 +17,9 @@
 #   --zed         Sync Zed config
 #   --prek        Sync prek hook templates
 #   --all         Sync everything
-#   --agentic     Non-interactive mode for AI agents (outputs diffs and apply instructions)
+#   --agentic     Non-interactive mode for AI agents (outputs JSON manifest to stdout)
+#   --apply PATH  Apply changes from a manifest file (used after --agentic)
+#   --ids LIST    Comma-separated IDs to apply (required with --apply)
 #   --dry-run     Show what would change without applying anything
 #   --help        Show this help message
 
@@ -54,110 +56,19 @@ SYNC_PREK=false
 DRY_RUN=false
 AGENTIC=false
 CLAUDE_INIT=false
+APPLY_MANIFEST=""
+APPLY_IDS=""
 
-if [[ $# -eq 0 ]]; then
-    echo -e "${RED}Error: No sync target specified${NC}"
-    echo "Use --help to see available options"
-    exit 1
-fi
+# === Functions ===
 
-for arg in "$@"; do
-    case $arg in
-        --zsh)
-            SYNC_ZSH=true
-            ;;
-        --zshrc)
-            SYNC_ZSHRC=true
-            ;;
-        --dotfiles)
-            SYNC_DOTFILES=true
-            ;;
-        --claude)
-            SYNC_CLAUDE=true
-            ;;
-        --init)
-            SYNC_ZSH=true
-            SYNC_ZSHRC=true
-            SYNC_DOTFILES=true
-            SYNC_CLAUDE=true
-            SYNC_VSCODE=true
-            SYNC_ATUIN=true
-            SYNC_ZED=true
-            SYNC_PREK=true
-            CLAUDE_INIT=true
-            ;;
-        --vscode)
-            SYNC_VSCODE=true
-            ;;
-        --atuin)
-            SYNC_ATUIN=true
-            ;;
-        --zed)
-            SYNC_ZED=true
-            ;;
-        --prek)
-            SYNC_PREK=true
-            ;;
-        --all)
-            SYNC_ZSH=true
-            SYNC_ZSHRC=true
-            SYNC_DOTFILES=true
-            SYNC_CLAUDE=true
-            SYNC_VSCODE=true
-            SYNC_ATUIN=true
-            SYNC_ZED=true
-            SYNC_PREK=true
-            ;;
-        --agentic)
-            AGENTIC=true
-            ;;
-        --dry-run)
-            DRY_RUN=true
-            ;;
-        --help)
-            echo "Dotfiles sync script"
-            echo ""
-            echo "Usage: sync.sh [options]"
-            echo ""
-            echo "Options:"
-            echo "  --zsh         Sync .zsh directory"
-            echo "  --zshrc       Sync .zshrc file"
-            echo "  --dotfiles    Sync other dotfiles (.gitconfig, .gitignore_global, .ripgreprc, ghostty.config)"
-            echo "  --claude      Sync .claude directory"
-            echo "  --vscode      Sync VSCode settings"
-            echo "  --atuin       Sync Atuin config"
-            echo "  --zed         Sync Zed config"
-            echo "  --prek        Sync prek hook templates"
-            echo "  --all         Sync everything"
-            echo "  --init        Sync everything and run all setup scripts (for new devices)"
-            echo "  --agentic     Non-interactive mode for AI agents (outputs diffs and apply instructions)"
-            echo "  --dry-run     Show what would change without applying anything"
-            echo "  --help        Show this help message"
-            exit 0
-            ;;
-        *)
-            echo -e "${RED}Unknown option: $arg${NC}"
-            echo "Use --help to see available options"
-            exit 1
-            ;;
-    esac
-done
-
-echo -e "${BLUE}Starting dotfiles sync...${NC}"
-
-# Navigate to dotfiles directory
-cd "$DOTFILES_DIR" || {
-    echo -e "${RED}Error: Could not find dotfiles directory at $DOTFILES_DIR${NC}"
-    exit 1
+# Status output — stderr in agentic/apply mode so stdout stays clean for JSON
+log_info() {
+    if [[ "$AGENTIC" == true ]]; then
+        echo -e "$@" >&2
+    else
+        echo -e "$@"
+    fi
 }
-
-echo -e "${BLUE}Pulling latest changes from GitHub...${NC}"
-git pull origin main || {
-    echo -e "${RED}Error: Failed to pull from GitHub${NC}"
-    exit 1
-}
-
-echo ""
 
 # Collect changes for a directory into the manifest
 collect_directory_changes() {
@@ -273,12 +184,22 @@ review_changes() {
     echo "$selected"
 }
 
-# Non-interactive output for AI agents — prints diffs and apply instructions
+# Non-interactive JSON output for AI agents — writes manifest file, outputs JSON to stdout
 agentic_output() {
-    local total_changes
-    total_changes=$(wc -l < "$CHANGES_MANIFEST" | tr -d ' ')
+    if ! command -v jq &>/dev/null; then
+        echo -e "${RED}Error: jq is required for --agentic mode. Install with: brew install jq${NC}" >&2
+        exit 1
+    fi
 
-    cat <<'AGENT_PREAMBLE'
+    local manifest_file
+    manifest_file=$(mktemp /tmp/dotfiles-sync-XXXXXX)
+    cp "$CHANGES_MANIFEST" "$manifest_file"
+
+    local script_path
+    script_path="$(cd "$(dirname "$0")" && pwd)/$(basename "$0")"
+
+    # Print agent instructions before JSON data
+    cat <<AGENT_INSTRUCTIONS
 <dotfiles-sync>
 
 You are helping the user sync their dotfiles from the repo to the local system.
@@ -286,52 +207,93 @@ The repo has been pulled and the changes below were detected.
 
 ## Instructions
 
-1. Present each changed file to the user one at a time.
+1. Present each change to the user one at a time.
 2. For modified files, analyze the diff and briefly explain what changed.
    For new files, briefly describe what the file contains.
-3. Ask the user: "Apply this change?"
-4. If approved and the file is modified (not new), run the backup command first, then the apply command.
-5. If approved and the file is new, run just the apply command.
-6. If the user declines, skip to the next file.
-7. After reviewing all files, print a summary listing applied and skipped files.
+3. Ask the user whether to apply or skip this change.
+4. If accepted, apply it immediately by running:
+     bash $script_path --apply $manifest_file --ids <id>
+5. If skipped, move on to the next change.
+6. After all changes have been reviewed, print a short summary of what was applied and what was skipped.
 
-AGENT_PREAMBLE
+## Changes
 
-    echo "Backup directory for this session: $BACKUP_DIR"
-    echo ""
-    echo "## Changes ($total_changes file(s))"
+AGENT_INSTRUCTIONS
 
-    local file_num=0
+    # Build JSON output using jq for safe escaping
+    local json
+    json=$(jq -n --arg manifest "$manifest_file" '{"manifest": $manifest, "changes": []}')
+
+    local id=0
     while IFS='|' read -r source_file target_file status display_name; do
-        ((++file_num))
-        echo ""
-        echo "---"
-        echo "### $file_num. $display_name ($status)"
-        echo ""
+        ((++id))
 
         if [[ "$status" == "new" ]]; then
-            echo 'NEW FILE — contents:'
-            echo '```'
-            cat "$source_file"
-            echo '```'
+            local content
+            content=$(<"$source_file")
+            json=$(echo "$json" | jq \
+                --argjson id "$id" \
+                --arg name "$display_name" \
+                --arg status "$status" \
+                --arg content "$content" \
+                '.changes += [{"id": $id, "display_name": $name, "status": $status, "content": $content}]')
         else
-            echo '```diff'
-            diff -u "$target_file" "$source_file" || true
-            echo '```'
+            local diff_text
+            diff_text=$(diff -u "$target_file" "$source_file" || true)
+            json=$(echo "$json" | jq \
+                --argjson id "$id" \
+                --arg name "$display_name" \
+                --arg status "$status" \
+                --arg diff "$diff_text" \
+                '.changes += [{"id": $id, "display_name": $name, "status": $status, "diff": $diff}]')
         fi
-
-        echo ""
-
-        if [[ "$status" == "modified" ]]; then
-            local relative_path="${target_file#$HOME/}"
-            local backup_dest="$BACKUP_DIR/$relative_path"
-            echo "Backup: mkdir -p \"$(dirname "$backup_dest")\" && cp \"$target_file\" \"$backup_dest\""
-        fi
-        echo "Apply: mkdir -p \"$(dirname "$target_file")\" && cp \"$source_file\" \"$target_file\""
     done < "$CHANGES_MANIFEST"
 
+    echo "$json" | jq .
     echo ""
     echo "</dotfiles-sync>"
+}
+
+# Apply selected IDs from a manifest file (backup + copy handled internally)
+apply_from_manifest() {
+    local manifest_path="$1"
+    local ids_str="$2"
+
+    if [[ -z "$ids_str" ]]; then
+        echo -e "${RED}Error: --ids is required with --apply${NC}" >&2
+        exit 1
+    fi
+    if [[ ! -f "$manifest_path" ]]; then
+        echo -e "${RED}Error: Manifest file not found: $manifest_path${NC}" >&2
+        exit 1
+    fi
+
+    # Parse accepted IDs into a searchable string
+    local id_search=",$(echo "$ids_str" | tr -d ' '),"
+
+    local line_num=0
+    local applied=0
+
+    while IFS='|' read -r source_file target_file status display_name; do
+        ((++line_num))
+
+        if [[ "$id_search" == *",$line_num,"* ]]; then
+            mkdir -p "$(dirname "$target_file")"
+            backup_if_changed "$source_file" "$target_file"
+            cp "$source_file" "$target_file"
+
+            if [[ "$status" == "new" ]]; then
+                echo -e "${GREEN}+ $display_name${NC}"
+            else
+                echo -e "${YELLOW}~ $display_name${NC}"
+            fi
+            ((++applied))
+        fi
+    done < "$manifest_path"
+
+    if [[ "$applied" -eq 0 ]]; then
+        echo -e "${YELLOW}No matching IDs found in manifest.${NC}"
+    fi
 }
 
 # Sync selected files from the manifest
@@ -361,9 +323,145 @@ sync_selected() {
     echo -e "${GREEN}Synced $count file(s).${NC}"
 }
 
+# === Argument parsing ===
+
+if [[ $# -eq 0 ]]; then
+    echo -e "${RED}Error: No sync target specified${NC}"
+    echo "Use --help to see available options"
+    exit 1
+fi
+
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --zsh)
+            SYNC_ZSH=true
+            ;;
+        --zshrc)
+            SYNC_ZSHRC=true
+            ;;
+        --dotfiles)
+            SYNC_DOTFILES=true
+            ;;
+        --claude)
+            SYNC_CLAUDE=true
+            ;;
+        --init)
+            SYNC_ZSH=true
+            SYNC_ZSHRC=true
+            SYNC_DOTFILES=true
+            SYNC_CLAUDE=true
+            SYNC_VSCODE=true
+            SYNC_ATUIN=true
+            SYNC_ZED=true
+            SYNC_PREK=true
+            CLAUDE_INIT=true
+            ;;
+        --vscode)
+            SYNC_VSCODE=true
+            ;;
+        --atuin)
+            SYNC_ATUIN=true
+            ;;
+        --zed)
+            SYNC_ZED=true
+            ;;
+        --prek)
+            SYNC_PREK=true
+            ;;
+        --all)
+            SYNC_ZSH=true
+            SYNC_ZSHRC=true
+            SYNC_DOTFILES=true
+            SYNC_CLAUDE=true
+            SYNC_VSCODE=true
+            SYNC_ATUIN=true
+            SYNC_ZED=true
+            SYNC_PREK=true
+            ;;
+        --agentic)
+            AGENTIC=true
+            ;;
+        --apply)
+            APPLY_MANIFEST="$2"
+            shift
+            ;;
+        --ids)
+            APPLY_IDS="$2"
+            shift
+            ;;
+        --dry-run)
+            DRY_RUN=true
+            ;;
+        --help)
+            echo "Dotfiles sync script"
+            echo ""
+            echo "Usage: sync.sh [options]"
+            echo ""
+            echo "Options:"
+            echo "  --zsh         Sync .zsh directory"
+            echo "  --zshrc       Sync .zshrc file"
+            echo "  --dotfiles    Sync other dotfiles (.gitconfig, .gitignore_global, .ripgreprc, ghostty.config)"
+            echo "  --claude      Sync .claude directory"
+            echo "  --vscode      Sync VSCode settings"
+            echo "  --atuin       Sync Atuin config"
+            echo "  --zed         Sync Zed config"
+            echo "  --prek        Sync prek hook templates"
+            echo "  --all         Sync everything"
+            echo "  --init        Sync everything and run all setup scripts (for new devices)"
+            echo "  --agentic     Non-interactive mode for AI agents (outputs JSON manifest)"
+            echo "  --apply PATH  Apply changes from a manifest file (used after --agentic)"
+            echo "  --ids LIST    Comma-separated IDs to apply (required with --apply)"
+            echo "  --dry-run     Show what would change without applying anything"
+            echo "  --help        Show this help message"
+            exit 0
+            ;;
+        *)
+            echo -e "${RED}Unknown option: $1${NC}"
+            echo "Use --help to see available options"
+            exit 1
+            ;;
+    esac
+    shift
+done
+
+# === Apply mode: read manifest and apply selected IDs ===
+if [[ -n "$APPLY_MANIFEST" ]]; then
+    apply_from_manifest "$APPLY_MANIFEST" "$APPLY_IDS"
+
+    if [[ "$BACKUP_CREATED" == true ]]; then
+        echo -e "${CYAN}Backup saved to $BACKUP_DIR${NC}"
+    fi
+    exit 0
+fi
+
+# === Collect mode (normal, dry-run, or agentic) ===
+
+log_info "${BLUE}Starting dotfiles sync...${NC}"
+
+# Navigate to dotfiles directory
+cd "$DOTFILES_DIR" || {
+    echo -e "${RED}Error: Could not find dotfiles directory at $DOTFILES_DIR${NC}" >&2
+    exit 1
+}
+
+log_info "${BLUE}Pulling latest changes from GitHub...${NC}"
+if [[ "$AGENTIC" == true ]]; then
+    git pull origin main >&2 || {
+        echo -e "${RED}Error: Failed to pull from GitHub${NC}" >&2
+        exit 1
+    }
+else
+    git pull origin main || {
+        echo -e "${RED}Error: Failed to pull from GitHub${NC}" >&2
+        exit 1
+    }
+fi
+
+log_info ""
+
 # === Collect phase ===
-echo -e "${BLUE}=== Checking for changes ===${NC}"
-echo ""
+log_info "${BLUE}=== Checking for changes ===${NC}"
+log_info ""
 
 if [[ "$SYNC_ZSH" == true ]]; then
     collect_directory_changes "$MAC_DIR/.zsh" "$HOME/.zsh" ".zsh"
@@ -405,7 +503,7 @@ fi
 
 # Check if there are any changes
 if [[ ! -s "$CHANGES_MANIFEST" ]]; then
-    echo -e "${GREEN}No changes detected — everything is up to date.${NC}"
+    log_info "${GREEN}No changes detected — everything is up to date.${NC}"
     exit 0
 fi
 
@@ -424,7 +522,7 @@ if [[ "$DRY_RUN" == true ]]; then
     exit 0
 fi
 
-# === Agentic mode: print diffs and instructions for AI agent ===
+# === Agentic mode: output JSON manifest for AI agent ===
 if [[ "$AGENTIC" == true ]]; then
     agentic_output
     exit 0
