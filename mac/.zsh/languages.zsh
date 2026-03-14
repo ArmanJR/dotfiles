@@ -137,10 +137,20 @@ if ! command -v fnm >/dev/null 2>&1 && [[ -d "$HOME/.nvm" ]]; then
     export NVM_DIR="$HOME/.nvm"
 
     # Add default node to PATH immediately (avoids slow nvm.sh sourcing)
+    # Resolve alias chain (e.g. default -> lts/* -> lts/iron -> v20.x.x)
     _nvm_default=$(cat "$NVM_DIR/alias/default" 2>/dev/null)
-    _nvm_dir=$(ls -d "$NVM_DIR/versions/node/v${_nvm_default}"* 2>/dev/null | sort -V | tail -1)
-    [[ -d "$_nvm_dir/bin" ]] && export PATH="$_nvm_dir/bin:$PATH"
-    unset _nvm_default _nvm_dir
+    # Follow alias indirections (up to 5 hops) until we get a plain version string
+    local _hops=0
+    while [[ -n "$_nvm_default" && "$_nvm_default" != v* && $_hops -lt 5 ]]; do
+        _nvm_default=$(cat "$NVM_DIR/alias/${_nvm_default//\//_}" 2>/dev/null \
+                       || cat "$NVM_DIR/alias/$_nvm_default" 2>/dev/null)
+        (( _hops++ ))
+    done
+    if [[ "$_nvm_default" == v* ]]; then
+        _nvm_dir=$(ls -d "$NVM_DIR/versions/node/${_nvm_default}"* 2>/dev/null | sort -V | tail -1)
+        [[ -d "$_nvm_dir/bin" ]] && export PATH="$_nvm_dir/bin:$PATH"
+    fi
+    unset _nvm_default _nvm_dir _hops
 
     # Lazy load nvm command itself (for nvm use, nvm install, etc.)
     nvm() {
