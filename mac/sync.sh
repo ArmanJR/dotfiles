@@ -287,7 +287,7 @@ The repo has been pulled and the changes below were detected.
 ## Instructions
 
 1. Present each changed file to the user one at a time.
-2. For modified files, show the diff and briefly explain what changed.
+2. For modified files, analyze the diff and briefly explain what changed.
    For new files, briefly describe what the file contains.
 3. Ask the user: "Apply this change?"
 4. If approved and the file is modified (not new), run the backup command first, then the apply command.
@@ -303,7 +303,7 @@ AGENT_PREAMBLE
 
     local file_num=0
     while IFS='|' read -r source_file target_file status display_name; do
-        ((file_num++))
+        ((++file_num))
         echo ""
         echo "---"
         echo "### $file_num. $display_name ($status)"
@@ -352,7 +352,7 @@ sync_selected() {
         else
             echo -e "  ${YELLOW}~ $display_name${NC}"
         fi
-        ((count++))
+        ((++count))
     done < "$selection_file"
 
     rm -f "$selection_file"
