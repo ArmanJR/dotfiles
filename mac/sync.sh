@@ -11,7 +11,6 @@
 #   --zshrc       Sync .zshrc file
 #   --dotfiles    Sync other dotfiles (.zshenv, .zprofile, .gitconfig, .gitignore_global, .ripgreprc, ghostty.config)
 #   --claude      Sync .claude directory
-#   --init        Sync everything and run all setup scripts (for new devices)
 #   --vscode      Sync VSCode settings
 #   --atuin       Sync Atuin config
 #   --zed         Sync Zed config
@@ -55,7 +54,6 @@ SYNC_ZED=false
 SYNC_PREK=false
 DRY_RUN=false
 AGENTIC=false
-CLAUDE_INIT=false
 APPLY_MANIFEST=""
 APPLY_IDS=""
 
@@ -340,17 +338,6 @@ while [[ $# -gt 0 ]]; do
         --claude)
             SYNC_CLAUDE=true
             ;;
-        --init)
-            SYNC_ZSH=true
-            SYNC_ZSHRC=true
-            SYNC_DOTFILES=true
-            SYNC_CLAUDE=true
-            SYNC_VSCODE=true
-            SYNC_ATUIN=true
-            SYNC_ZED=true
-            SYNC_PREK=true
-            CLAUDE_INIT=true
-            ;;
         --vscode)
             SYNC_VSCODE=true
             ;;
@@ -402,7 +389,6 @@ while [[ $# -gt 0 ]]; do
             echo "  --zed         Sync Zed config"
             echo "  --prek        Sync prek hook templates"
             echo "  --all         Sync everything"
-            echo "  --init        Sync everything and run all setup scripts (for new devices)"
             echo "  --agentic     Non-interactive mode for AI agents (outputs JSON manifest)"
             echo "  --apply PATH  Apply changes from a manifest file (used after --agentic)"
             echo "  --ids LIST    Comma-separated IDs to apply (required with --apply)"
@@ -553,16 +539,6 @@ fi
 # === Review + sync phase ===
 SELECTION_FILE=$(review_changes)
 sync_selected "$SELECTION_FILE"
-
-# Post-sync tasks
-if [[ "$CLAUDE_INIT" == true ]] && [[ -f "$HOME/.claude/setup-claude.sh" ]]; then
-    echo -e "${BLUE}Running Claude setup script...${NC}"
-    bash "$HOME/.claude/setup-claude.sh" || {
-        echo -e "${RED}Error: Failed to run setup-claude.sh${NC}"
-        exit 1
-    }
-    echo -e "${GREEN}  Setup complete${NC}"
-fi
 
 echo ""
 echo -e "${GREEN}Dotfiles synced successfully!${NC}"

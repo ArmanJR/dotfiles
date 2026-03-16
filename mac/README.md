@@ -72,7 +72,7 @@ npm install -g @anthropic-ai/claude-code
 
 # 11. Clone & sync
 git clone https://github.com/ArmanJR/dotfiles ~/code/dotfiles
-~/code/dotfiles/mac/sync.sh --init
+~/code/dotfiles/mac/sync.sh --all
 
 # 12. VSCode extensions (optional)
 ~/code/dotfiles/mac/vscode/install-extensions.sh
@@ -86,8 +86,7 @@ exec zsh
 `sync.sh` pulls the latest repo, compares files against their targets, shows diffs via `fzf`, and applies selected changes with backups.
 
 ```
-sync.sh --all          # Sync all configs (no setup scripts)
-sync.sh --init         # Sync all + run setup scripts (first-time)
+sync.sh --all          # Sync all configs
 sync.sh --dry-run      # Preview changes without applying
 sync.sh --agentic      # Non-interactive JSON manifest for AI agents
 sync.sh --apply PATH --ids 1,3  # Apply specific changes from a manifest
@@ -111,5 +110,4 @@ Flags can be combined: `sync.sh --zsh --zshrc --dotfiles`.
 ## Notes
 
 - Shell scripts synced via `--claude` (e.g. `statusline.sh`) must be executable in git. Fix with: `git update-index --chmod=+x <file>`.
-- `--init` runs `.claude/setup-claude.sh` after syncing, which installs Claude Code plugins.
-- `--all` syncs everything but skips setup scripts — use `--init` only on a fresh machine.
+- `--all` syncs everything. Use `--dry-run` first to preview changes on a fresh machine.
