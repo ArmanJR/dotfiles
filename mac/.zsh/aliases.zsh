@@ -317,7 +317,7 @@ cleanup() {
 # =============================================================================
 
 # Reload shell configuration
-alias reload="source ~/.zshrc"
+alias reload="exec zsh"
 alias rl="reload"
 
 # Edit configuration files

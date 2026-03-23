@@ -115,9 +115,11 @@ setopt GLOB_DOTS               # Include dotfiles in globbing
 # Use emacs key bindings
 bindkey -e
 
-# Better history search
-bindkey '^R' history-incremental-search-backward
-bindkey '^S' history-incremental-search-forward
+# Better history search (only when Atuin is not managing history)
+if ! command -v atuin >/dev/null 2>&1; then
+    bindkey '^R' history-incremental-search-backward
+    bindkey '^S' history-incremental-search-forward
+fi
 bindkey '^P' history-search-backward
 bindkey '^N' history-search-forward
 
