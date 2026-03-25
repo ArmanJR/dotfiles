@@ -21,6 +21,9 @@
 #   --ids LIST    Comma-separated IDs to apply (required with --apply)
 #   --dry-run     Show what would change without applying anything
 #   --help        Show this help message
+#
+# For agent mode, tell the agent to:
+#   We want to sync our local configs with remote. Run `sync.sh --agentic --all` and follow its instructions.
 
 set -e  # Exit on error
 
