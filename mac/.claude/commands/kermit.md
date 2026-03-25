@@ -9,7 +9,9 @@ description: Commits task changes, handles residual files, and pushes to remote.
 1. **Identify Scope:** Use `git status -s` to identify files modified or created during the current task.
 2. **Sensitive Data Scan:** Analyze the diff of these files for secrets (e.g., API keys, tokens, passwords) and temporary artifacts (e.g., `.env`, `__pycache__/`, `node_modules/`, `vendor/`).
    * *IF UNSAFE:* HALT immediately. Alert the user with the exact file and lines containing the suspected leak. Do not proceed.
-   * *IF SAFE:* Run `git add <specific_files>`.
+   *IF SAFE:*  
+      (1) Check whether a README file exists. If it does AND your changes would make it outdated, update it accordingly. Otherwise, skip.  
+      (2) Run `git add <specific_files>`.
 3. **Generate Message:** Run `git diff --staged`. Generate a Conventional Commit message based *strictly* on this diff output, not chat history.
 4. **Commit with Hook Awareness:** Run `git commit -m "<message>"`. Then follow the **Pre-commit Hook Protocol** below.
 
