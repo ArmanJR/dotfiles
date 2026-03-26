@@ -187,6 +187,10 @@ alias gr="git rebase"
 alias gst="git stash"
 alias gstp="git stash pop"
 
+# Merge conflict resolution
+alias gct="git checkout --theirs . && git add -A"
+alias gcours="git checkout --ours . && git add -A"
+
 # Git functions
 git-clean-branches() {
     echo "Cleaning up merged branches..."
