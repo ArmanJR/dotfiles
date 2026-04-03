@@ -1,0 +1,21 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "provider": {
+    "llama.cpp": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "llama-server (Jetson)",
+      "options": {
+        "baseURL": "http://jetson:8001/v1"
+      },
+      "models": {
+        "qwen3.5-27b-distilled": {
+          "name": "Qwen3.5-27B Claude Opus Distilled",
+          "limit": {
+            "context": 131072,
+            "output": 65536
+          }
+        }
+      }
+    }
+  }
+}

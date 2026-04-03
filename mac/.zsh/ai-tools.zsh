@@ -15,7 +15,7 @@ alias claudeskip='~/.local/bin/claude --dangerously-skip-permissions'
 
 # Short aliases
 alias cc='claude'
-alias ccskip='claudeskip'
+alias ccx='claudeskip'
 
 # MCP tool installer
 # Usage: ccmcp <tool> <api-key>
@@ -40,3 +40,11 @@ ccmcp() {
 
 # Skip approvals and sandbox (use with caution)
 alias codexskip="codex --dangerously-bypass-approvals-and-sandbox"
+
+# =============================================================================
+# OpenCode
+# =============================================================================
+
+# Separating Cloud-based usage and Local running models usage
+alias oc="export OPENCODE_CONFIG_DIR=$HOME/.config/opencode/cloud opencode"
+alias ocl="export OPENCODE_CONFIG_DIR=$HOME/.config/opencode/local opencode"
