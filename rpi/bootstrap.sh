@@ -2,18 +2,18 @@
 # ============================================================================
 # Raspberry Pi Development Environment Bootstrap Script
 #
-# Sets up a complete development environment including:
-# - Zsh with Oh My Zsh and plugins
+# Sets up a home server / self-hosting development environment:
+# - Zsh with Powerlevel10k (no Oh My Zsh), autosuggestions, syntax highlighting
 # - Neovim with LazyVim
-# - Development tools and languages
-# - Nerd Fonts
+# - Modern CLI tools (eza, fd, rg, bat, fzf, zoxide, atuin)
+# - Languages: Rust, Python (uv), Go, Node.js (fnm)
 # - Docker (optional)
-# - Various CLI utilities
+# - JetBrainsMono Nerd Font
 #
 # Usage: ./bootstrap.sh [options]
 # Options:
-#   --minimal    : Install only essential packages
-#   --full       : Install everything including optional packages
+#   --minimal    : Essential packages + Zsh + modern CLI tools only
+#   --full       : Everything including security tools and extras
 #   --docker     : Include Docker installation
 #   --no-backup  : Skip backup of existing configs
 #   --help       : Show this help message
@@ -25,217 +25,112 @@ set -euo pipefail
 # CONFIGURATION
 # ============================================================================
 
-# Colors for output
 readonly RED='\033[0;31m'
 readonly GREEN='\033[0;32m'
 readonly YELLOW='\033[1;33m'
 readonly BLUE='\033[0;34m'
-readonly MAGENTA='\033[0;35m'
 readonly CYAN='\033[0;36m'
-readonly NC='\033[0m' # No Color
+readonly NC='\033[0m'
 
-# System detection
 readonly OS_TYPE="$(uname -s)"
 readonly ARCH="$(uname -m)"
 readonly DISTRO="$(lsb_release -si 2>/dev/null || echo "Unknown")"
-readonly CODENAME="$(lsb_release -sc 2>/dev/null || echo "unknown")"
 
-# Directories
-readonly DOTFILES_DIR="${DOTFILES_DIR:-$HOME/dotfiles}"
+readonly DOTFILES_DIR="${DOTFILES_DIR:-$HOME/code/dotfiles}"
+readonly RPI_DIR="$DOTFILES_DIR/rpi"
 readonly BACKUP_DIR="$HOME/.bootstrap-backup-$(date +%Y%m%d-%H%M%S)"
-readonly NVIM_CONFIG_DIR="$HOME/.config/nvim"
-readonly OH_MY_ZSH_DIR="$HOME/.oh-my-zsh"
-readonly FONTS_DIR="$HOME/.local/share/fonts"
+readonly TEMP_DIR="/tmp/bootstrap-$$"
 readonly LOCAL_BIN="$HOME/.local/bin"
 readonly CONFIG_DIR="$HOME/.config"
-readonly TEMP_DIR="/tmp/bootstrap-$$"
+readonly FONTS_DIR="$HOME/.local/share/fonts"
+readonly ZSH_PLUGIN_DIR="$HOME/.zsh/plugins"
 
-# Installation flags
 INSTALL_MODE="standard"
 INSTALL_DOCKER=false
 CREATE_BACKUP=true
-VERBOSE=false
 
-# Log file
 readonly LOG_FILE="$HOME/bootstrap-$(date +%Y%m%d-%H%M%S).log"
 
 # ============================================================================
 # PACKAGE LISTS
 # ============================================================================
 
-# Essential packages
-readonly ESSENTIAL_PACKAGES=(
+readonly MINIMAL_PACKAGES=(
     # Core utilities
-    curl wget git vim tmux screen htop btop
-    zsh fish bash-completion
+    curl wget git vim tmux htop btop
+    zsh
 
     # Build essentials
     build-essential cmake make gcc g++
-    python3-dev python3-pip python3-venv
+    python3-dev python3-venv
 
     # System utilities
     software-properties-common apt-transport-https
     ca-certificates gnupg lsb-release
 
-    # File management
-    tree ncdu fd-find ripgrep silversearcher-ag
-    unzip zip p7zip-full tar gzip bzip2
+    # Modern CLI tools (Debian package names)
+    fd-find ripgrep bat
+    unzip zip jq
 
     # Network tools
-    net-tools dnsutils iputils-ping traceroute
-    openssh-client openssh-server
-
-    # Text processing
-    jq yq sed gawk grep
+    net-tools openssh-server
 )
 
-# Standard packages (includes essential)
 readonly STANDARD_PACKAGES=(
-    # Development tools
-    nodejs npm yarn
-    golang rustc cargo
-    sqlite3 postgresql-client mysql-client
-    redis-tools
+    # Search and navigation
+    fzf zoxide
 
-    # Python extras
-    python3-setuptools python3-wheel
-    pipx virtualenv
+    # Monitoring
+    ncdu iotop iftop nethogs
 
-    # Monitoring & Performance
-    iotop iftop nethogs bmon
-    sysstat dstat
+    # Database clients
+    sqlite3 postgresql-client redis-tools
 
-    # Modern CLI tools
-    fzf bat eza zoxide
-    autojump z
-    neofetch fastfetch
+    # Additional tools
+    neofetch tree dnsutils
+    p7zip-full tar gzip bzip2
+    xclip
+)
 
+readonly FULL_PACKAGES=(
     # Archive tools
     rar unrar
 
-    # Media tools
-    ffmpeg imagemagick
+    # Media
+    ffmpeg
 
-    # Fonts
-    fonts-powerline fonts-firacode
-    fonts-dejavu fontconfig
-)
-
-# Full installation packages
-readonly FULL_PACKAGES=(
-    # Additional languages
-    ruby ruby-dev
-    php php-cli
-    lua5.4
-
-    # Database clients
-    mongodb-clients
-
-    # Additional tools
-    ansible terraform
-    httpie aria2
-    mosh eternal-terminal
-
-    # Security tools
+    # Security
     fail2ban ufw
-    gnupg2 pass
 
-    # System tools
-    cockpit cockpit-pcp
-    webmin
-)
+    # Remote access
+    mosh
 
-# Python packages to install via pip
-readonly PYTHON_PACKAGES=(
-    # Development
-    ipython jupyter
-    black flake8 pylint mypy
-    pytest pytest-cov
+    # HTTP tools
+    httpie aria2
 
-    # Utilities
-    httpie glances
-    speedtest-cli
-    youtube-dl yt-dlp
-    thefuck
-
-    # Data science (optional)
-    numpy pandas matplotlib
-)
-
-# Node.js global packages
-readonly NODE_PACKAGES=(
-    # Package managers
-    pnpm
-
-    # Development tools
-    nodemon pm2
-    eslint prettier
-    typescript ts-node
-
-    # CLI tools
-    gtop blessed-contrib
-    tldr how-2
-    npm-check-updates
-)
-
-# Go packages
-readonly GO_PACKAGES=(
-    # Development tools
-    github.com/jesseduffield/lazygit@latest
-    github.com/jesseduffield/lazydocker@latest
-    github.com/golang/tools/gopls@latest
-
-    # CLI tools
-    github.com/junegunn/fzf@latest
-    github.com/gokcehan/lf@latest
-)
-
-# Rust packages
-readonly RUST_PACKAGES=(
-    # Modern alternatives to Unix tools
-    bat eza ripgrep fd-find
-    procs dust tokei hyperfine
-    bottom zoxide starship
-
-    # Development tools
-    cargo-edit cargo-watch
-    cargo-expand cargo-outdated
+    # Monitoring
+    sysstat
 )
 
 # ============================================================================
 # UTILITY FUNCTIONS
 # ============================================================================
 
-# Logging functions
 log() {
     local level=$1
     shift
     local message="$*"
-    local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
 
     case $level in
-        ERROR)
-            echo -e "${RED}[ERROR]${NC} $message" | tee -a "$LOG_FILE"
-            ;;
-        SUCCESS)
-            echo -e "${GREEN}[SUCCESS]${NC} $message" | tee -a "$LOG_FILE"
-            ;;
-        WARNING)
-            echo -e "${YELLOW}[WARNING]${NC} $message" | tee -a "$LOG_FILE"
-            ;;
-        INFO)
-            echo -e "${BLUE}[INFO]${NC} $message" | tee -a "$LOG_FILE"
-            ;;
-        STEP)
-            echo -e "${CYAN}[STEP]${NC} $message" | tee -a "$LOG_FILE"
-            ;;
-        *)
-            echo "[$timestamp] $message" | tee -a "$LOG_FILE"
-            ;;
+        ERROR)   echo -e "${RED}[ERROR]${NC} $message" | tee -a "$LOG_FILE" ;;
+        SUCCESS) echo -e "${GREEN}[OK]${NC} $message" | tee -a "$LOG_FILE" ;;
+        WARNING) echo -e "${YELLOW}[WARN]${NC} $message" | tee -a "$LOG_FILE" ;;
+        INFO)    echo -e "${BLUE}[INFO]${NC} $message" | tee -a "$LOG_FILE" ;;
+        STEP)    echo -e "${CYAN}[STEP]${NC} $message" | tee -a "$LOG_FILE" ;;
+        *)       echo "$message" | tee -a "$LOG_FILE" ;;
     esac
 }
 
-# Error handler
 error_handler() {
     local line_no=$1
     local exit_code=$2
@@ -244,53 +139,39 @@ error_handler() {
     exit "$exit_code"
 }
 
-# Cleanup function
 cleanup() {
-    if [[ -d "$TEMP_DIR" ]]; then
-        rm -rf "$TEMP_DIR"
-    fi
+    [[ -d "$TEMP_DIR" ]] && rm -rf "$TEMP_DIR"
 }
 
-# Check if running with sudo (and advise against it)
-check_sudo() {
-    if [[ $EUID -eq 0 ]]; then
-        log WARNING "This script should not be run as root!"
-        log WARNING "It will request sudo privileges when needed."
-        read -p "Continue anyway? (y/N): " -n 1 -r
-        echo
-        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-            exit 1
-        fi
-    fi
+command_exists() {
+    command -v "$1" >/dev/null 2>&1
 }
 
-# Check system requirements
+# ============================================================================
+# SYSTEM CHECKS
+# ============================================================================
+
 check_system() {
     log STEP "Checking system requirements..."
 
-    # Check OS
     if [[ "$OS_TYPE" != "Linux" ]]; then
         log ERROR "This script is designed for Linux systems only"
         exit 1
     fi
 
-    # Check architecture
-    log INFO "Detected architecture: $ARCH"
-    log INFO "Detected distribution: $DISTRO $CODENAME"
+    log INFO "Architecture: $ARCH"
+    log INFO "Distribution: $DISTRO"
 
-    # Check available space
-    local available_space=$(df / | awk 'NR==2 {print $4}')
-    if [[ $available_space -lt 1048576 ]]; then  # Less than 1GB
+    local available_space
+    available_space=$(df / | awk 'NR==2 {print $4}')
+    if [[ $available_space -lt 1048576 ]]; then
         log WARNING "Less than 1GB of free space available"
         read -p "Continue anyway? (y/N): " -n 1 -r
         echo
-        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-            exit 1
-        fi
+        [[ $REPLY =~ ^[Yy]$ ]] || exit 1
     fi
 
-    # Check internet connectivity
-    if ! ping -c 1 google.com &> /dev/null; then
+    if ! ping -c 1 -W 2 google.com &>/dev/null; then
         log ERROR "No internet connection detected"
         exit 1
     fi
@@ -298,59 +179,38 @@ check_system() {
     log SUCCESS "System checks passed"
 }
 
-# Check if command exists
-command_exists() {
-    command -v "$1" >/dev/null 2>&1
-}
-
-# Create necessary directories
 create_directories() {
-    log STEP "Creating necessary directories..."
-    mkdir -p "$LOCAL_BIN"
-    mkdir -p "$CONFIG_DIR"
-    mkdir -p "$FONTS_DIR"
-    mkdir -p "$TEMP_DIR"
-    mkdir -p "$HOME/.local/state/zsh"
-    mkdir -p "$HOME/.cache/zsh"
+    log STEP "Creating directories..."
+    mkdir -p "$LOCAL_BIN" "$CONFIG_DIR" "$FONTS_DIR" "$TEMP_DIR"
+    mkdir -p "$HOME/.zsh/completions" "$HOME/.zsh/cache" "$ZSH_PLUGIN_DIR"
     log SUCCESS "Directories created"
 }
 
-# Backup existing configurations
 backup_configs() {
     if [[ "$CREATE_BACKUP" == false ]]; then
-        log INFO "Skipping backup as requested"
+        log INFO "Skipping backup"
         return
     fi
 
     log STEP "Backing up existing configurations..."
 
     local files_to_backup=(
-        "$HOME/.zshrc"
-        "$HOME/.bashrc"
-        "$HOME/.vimrc"
-        "$HOME/.tmux.conf"
-        "$HOME/.gitconfig"
-        "$NVIM_CONFIG_DIR"
-        "$HOME/.config/fish"
+        "$HOME/.zshrc" "$HOME/.zshenv" "$HOME/.bashrc"
+        "$HOME/.vimrc" "$HOME/.tmux.conf"
+        "$HOME/.config/nvim" "$HOME/.zsh"
     )
 
     local backup_needed=false
     for file in "${files_to_backup[@]}"; do
-        if [[ -e "$file" ]]; then
-            backup_needed=true
-            break
-        fi
+        [[ -e "$file" ]] && backup_needed=true && break
     done
 
     if [[ "$backup_needed" == true ]]; then
         mkdir -p "$BACKUP_DIR"
         for file in "${files_to_backup[@]}"; do
-            if [[ -e "$file" ]]; then
-                cp -r "$file" "$BACKUP_DIR/" 2>/dev/null || true
-                log INFO "Backed up: $file"
-            fi
+            [[ -e "$file" ]] && cp -r "$file" "$BACKUP_DIR/" 2>/dev/null && log INFO "Backed up: $file"
         done
-        log SUCCESS "Backup completed at: $BACKUP_DIR"
+        log SUCCESS "Backup at: $BACKUP_DIR"
     else
         log INFO "No existing configurations to backup"
     fi
@@ -360,198 +220,279 @@ backup_configs() {
 # INSTALLATION FUNCTIONS
 # ============================================================================
 
-# Update system
 update_system() {
     log STEP "Updating system packages..."
     sudo apt update
     sudo apt upgrade -y
     sudo apt autoremove -y
-    sudo apt autoclean
     log SUCCESS "System updated"
 }
 
-# Install packages based on mode
 install_packages() {
     log STEP "Installing packages ($INSTALL_MODE mode)..."
 
-    local packages=()
+    local packages=("${MINIMAL_PACKAGES[@]}")
 
     case "$INSTALL_MODE" in
-        minimal)
-            packages=("${ESSENTIAL_PACKAGES[@]}")
-            ;;
-        standard)
-            packages=("${ESSENTIAL_PACKAGES[@]}" "${STANDARD_PACKAGES[@]}")
-            ;;
-        full)
-            packages=("${ESSENTIAL_PACKAGES[@]}" "${STANDARD_PACKAGES[@]}" "${FULL_PACKAGES[@]}")
-            ;;
+        standard) packages+=("${STANDARD_PACKAGES[@]}") ;;
+        full)     packages+=("${STANDARD_PACKAGES[@]}" "${FULL_PACKAGES[@]}") ;;
     esac
 
-    # Install packages in batches to avoid command line length issues
-    local batch_size=10
-    local total=${#packages[@]}
+    sudo apt install -y "${packages[@]}" 2>&1 | tee -a "$LOG_FILE" || true
 
-    for ((i=0; i<$total; i+=batch_size)); do
-        local batch=("${packages[@]:i:batch_size}")
-        log INFO "Installing batch $((i/batch_size + 1))..."
-        sudo apt install -y "${batch[@]}" 2>&1 | tee -a "$LOG_FILE" || true
-    done
+    # Handle Debian naming differences: batcat -> bat, fdfind -> fd
+    if command_exists batcat && ! command_exists bat; then
+        ln -sf "$(which batcat)" "$LOCAL_BIN/bat"
+        log INFO "Created symlink: bat -> batcat"
+    fi
+
+    if command_exists fdfind && ! command_exists fd; then
+        ln -sf "$(which fdfind)" "$LOCAL_BIN/fd"
+        log INFO "Created symlink: fd -> fdfind"
+    fi
 
     log SUCCESS "Package installation completed"
 }
 
-# Install Zsh and Oh My Zsh
-install_zsh() {
-    log STEP "Setting up Zsh..."
+install_rust() {
+    log STEP "Installing Rust..."
 
-    # Install Oh My Zsh
-    if [[ ! -d "$OH_MY_ZSH_DIR" ]]; then
-        log INFO "Installing Oh My Zsh..."
-        RUNZSH=no sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" || {
-            log ERROR "Failed to install Oh My Zsh"
-            return 1
-        }
-    else
-        log INFO "Oh My Zsh already installed"
+    if command_exists rustc; then
+        log INFO "Rust already installed ($(rustc --version))"
+        return
     fi
 
-    # Install plugins
-    local custom_plugins="$OH_MY_ZSH_DIR/custom/plugins"
-    mkdir -p "$custom_plugins"
+    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --no-modify-path
+    source "$HOME/.cargo/env"
 
-    # Plugin list with their repos
-    declare -A plugins=(
-        ["zsh-autosuggestions"]="https://github.com/zsh-users/zsh-autosuggestions"
-        ["zsh-syntax-highlighting"]="https://github.com/zsh-users/zsh-syntax-highlighting"
-        ["zsh-history-substring-search"]="https://github.com/zsh-users/zsh-history-substring-search"
-        ["zsh-completions"]="https://github.com/zsh-users/zsh-completions"
-        ["fzf-tab"]="https://github.com/Aloxaf/fzf-tab"
-        ["zsh-vi-mode"]="https://github.com/jeffreytse/zsh-vi-mode"
-    )
+    log SUCCESS "Rust installed"
+}
 
-    for plugin in "${!plugins[@]}"; do
-        if [[ ! -d "$custom_plugins/$plugin" ]]; then
-            log INFO "Installing $plugin..."
-            git clone --depth=1 "${plugins[$plugin]}" "$custom_plugins/$plugin"
+install_cargo_tools() {
+    log STEP "Installing Rust CLI tools via cargo..."
+
+    local tools=(eza zoxide starship)
+
+    # Only install tools not already available (some may come from apt)
+    for tool in "${tools[@]}"; do
+        if ! command_exists "$tool"; then
+            log INFO "Installing $tool..."
+            cargo install "$tool" 2>&1 | tee -a "$LOG_FILE" || log WARNING "Failed to install $tool"
         else
-            log INFO "$plugin already installed"
+            log INFO "$tool already installed"
         fi
     done
 
-    # Install Powerlevel10k theme
-    local custom_themes="$OH_MY_ZSH_DIR/custom/themes"
-    mkdir -p "$custom_themes"
-
-    if [[ ! -d "$custom_themes/powerlevel10k" ]]; then
-        log INFO "Installing Powerlevel10k theme..."
-        git clone --depth=1 https://github.com/romkatv/powerlevel10k.git "$custom_themes/powerlevel10k"
-    fi
-
-    log SUCCESS "Zsh setup completed"
+    log SUCCESS "Cargo tools installed"
 }
 
-# Install Neovim
+install_uv() {
+    log STEP "Installing uv (Python package manager)..."
+
+    if command_exists uv; then
+        log INFO "uv already installed ($(uv --version))"
+        return
+    fi
+
+    curl -LsSf https://astral.sh/uv/install.sh | sh
+
+    log SUCCESS "uv installed"
+}
+
+install_go() {
+    log STEP "Installing Go..."
+
+    if command_exists go; then
+        log INFO "Go already installed ($(go version))"
+        return
+    fi
+
+    local go_arch
+    case "$ARCH" in
+        aarch64|arm64) go_arch="arm64" ;;
+        x86_64)        go_arch="amd64" ;;
+        armv7l)        go_arch="armv6l" ;;
+        *)
+            log WARNING "Unsupported architecture for Go: $ARCH"
+            return
+            ;;
+    esac
+
+    local go_version
+    go_version=$(curl -sL 'https://go.dev/VERSION?m=text' | head -1)
+
+    log INFO "Downloading ${go_version} for linux/${go_arch}..."
+    wget -q --show-progress "https://go.dev/dl/${go_version}.linux-${go_arch}.tar.gz" -O "$TEMP_DIR/go.tar.gz"
+
+    sudo rm -rf /usr/local/go
+    sudo tar -C /usr/local -xzf "$TEMP_DIR/go.tar.gz"
+    export PATH="/usr/local/go/bin:$PATH"
+
+    log SUCCESS "Go installed ($(go version))"
+}
+
+install_fnm() {
+    log STEP "Installing fnm (Node.js version manager)..."
+
+    if command_exists fnm; then
+        log INFO "fnm already installed"
+        return
+    fi
+
+    curl -fsSL https://fnm.vercel.app/install | bash -s -- --skip-shell
+
+    # Source fnm for current session
+    export PATH="$HOME/.local/share/fnm:$PATH"
+    if command_exists fnm; then
+        eval "$(fnm env)"
+        fnm install --lts
+        log SUCCESS "fnm installed with latest LTS Node.js"
+    else
+        log WARNING "fnm installed but not in PATH yet"
+    fi
+}
+
 install_neovim() {
     log STEP "Installing Neovim..."
 
-    local nvim_path="/usr/local/bin/nvim"
-
-    if [[ ! -f "$nvim_path" ]]; then
-        cd "$TEMP_DIR"
-
-        # Determine download URL based on architecture
-        local nvim_url=""
+    if command_exists nvim; then
+        log INFO "Neovim already installed ($(nvim --version | head -1))"
+    else
+        local nvim_arch
         case "$ARCH" in
-            aarch64|arm64)
-                nvim_url="https://github.com/neovim/neovim/releases/latest/download/nvim-linux64.tar.gz"
-                ;;
-            x86_64)
-                nvim_url="https://github.com/neovim/neovim/releases/latest/download/nvim-linux64.tar.gz"
-                ;;
+            aarch64|arm64) nvim_arch="arm64" ;;
+            x86_64)        nvim_arch="x86_64" ;;
             armv7l)
-                log WARNING "ARM32 detected. Building from source might be required."
-                nvim_url="https://github.com/neovim/neovim/releases/latest/download/nvim-linux64.tar.gz"
+                log WARNING "ARM32: installing Neovim from apt (may be older version)"
+                sudo apt install -y neovim
                 ;;
             *)
-                log ERROR "Unsupported architecture: $ARCH"
-                return 1
+                log ERROR "Unsupported architecture for Neovim: $ARCH"
+                return
                 ;;
         esac
 
-        log INFO "Downloading Neovim..."
-        wget -q --show-progress "$nvim_url" -O nvim.tar.gz
+        if [[ "$ARCH" != "armv7l" ]]; then
+            local nvim_url="https://github.com/neovim/neovim/releases/latest/download/nvim-linux-${nvim_arch}.tar.gz"
+            log INFO "Downloading Neovim for ${nvim_arch}..."
+            wget -q --show-progress "$nvim_url" -O "$TEMP_DIR/nvim.tar.gz"
 
-        log INFO "Extracting Neovim..."
-        tar xzf nvim.tar.gz
-
-        # Find and move the nvim binary
-        local nvim_dir=$(find . -name "nvim-linux64" -type d 2>/dev/null | head -1)
-        if [[ -n "$nvim_dir" ]]; then
-            sudo cp -r "$nvim_dir"/* /usr/local/
-        else
-            log ERROR "Could not find Neovim directory"
-            return 1
+            tar xzf "$TEMP_DIR/nvim.tar.gz" -C "$TEMP_DIR"
+            local nvim_dir
+            nvim_dir=$(find "$TEMP_DIR" -maxdepth 1 -name "nvim-linux*" -type d | head -1)
+            if [[ -n "$nvim_dir" ]]; then
+                sudo cp -r "$nvim_dir"/* /usr/local/
+            else
+                log ERROR "Could not find Neovim directory after extraction"
+                return
+            fi
         fi
 
-        cd - > /dev/null
         log SUCCESS "Neovim installed"
-    else
-        log INFO "Neovim already installed"
     fi
 
-    # Install Neovim Python support
-    pip3 install --user pynvim neovim
-
     # Install LazyVim
-    if [[ ! -d "$NVIM_CONFIG_DIR" ]]; then
-        log INFO "Installing LazyVim..."
-        git clone https://github.com/LazyVim/starter "$NVIM_CONFIG_DIR"
-        rm -rf "$NVIM_CONFIG_DIR/.git"
+    local nvim_config="$HOME/.config/nvim"
+    if [[ ! -d "$nvim_config" ]]; then
+        log INFO "Installing LazyVim starter..."
+        git clone https://github.com/LazyVim/starter "$nvim_config"
+        rm -rf "$nvim_config/.git"
+        log SUCCESS "LazyVim installed"
     else
         log INFO "Neovim config already exists"
     fi
-
-    log SUCCESS "Neovim setup completed"
 }
 
-# Install Nerd Fonts
-install_fonts() {
-    log STEP "Installing Nerd Fonts..."
+install_powerlevel10k() {
+    log STEP "Installing Powerlevel10k..."
 
-    cd "$TEMP_DIR"
+    local p10k_dir="$HOME/powerlevel10k"
+    if [[ ! -d "$p10k_dir" ]]; then
+        git clone --depth=1 https://github.com/romkatv/powerlevel10k.git "$p10k_dir"
+        log SUCCESS "Powerlevel10k installed"
+    else
+        log INFO "Powerlevel10k already installed"
+    fi
+}
 
-    # List of fonts to install
-    local fonts=(
-        "JetBrainsMono"
-        "FiraCode"
-        "Hack"
-        "RobotoMono"
-        "SourceCodePro"
+install_zsh_plugins() {
+    log STEP "Installing Zsh plugins..."
+
+    local plugins=(
+        "zsh-autosuggestions:https://github.com/zsh-users/zsh-autosuggestions"
+        "zsh-syntax-highlighting:https://github.com/zsh-users/zsh-syntax-highlighting"
     )
 
-    for font in "${fonts[@]}"; do
-        log INFO "Installing $font Nerd Font..."
+    for entry in "${plugins[@]}"; do
+        local name="${entry%%:*}"
+        local url="${entry#*:}"
 
-        local font_url="https://github.com/ryanoasis/nerd-fonts/releases/latest/download/${font}.zip"
-
-        if wget -q --show-progress "$font_url" -O "${font}.zip"; then
-            unzip -q -o "${font}.zip" -d "$FONTS_DIR"
-            rm "${font}.zip"
-            log SUCCESS "$font installed"
+        if [[ ! -d "$ZSH_PLUGIN_DIR/$name" ]]; then
+            log INFO "Installing $name..."
+            git clone --depth=1 "$url" "$ZSH_PLUGIN_DIR/$name"
         else
-            log WARNING "Failed to download $font"
+            log INFO "$name already installed"
         fi
     done
 
-    # Update font cache
-    fc-cache -fv > /dev/null 2>&1
-
-    cd - > /dev/null
-    log SUCCESS "Fonts installation completed"
+    log SUCCESS "Zsh plugins installed"
 }
 
-# Install Docker
+install_font() {
+    log STEP "Installing JetBrainsMono Nerd Font..."
+
+    if ls "$FONTS_DIR"/JetBrainsMonoNerd* &>/dev/null; then
+        log INFO "JetBrainsMono Nerd Font already installed"
+        return
+    fi
+
+    cd "$TEMP_DIR"
+    local font_url="https://github.com/ryanoasis/nerd-fonts/releases/latest/download/JetBrainsMono.zip"
+
+    if wget -q --show-progress "$font_url" -O JetBrainsMono.zip; then
+        unzip -q -o JetBrainsMono.zip -d "$FONTS_DIR"
+        rm JetBrainsMono.zip
+        fc-cache -fv >/dev/null 2>&1
+        log SUCCESS "JetBrainsMono Nerd Font installed"
+    else
+        log WARNING "Failed to download JetBrainsMono Nerd Font"
+    fi
+    cd - >/dev/null
+}
+
+install_atuin() {
+    log STEP "Installing Atuin (shell history)..."
+
+    if command_exists atuin; then
+        log INFO "Atuin already installed"
+        return
+    fi
+
+    curl --proto '=https' --tlsv1.2 -sSf https://setup.atuin.sh | bash
+
+    log SUCCESS "Atuin installed"
+}
+
+install_github_cli() {
+    log STEP "Installing GitHub CLI..."
+
+    if command_exists gh; then
+        log INFO "GitHub CLI already installed"
+        return
+    fi
+
+    curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg \
+        | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
+
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" \
+        | sudo tee /etc/apt/sources.list.d/github-cli.list >/dev/null
+
+    sudo apt update
+    sudo apt install gh -y
+
+    log SUCCESS "GitHub CLI installed"
+}
+
 install_docker() {
     if [[ "$INSTALL_DOCKER" != true ]]; then
         return
@@ -564,172 +505,58 @@ install_docker() {
         return
     fi
 
-    # Add Docker's official GPG key
-    curl -fsSL https://download.docker.com/linux/debian/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+    curl -fsSL https://get.docker.com | sh
 
-    # Add Docker repository
-    echo \
-        "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/debian \
-        $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-
-    # Install Docker
-    sudo apt update
-    sudo apt install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
-
-    # Add user to docker group
     sudo usermod -aG docker "$USER"
 
-    # Install Docker Compose v2
-    sudo apt install -y docker-compose-plugin
-
-    log SUCCESS "Docker installed (restart required for group changes)"
+    log SUCCESS "Docker installed (log out and back in for group changes)"
 }
 
-# Install programming languages
-install_languages() {
-    log STEP "Installing programming language tools..."
+# ============================================================================
+# DOTFILES SETUP
+# ============================================================================
 
-    # Python packages
-    if command_exists pip3; then
-        log INFO "Installing Python packages..."
-        pip3 install --user --upgrade pip setuptools wheel
-
-        for package in "${PYTHON_PACKAGES[@]}"; do
-            pip3 install --user "$package" || log WARNING "Failed to install $package"
-        done
-    fi
-
-    # Node packages
-    if command_exists npm; then
-        log INFO "Installing Node.js packages..."
-
-        # Set npm prefix for global packages
-        npm config set prefix "$HOME/.npm-global"
-        export PATH="$HOME/.npm-global/bin:$PATH"
-
-        for package in "${NODE_PACKAGES[@]}"; do
-            npm install -g "$package" || log WARNING "Failed to install $package"
-        done
-    fi
-
-    # Go packages
-    if command_exists go; then
-        log INFO "Installing Go packages..."
-        export GOPATH="$HOME/.go"
-        export PATH="$GOPATH/bin:$PATH"
-
-        for package in "${GO_PACKAGES[@]}"; do
-            go install "$package" || log WARNING "Failed to install $package"
-        done
-    fi
-
-    # Rust packages
-    if command_exists cargo; then
-        log INFO "Installing Rust packages..."
-
-        for package in "${RUST_PACKAGES[@]}"; do
-            cargo install "$package" || log WARNING "Failed to install $package"
-        done
-    fi
-
-    log SUCCESS "Programming languages setup completed"
-}
-
-# Install additional tools
-install_additional_tools() {
-    log STEP "Installing additional tools..."
-
-    # Install Starship prompt
-    if ! command_exists starship; then
-        log INFO "Installing Starship prompt..."
-        curl -sS https://starship.rs/install.sh | sh -s -- -y
-    fi
-
-    # Install GitHub CLI
-    if ! command_exists gh; then
-        log INFO "Installing GitHub CLI..."
-        curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
-        echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
-        sudo apt update
-        sudo apt install gh -y
-    fi
-
-    # Install Terraform
-    if ! command_exists terraform && [[ "$INSTALL_MODE" == "full" ]]; then
-        log INFO "Installing Terraform..."
-        wget -O- https://apt.releases.hashicorp.com/gpg | gpg --dearmor | sudo tee /usr/share/keyrings/hashicorp-archive-keyring.gpg
-        echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list
-        sudo apt update && sudo apt install terraform -y
-    fi
-
-    # Install kubectl
-    if ! command_exists kubectl; then
-        log INFO "Installing kubectl..."
-        curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/${ARCH}/kubectl"
-        chmod +x kubectl
-        sudo mv kubectl /usr/local/bin/
-    fi
-
-    log SUCCESS "Additional tools installed"
-}
-
-# Configure Git
-configure_git() {
-    log STEP "Configuring Git..."
-
-    if [[ ! -d "$DOTFILES_DIR/rpi/git" ]]; then
-        log WARNING "Git configs directory not found. Skipping..."
-        return
-    fi
-
-    # Link git config files
-    if [[ -f "$DOTFILES_DIR/rpi/git/.gitconfig" ]]; then
-        ln -sf "$DOTFILES_DIR/rpi/git/.gitconfig" "$HOME/.gitconfig"
-        log INFO "Linked .gitconfig"
-    fi
-
-    if [[ -f "$DOTFILES_DIR/rpi/git/.gitignore_global" ]]; then
-        ln -sf "$DOTFILES_DIR/rpi/git/.gitignore_global" "$HOME/.gitignore_global"
-        log INFO "Linked .gitignore_global"
-    fi
-
-    log SUCCESS "Git configured"
-}
-
-# Link dotfiles
 link_dotfiles() {
     log STEP "Setting up dotfiles..."
 
-    if [[ ! -d "$DOTFILES_DIR" ]]; then
-        log INFO "Dotfiles directory not found. Skipping..."
+    if [[ ! -d "$RPI_DIR" ]]; then
+        log WARNING "Dotfiles directory not found at $RPI_DIR"
+        log INFO "Clone your dotfiles repo to $DOTFILES_DIR first"
         return
     fi
 
-    # Link common dotfiles
-    local dotfiles=(
-        ".zshrc"
-        ".bashrc"
-        ".tmux.conf"
-        ".vimrc"
-    )
-
-    for file in "${dotfiles[@]}"; do
-        if [[ -f "$DOTFILES_DIR/$file" ]]; then
-            ln -sf "$DOTFILES_DIR/$file" "$HOME/$file"
+    # Shell config files
+    local shell_files=(".zshrc" ".zshenv" ".gitignore_global" ".ripgreprc")
+    for file in "${shell_files[@]}"; do
+        if [[ -f "$RPI_DIR/$file" ]]; then
+            ln -sf "$RPI_DIR/$file" "$HOME/$file"
             log INFO "Linked $file"
         fi
     done
 
-    # Link Neovim config
-    if [[ -d "$DOTFILES_DIR/nvim" ]]; then
-        ln -sf "$DOTFILES_DIR/nvim" "$NVIM_CONFIG_DIR"
-        log INFO "Linked Neovim config"
+    # .zsh directory (symlink individual files to allow local overrides)
+    mkdir -p "$HOME/.zsh"
+    for file in "$RPI_DIR/.zsh/"*; do
+        [[ -f "$file" ]] && ln -sf "$file" "$HOME/.zsh/$(basename "$file")"
+    done
+    log INFO "Linked .zsh/ modules"
+
+    # Config files
+    mkdir -p "$HOME/.config/atuin" "$HOME/.config/prek"
+
+    if [[ -f "$RPI_DIR/.config/atuin/config.toml" ]]; then
+        ln -sf "$RPI_DIR/.config/atuin/config.toml" "$HOME/.config/atuin/config.toml"
+        log INFO "Linked atuin config"
     fi
+
+    for file in "$RPI_DIR/.config/prek/"*; do
+        [[ -f "$file" ]] && ln -sf "$file" "$HOME/.config/prek/$(basename "$file")"
+    done
+    log INFO "Linked prek templates"
 
     log SUCCESS "Dotfiles linked"
 }
 
-# Final setup
 final_setup() {
     log STEP "Performing final setup..."
 
@@ -740,11 +567,9 @@ final_setup() {
     fi
 
     # Create useful directories
-    mkdir -p "$HOME/projects"
-    mkdir -p "$HOME/scripts"
-    mkdir -p "$HOME/notes"
+    mkdir -p "$HOME/projects" "$HOME/code" "$HOME/notes"
 
-    # Set proper permissions
+    # Set SSH permissions
     chmod 700 "$HOME/.ssh" 2>/dev/null || true
     chmod 600 "$HOME/.ssh/config" 2>/dev/null || true
 
@@ -752,38 +577,17 @@ final_setup() {
 }
 
 # ============================================================================
-# MAIN SCRIPT
+# MAIN
 # ============================================================================
 
-# Parse command line arguments
 parse_arguments() {
     while [[ $# -gt 0 ]]; do
         case $1 in
-            --minimal)
-                INSTALL_MODE="minimal"
-                shift
-                ;;
-            --full)
-                INSTALL_MODE="full"
-                shift
-                ;;
-            --docker)
-                INSTALL_DOCKER=true
-                shift
-                ;;
-            --no-backup)
-                CREATE_BACKUP=false
-                shift
-                ;;
-            --verbose)
-                VERBOSE=true
-                set -x
-                shift
-                ;;
-            --help)
-                show_help
-                exit 0
-                ;;
+            --minimal)   INSTALL_MODE="minimal"; shift ;;
+            --full)      INSTALL_MODE="full"; shift ;;
+            --docker)    INSTALL_DOCKER=true; shift ;;
+            --no-backup) CREATE_BACKUP=false; shift ;;
+            --help)      show_help; exit 0 ;;
             *)
                 log ERROR "Unknown option: $1"
                 show_help
@@ -793,70 +597,76 @@ parse_arguments() {
     done
 }
 
-# Show help message
 show_help() {
-    cat << EOF
-Raspberry Pi Development Environment Bootstrap Script
+    cat << 'EOF'
+Raspberry Pi Development Environment Bootstrap
 
-Usage: $0 [options]
+Usage: ./bootstrap.sh [options]
 
 Options:
-    --minimal    Install only essential packages
-    --full       Install everything including optional packages
+    --minimal    Essential packages + Zsh + modern CLI tools only
+    --full       Everything including security tools and extras
     --docker     Include Docker installation
     --no-backup  Skip backup of existing configurations
-    --verbose    Enable verbose output
     --help       Show this help message
 
-Default mode is 'standard' which includes most common development tools.
+Default mode is 'standard' which includes monitoring, DB clients, and dev tools.
 
 Examples:
-    $0                    # Standard installation
-    $0 --minimal          # Minimal installation
-    $0 --full --docker    # Everything including Docker
+    ./bootstrap.sh                    # Standard installation
+    ./bootstrap.sh --minimal          # Minimal (lightweight)
+    ./bootstrap.sh --full --docker    # Everything including Docker
 
 EOF
 }
 
-# Main function
 main() {
-    # Set up error handling
     trap 'error_handler $LINENO $?' ERR
     trap cleanup EXIT
 
-    # Show banner
     echo -e "${CYAN}"
     echo "============================================="
     echo "   Raspberry Pi Dev Environment Bootstrap"
     echo "============================================="
     echo -e "${NC}"
 
-    # Parse arguments
     parse_arguments "$@"
 
-    # Start logging
     log INFO "Bootstrap started at $(date)"
     log INFO "Installation mode: $INSTALL_MODE"
     log INFO "Log file: $LOG_FILE"
 
-    # Run setup steps
-    check_sudo
+    # Pre-flight
     check_system
     create_directories
     backup_configs
+
+    # System packages
     update_system
     install_packages
-    install_zsh
+
+    # Languages and tools
+    install_rust
+    install_cargo_tools
+    install_uv
+    install_go
+    install_fnm
     install_neovim
-    install_fonts
+
+    # Shell setup
+    install_powerlevel10k
+    install_zsh_plugins
+    install_font
+    install_atuin
+    install_github_cli
+
+    # Optional
     install_docker
-    install_languages
-    install_additional_tools
-    configure_git
+
+    # Dotfiles
     link_dotfiles
     final_setup
 
-    # Success message
     echo -e "${GREEN}"
     echo "============================================="
     echo "   Bootstrap Completed Successfully!"
@@ -867,20 +677,17 @@ main() {
 
     echo ""
     echo "Next steps:"
-    echo "1. Log out and log back in (or restart) to apply all changes"
+    echo "1. Log out and log back in (or run: exec zsh)"
     echo "2. Run 'nvim' to complete Neovim plugin installation"
-    echo "3. Configure your terminal to use a Nerd Font"
+    echo "3. Configure your terminal to use JetBrainsMono Nerd Font"
 
     if [[ "$INSTALL_DOCKER" == true ]]; then
-        echo "4. Docker was installed - restart to apply group changes"
+        echo "4. Docker installed - log out/in for group changes"
     fi
 
     echo ""
-    echo "Backup location: $BACKUP_DIR"
-    echo "Log file: $LOG_FILE"
-    echo ""
-    echo "Enjoy your new development environment! 🚀"
+    echo "Backup: $BACKUP_DIR"
+    echo "Log: $LOG_FILE"
 }
 
-# Run main function
 main "$@"
