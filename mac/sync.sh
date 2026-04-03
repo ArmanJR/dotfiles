@@ -9,7 +9,7 @@
 # Options:
 #   --zsh         Sync .zsh directory
 #   --zshrc       Sync .zshrc file
-#   --dotfiles    Sync other dotfiles (.zshenv, .zprofile, .gitconfig, .gitignore_global, .ripgreprc, ghostty.config)
+#   --dotfiles    Sync other dotfiles (.zshenv, .zprofile, .gitignore_global, .ripgreprc, ghostty.config)
 #   --claude      Sync .claude directory
 #   --vscode      Sync VSCode settings
 #   --atuin       Sync Atuin config
@@ -385,7 +385,7 @@ while [[ $# -gt 0 ]]; do
             echo "Options:"
             echo "  --zsh         Sync .zsh directory"
             echo "  --zshrc       Sync .zshrc file"
-            echo "  --dotfiles    Sync other dotfiles (.gitconfig, .gitignore_global, .ripgreprc, ghostty.config)"
+            echo "  --dotfiles    Sync other dotfiles (.gitignore_global, .ripgreprc, ghostty.config)"
             echo "  --claude      Sync .claude directory"
             echo "  --vscode      Sync VSCode settings"
             echo "  --atuin       Sync Atuin config"
@@ -485,7 +485,6 @@ fi
 if [[ "$SYNC_DOTFILES" == true ]]; then
     collect_file_changes "$MAC_DIR/.zshenv" "$HOME/.zshenv" ".zshenv"
     collect_file_changes "$MAC_DIR/.zprofile" "$HOME/.zprofile" ".zprofile"
-    collect_file_changes "$MAC_DIR/.gitconfig" "$HOME/.gitconfig" ".gitconfig"
     collect_file_changes "$MAC_DIR/.gitignore_global" "$HOME/.gitignore_global" ".gitignore_global"
     collect_file_changes "$MAC_DIR/.ripgreprc" "$HOME/.ripgreprc" ".ripgreprc"
     collect_file_changes "$MAC_DIR/ghostty.config" "$HOME/.config/ghostty/config" "ghostty.config"

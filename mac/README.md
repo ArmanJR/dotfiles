@@ -20,7 +20,6 @@ Zsh-based development environment for macOS Apple Silicon. Managed via `sync.sh`
   aliases.zsh             # General aliases (eza, fd, rg, bat replacements)
   functions.zsh           # Utility functions, project scaffolding
   .p10k.zsh               # Powerlevel10k theme file
-.gitconfig                # Git core config (editor: zed)
 .gitignore_global         # Global gitignore
 .ripgreprc                # ripgrep defaults
 ghostty.config            # Ghostty terminal config
@@ -98,7 +97,7 @@ Individual targets:
 |------|---------------|
 | `--zsh` | `~/.zsh/` |
 | `--zshrc` | `~/.zshrc` |
-| `--dotfiles` | `~/.zshenv`, `~/.zprofile`, `~/.gitconfig`, `~/.gitignore_global`, `~/.ripgreprc`, `ghostty.config` |
+| `--dotfiles` | `~/.zshenv`, `~/.zprofile`, `~/.gitignore_global`, `~/.ripgreprc`, `ghostty.config` |
 | `--claude` | `~/.claude/` |
 | `--vscode` | `~/Library/Application Support/Code/User/settings.json` |
 | `--atuin` | `~/.config/atuin/config.toml` |
