@@ -15,6 +15,7 @@
 #   --atuin       Sync Atuin config
 #   --zed         Sync Zed config
 #   --prek        Sync prek hook templates
+#   --tmux        Sync .tmux.conf
 #   --all         Sync everything
 #   --agentic     Non-interactive mode for AI agents (outputs JSON manifest to stdout)
 #   --apply PATH  Apply changes from a manifest file (used after --agentic)
@@ -55,6 +56,7 @@ SYNC_VSCODE=false
 SYNC_ATUIN=false
 SYNC_ZED=false
 SYNC_PREK=false
+SYNC_TMUX=false
 DRY_RUN=false
 AGENTIC=false
 APPLY_MANIFEST=""
@@ -353,6 +355,9 @@ while [[ $# -gt 0 ]]; do
         --prek)
             SYNC_PREK=true
             ;;
+        --tmux)
+            SYNC_TMUX=true
+            ;;
         --all)
             SYNC_ZSH=true
             SYNC_ZSHRC=true
@@ -362,6 +367,7 @@ while [[ $# -gt 0 ]]; do
             SYNC_ATUIN=true
             SYNC_ZED=true
             SYNC_PREK=true
+            SYNC_TMUX=true
             ;;
         --agentic)
             AGENTIC=true
@@ -391,6 +397,7 @@ while [[ $# -gt 0 ]]; do
             echo "  --atuin       Sync Atuin config"
             echo "  --zed         Sync Zed config"
             echo "  --prek        Sync prek hook templates"
+            echo "  --tmux        Sync .tmux.conf"
             echo "  --all         Sync everything"
             echo "  --agentic     Non-interactive mode for AI agents (outputs JSON manifest)"
             echo "  --apply PATH  Apply changes from a manifest file (used after --agentic)"
@@ -509,6 +516,10 @@ fi
 
 if [[ "$SYNC_PREK" == true ]]; then
     collect_directory_changes "$MAC_DIR/.config/prek" "$HOME/.config/prek" ".config/prek"
+fi
+
+if [[ "$SYNC_TMUX" == true ]]; then
+    collect_file_changes "$MAC_DIR/.tmux.conf" "$HOME/.tmux.conf" ".tmux.conf"
 fi
 
 # Check if there are any changes
