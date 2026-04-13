@@ -61,6 +61,7 @@ source_if_exists "$ZSH_CONFIG_DIR/history.zsh"
 source_if_exists "$ZSH_CONFIG_DIR/languages.zsh"
 source_if_exists "$ZSH_CONFIG_DIR/dev-tools.zsh"
 source_if_exists "$ZSH_CONFIG_DIR/editors.zsh"
+source_if_exists "$ZSH_CONFIG_DIR/ai-tools.zsh"
 source_if_exists "$ZSH_CONFIG_DIR/aliases.zsh"
 source_if_exists "$ZSH_CONFIG_DIR/functions.zsh"
 source_if_exists "$ZSH_CONFIG_DIR/plugins.zsh"  # Must be last (zsh-syntax-highlighting requirement)

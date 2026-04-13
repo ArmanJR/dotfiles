@@ -493,6 +493,22 @@ install_github_cli() {
     log SUCCESS "GitHub CLI installed"
 }
 
+install_claude_code() {
+    log STEP "Installing Claude Code..."
+
+    if command_exists claude; then
+        log INFO "Claude Code already installed"
+        return
+    fi
+
+    if command_exists npm; then
+        npm install -g @anthropic-ai/claude-code
+        log SUCCESS "Claude Code installed"
+    else
+        log WARNING "npm not found — install Node.js first, then run: npm install -g @anthropic-ai/claude-code"
+    fi
+}
+
 install_docker() {
     if [[ "$INSTALL_DOCKER" != true ]]; then
         return
@@ -553,6 +569,21 @@ link_dotfiles() {
         [[ -f "$file" ]] && ln -sf "$file" "$HOME/.config/prek/$(basename "$file")"
     done
     log INFO "Linked prek templates"
+
+    # Claude Code configuration
+    if [[ -d "$EDGE_DIR/.claude" ]]; then
+        mkdir -p "$HOME/.claude"
+        for file in "$EDGE_DIR/.claude/"*; do
+            [[ -f "$file" ]] && ln -sf "$file" "$HOME/.claude/$(basename "$file")"
+        done
+        if [[ -d "$EDGE_DIR/.claude/commands" ]]; then
+            mkdir -p "$HOME/.claude/commands"
+            for file in "$EDGE_DIR/.claude/commands/"*; do
+                [[ -f "$file" ]] && ln -sf "$file" "$HOME/.claude/commands/$(basename "$file")"
+            done
+        fi
+        log INFO "Linked .claude/ config"
+    fi
 
     log SUCCESS "Dotfiles linked"
 }
@@ -659,6 +690,7 @@ main() {
     install_font
     install_atuin
     install_github_cli
+    install_claude_code
 
     # Optional
     install_docker

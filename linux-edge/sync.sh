@@ -13,6 +13,7 @@
 #   --atuin       Sync Atuin config
 #   --prek        Sync prek hook templates
 #   --tmux        Sync .tmux.conf
+#   --claude      Sync .claude directory
 #   --all         Sync everything
 #   --agentic     Non-interactive mode for AI agents (outputs JSON manifest to stdout)
 #   --apply PATH  Apply changes from a manifest file (used after --agentic)
@@ -51,6 +52,7 @@ SYNC_DOTFILES=false
 SYNC_ATUIN=false
 SYNC_PREK=false
 SYNC_TMUX=false
+SYNC_CLAUDE=false
 DRY_RUN=false
 AGENTIC=false
 APPLY_MANIFEST=""
@@ -340,6 +342,9 @@ while [[ $# -gt 0 ]]; do
         --tmux)
             SYNC_TMUX=true
             ;;
+        --claude)
+            SYNC_CLAUDE=true
+            ;;
         --all)
             SYNC_ZSH=true
             SYNC_ZSHRC=true
@@ -347,6 +352,7 @@ while [[ $# -gt 0 ]]; do
             SYNC_ATUIN=true
             SYNC_PREK=true
             SYNC_TMUX=true
+            SYNC_CLAUDE=true
             ;;
         --agentic)
             AGENTIC=true
@@ -374,6 +380,7 @@ while [[ $# -gt 0 ]]; do
             echo "  --atuin       Sync Atuin config"
             echo "  --prek        Sync prek hook templates"
             echo "  --tmux        Sync .tmux.conf"
+            echo "  --claude      Sync .claude directory"
             echo "  --all         Sync everything"
             echo "  --agentic     Non-interactive mode for AI agents (outputs JSON manifest)"
             echo "  --apply PATH  Apply changes from a manifest file (used after --agentic)"
@@ -471,6 +478,10 @@ fi
 
 if [[ "$SYNC_TMUX" == true ]]; then
     collect_file_changes "$EDGE_DIR/.tmux.conf" "$HOME/.tmux.conf" ".tmux.conf"
+fi
+
+if [[ "$SYNC_CLAUDE" == true ]]; then
+    collect_directory_changes "$EDGE_DIR/.claude" "$HOME/.claude" ".claude"
 fi
 
 # Check if there are any changes
