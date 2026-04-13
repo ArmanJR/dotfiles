@@ -312,4 +312,4 @@ alias rl="reload"
 alias ezsh="nvim ~/.zshrc"
 
 # Dotfiles sync
-alias dotsync="$HOME/code/dotfiles/rpi/sync.sh"
+alias dotsync="$HOME/code/dotfiles/linux-edge/sync.sh"

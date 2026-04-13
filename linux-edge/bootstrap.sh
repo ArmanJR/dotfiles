@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # ============================================================================
-# Raspberry Pi Development Environment Bootstrap Script
+# Linux Edge Device Development Environment Bootstrap Script
 #
-# Sets up a home server / self-hosting development environment:
+# Sets up an edge device (Raspberry Pi, Jetson, etc.) development environment:
 # - Zsh with Powerlevel10k (no Oh My Zsh), autosuggestions, syntax highlighting
 # - Neovim with LazyVim
 # - Modern CLI tools (eza, fd, rg, bat, fzf, zoxide, atuin)
@@ -37,7 +37,7 @@ readonly ARCH="$(uname -m)"
 readonly DISTRO="$(lsb_release -si 2>/dev/null || echo "Unknown")"
 
 readonly DOTFILES_DIR="${DOTFILES_DIR:-$HOME/code/dotfiles}"
-readonly RPI_DIR="$DOTFILES_DIR/rpi"
+readonly EDGE_DIR="$DOTFILES_DIR/linux-edge"
 readonly BACKUP_DIR="$HOME/.bootstrap-backup-$(date +%Y%m%d-%H%M%S)"
 readonly TEMP_DIR="/tmp/bootstrap-$$"
 readonly LOCAL_BIN="$HOME/.local/bin"
@@ -519,8 +519,8 @@ install_docker() {
 link_dotfiles() {
     log STEP "Setting up dotfiles..."
 
-    if [[ ! -d "$RPI_DIR" ]]; then
-        log WARNING "Dotfiles directory not found at $RPI_DIR"
+    if [[ ! -d "$EDGE_DIR" ]]; then
+        log WARNING "Dotfiles directory not found at $EDGE_DIR"
         log INFO "Clone your dotfiles repo to $DOTFILES_DIR first"
         return
     fi
@@ -528,15 +528,15 @@ link_dotfiles() {
     # Shell config files
     local shell_files=(".zshrc" ".zshenv" ".gitignore_global" ".ripgreprc")
     for file in "${shell_files[@]}"; do
-        if [[ -f "$RPI_DIR/$file" ]]; then
-            ln -sf "$RPI_DIR/$file" "$HOME/$file"
+        if [[ -f "$EDGE_DIR/$file" ]]; then
+            ln -sf "$EDGE_DIR/$file" "$HOME/$file"
             log INFO "Linked $file"
         fi
     done
 
     # .zsh directory (symlink individual files to allow local overrides)
     mkdir -p "$HOME/.zsh"
-    for file in "$RPI_DIR/.zsh/"*; do
+    for file in "$EDGE_DIR/.zsh/"*; do
         [[ -f "$file" ]] && ln -sf "$file" "$HOME/.zsh/$(basename "$file")"
     done
     log INFO "Linked .zsh/ modules"
@@ -544,12 +544,12 @@ link_dotfiles() {
     # Config files
     mkdir -p "$HOME/.config/atuin" "$HOME/.config/prek"
 
-    if [[ -f "$RPI_DIR/.config/atuin/config.toml" ]]; then
-        ln -sf "$RPI_DIR/.config/atuin/config.toml" "$HOME/.config/atuin/config.toml"
+    if [[ -f "$EDGE_DIR/.config/atuin/config.toml" ]]; then
+        ln -sf "$EDGE_DIR/.config/atuin/config.toml" "$HOME/.config/atuin/config.toml"
         log INFO "Linked atuin config"
     fi
 
-    for file in "$RPI_DIR/.config/prek/"*; do
+    for file in "$EDGE_DIR/.config/prek/"*; do
         [[ -f "$file" ]] && ln -sf "$file" "$HOME/.config/prek/$(basename "$file")"
     done
     log INFO "Linked prek templates"
@@ -599,7 +599,7 @@ parse_arguments() {
 
 show_help() {
     cat << 'EOF'
-Raspberry Pi Development Environment Bootstrap
+Linux Edge Device Development Environment Bootstrap
 
 Usage: ./bootstrap.sh [options]
 
@@ -626,7 +626,7 @@ main() {
 
     echo -e "${CYAN}"
     echo "============================================="
-    echo "   Raspberry Pi Dev Environment Bootstrap"
+    echo "   Linux Edge Dev Environment Bootstrap"
     echo "============================================="
     echo -e "${NC}"
 

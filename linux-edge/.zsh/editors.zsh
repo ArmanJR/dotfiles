@@ -34,7 +34,7 @@ nvim-health() {
 # Quick edit configuration files
 alias nvimrc="nvim ~/.config/nvim/init.lua"
 alias zshrc="nvim ~/.zshrc"
-alias zshconfig="nvim ~/code/dotfiles/rpi/.zsh"
+alias zshconfig="nvim ~/code/dotfiles/linux-edge/.zsh"
 
 # =============================================================================
 # Font and Color Configuration

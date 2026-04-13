@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Dotfiles sync script (Raspberry Pi)
+# Dotfiles sync script (Linux Edge)
 # Pulls latest dotfiles from GitHub and syncs them to the local system
 #
 # Usage:
@@ -35,7 +35,7 @@ MAGENTA='\033[0;35m'
 NC='\033[0m'
 
 DOTFILES_DIR="$HOME/code/dotfiles"
-RPI_DIR="$DOTFILES_DIR/rpi"
+EDGE_DIR="$DOTFILES_DIR/linux-edge"
 BACKUP_BASE="$HOME/.dotfiles.backups"
 BACKUP_DIR="$BACKUP_BASE/sync-$(date +%Y%m%d-%H%M%S)"
 BACKUP_CREATED=false
@@ -363,7 +363,7 @@ while [[ $# -gt 0 ]]; do
             DRY_RUN=true
             ;;
         --help)
-            echo "Dotfiles sync script (Raspberry Pi)"
+            echo "Dotfiles sync script (Linux Edge)"
             echo ""
             echo "Usage: sync.sh [options]"
             echo ""
@@ -448,29 +448,29 @@ log_info "${BLUE}=== Checking for changes ===${NC}"
 log_info ""
 
 if [[ "$SYNC_ZSH" == true ]]; then
-    collect_directory_changes "$RPI_DIR/.zsh" "$HOME/.zsh" ".zsh"
+    collect_directory_changes "$EDGE_DIR/.zsh" "$HOME/.zsh" ".zsh"
 fi
 
 if [[ "$SYNC_ZSHRC" == true ]]; then
-    collect_file_changes "$RPI_DIR/.zshrc" "$HOME/.zshrc" ".zshrc"
+    collect_file_changes "$EDGE_DIR/.zshrc" "$HOME/.zshrc" ".zshrc"
 fi
 
 if [[ "$SYNC_DOTFILES" == true ]]; then
-    collect_file_changes "$RPI_DIR/.zshenv" "$HOME/.zshenv" ".zshenv"
-    collect_file_changes "$RPI_DIR/.gitignore_global" "$HOME/.gitignore_global" ".gitignore_global"
-    collect_file_changes "$RPI_DIR/.ripgreprc" "$HOME/.ripgreprc" ".ripgreprc"
+    collect_file_changes "$EDGE_DIR/.zshenv" "$HOME/.zshenv" ".zshenv"
+    collect_file_changes "$EDGE_DIR/.gitignore_global" "$HOME/.gitignore_global" ".gitignore_global"
+    collect_file_changes "$EDGE_DIR/.ripgreprc" "$HOME/.ripgreprc" ".ripgreprc"
 fi
 
 if [[ "$SYNC_ATUIN" == true ]]; then
-    collect_file_changes "$RPI_DIR/.config/atuin/config.toml" "$HOME/.config/atuin/config.toml" "atuin/config.toml"
+    collect_file_changes "$EDGE_DIR/.config/atuin/config.toml" "$HOME/.config/atuin/config.toml" "atuin/config.toml"
 fi
 
 if [[ "$SYNC_PREK" == true ]]; then
-    collect_directory_changes "$RPI_DIR/.config/prek" "$HOME/.config/prek" ".config/prek"
+    collect_directory_changes "$EDGE_DIR/.config/prek" "$HOME/.config/prek" ".config/prek"
 fi
 
 if [[ "$SYNC_TMUX" == true ]]; then
-    collect_file_changes "$RPI_DIR/.tmux.conf" "$HOME/.tmux.conf" ".tmux.conf"
+    collect_file_changes "$EDGE_DIR/.tmux.conf" "$HOME/.tmux.conf" ".tmux.conf"
 fi
 
 # Check if there are any changes
