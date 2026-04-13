@@ -12,6 +12,38 @@ Notes:
 - Do not use `python`, `python3`, or `pip` directly. Use `uv` for all Python package and project management. For standalone scripts, add inline script metadata for `uv`. Use `uv run` to execute scripts and `uv add <package>` to install packages.
 - Some core tools are aliased: `ls`→`eza`, `find`→`fd`, `grep`→`rg`, `cat`→`bat`, `tree`→`eza -T`.
 
+## Resource Guards
+
+When writing a script that runs directly on this machine **and** is resource-heavy enough to risk exhausting system resources (large data processing, unbounded concurrency, recursive computations, etc.), add in-process resource guards. Skip this for lightweight or short-lived scripts — not every script needs guards.
+
+Before setting limits, check the system's current resources (memory, CPU count) and choose guard values that are proportional: high enough for the script to run efficiently, but capped well below total system capacity so a runaway process cannot crash the machine. On macOS, OS-level memory limits are unreliable — enforce them inside the script. Always test on a small input first and extrapolate before going full scale.
+
+**Python:**
+```python
+import resource, signal, sys
+
+resource.setrlimit(resource.RLIMIT_RSS, (1 * 1024**3, 1 * 1024**3))  # advisory on macOS — adjust to system
+resource.setrlimit(resource.RLIMIT_CPU, (60, 60))                     # CPU seconds — adjust to workload
+signal.signal(signal.SIGALRM, lambda s, f: sys.exit("timeout"))
+signal.alarm(120)                                                      # wall-clock timeout (most reliable on macOS)
+```
+
+**Go:**
+```go
+import ("context"; "runtime/debug"; "time")
+
+func main() {
+    debug.SetMemoryLimit(512 << 20)  // runtime-enforced, works on macOS — adjust to system
+    ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+    defer cancel()
+    run(ctx)
+}
+```
+
+- Python: `signal.alarm` (wall-clock timeout) is the most reliable guard on macOS.
+- Go: `debug.SetMemoryLimit` is runtime-enforced and always works.
+- For other languages, apply equivalent in-process memory and timeout limits.
+
 ## Code quality
 
 - Prefer readable and maintainable code over clever or dense code.
