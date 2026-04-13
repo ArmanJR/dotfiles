@@ -45,7 +45,7 @@ case "${EMAIL:0:2}" in
 esac
 
 # Build output
-OUTPUT="$MACHINE • $DIR$GIT_BRANCH • $MODEL • ${PERCENT_USED}%"
+OUTPUT="$MACHINE • $DIR$GIT_BRANCH • ${PERCENT_USED}% • $MODEL"
 
 # Add lines changed if any
 [ "$LINES_ADDED" -gt 0 ] || [ "$LINES_REMOVED" -gt 0 ] && OUTPUT="$OUTPUT • +${LINES_ADDED}/-${LINES_REMOVED}"
