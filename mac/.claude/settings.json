@@ -156,9 +156,6 @@
     "typescript-lsp@claude-plugins-official": false,
     "gopls-lsp@claude-plugins-official": false
   },
-  "companyAnnouncements": [
-    "bro remember to drink water"
-  ],
   "spinnerTipsEnabled": false,
   "alwaysThinkingEnabled": true,
   "effortLevel": "high",
