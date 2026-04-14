@@ -163,24 +163,24 @@ review_changes() {
         --header-first \
         --marker='✓ ' \
         --marker-multi-line='╻ │ ╹ ' \
-        --color='marker:green,fg:gray,selected-fg:white:bold' \
+        --color='marker:green,fg:gray,fg+:white:bold' \
         --ansi \
         > "$selected" || fzf_exit=$?
 
     # Esc/Ctrl-C
     if [[ "$fzf_exit" -ne 0 ]]; then
         rm -f "$selected" "$has_selections"
-        echo ""
-        echo -e "${YELLOW}Cancelled — no files synced.${NC}"
-        exit 0
+        echo "" >&2
+        echo -e "${YELLOW}Cancelled — no files synced.${NC}" >&2
+        return 1
     fi
 
     # Ctrl-D (deselect all) then Enter — flag file is empty
     if [[ ! -s "$has_selections" ]] || [[ ! -s "$selected" ]]; then
         rm -f "$selected" "$has_selections"
-        echo ""
-        echo -e "${YELLOW}No files selected — nothing to sync.${NC}"
-        exit 0
+        echo "" >&2
+        echo -e "${YELLOW}No files selected — nothing to sync.${NC}" >&2
+        return 1
     fi
 
     rm -f "$has_selections"
@@ -550,7 +550,7 @@ if [[ "$AGENTIC" == true ]]; then
 fi
 
 # === Review + sync phase ===
-SELECTION_FILE=$(review_changes)
+SELECTION_FILE=$(review_changes) || exit 0
 sync_selected "$SELECTION_FILE"
 
 echo ""
