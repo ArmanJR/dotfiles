@@ -13,6 +13,7 @@
 #   --atuin       Sync Atuin config
 #   --prek        Sync prek hook templates
 #   --tmux        Sync .tmux.conf
+#   --bin         Sync .local/bin scripts
 #   --claude      Sync .claude directory
 #   --all         Sync everything
 #   --agentic     Non-interactive mode for AI agents (outputs JSON manifest to stdout)
@@ -52,6 +53,7 @@ SYNC_DOTFILES=false
 SYNC_ATUIN=false
 SYNC_PREK=false
 SYNC_TMUX=false
+SYNC_BIN=false
 SYNC_CLAUDE=false
 DRY_RUN=false
 AGENTIC=false
@@ -342,6 +344,9 @@ while [[ $# -gt 0 ]]; do
         --tmux)
             SYNC_TMUX=true
             ;;
+        --bin)
+            SYNC_BIN=true
+            ;;
         --claude)
             SYNC_CLAUDE=true
             ;;
@@ -352,6 +357,7 @@ while [[ $# -gt 0 ]]; do
             SYNC_ATUIN=true
             SYNC_PREK=true
             SYNC_TMUX=true
+            SYNC_BIN=true
             SYNC_CLAUDE=true
             ;;
         --agentic)
@@ -380,6 +386,7 @@ while [[ $# -gt 0 ]]; do
             echo "  --atuin       Sync Atuin config"
             echo "  --prek        Sync prek hook templates"
             echo "  --tmux        Sync .tmux.conf"
+            echo "  --bin         Sync .local/bin scripts"
             echo "  --claude      Sync .claude directory"
             echo "  --all         Sync everything"
             echo "  --agentic     Non-interactive mode for AI agents (outputs JSON manifest)"
@@ -478,6 +485,10 @@ fi
 
 if [[ "$SYNC_TMUX" == true ]]; then
     collect_file_changes "$EDGE_DIR/.tmux.conf" "$HOME/.tmux.conf" ".tmux.conf"
+fi
+
+if [[ "$SYNC_BIN" == true ]]; then
+    collect_directory_changes "$EDGE_DIR/.local/bin" "$HOME/.local/bin" ".local/bin"
 fi
 
 if [[ "$SYNC_CLAUDE" == true ]]; then

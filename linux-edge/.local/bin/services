@@ -1,0 +1,47 @@
+#!/bin/bash
+
+BOLD='\033[1m'
+CYAN='\033[0;36m'
+YELLOW='\033[0;33m'
+GREEN='\033[0;32m'
+MAGENTA='\033[0;35m'
+DIM='\033[2m'
+RED='\033[0;31m'
+RESET='\033[0m'
+
+printf "${BOLD}%-40s %6s %10s  %s${RESET}\n" "SERVICE" "CPU%" "MEM" "COMMAND"
+printf '%s\n' "$(printf '─%.0s' {1..100})"
+
+systemctl list-units --type=service --state=running --no-pager --no-legend | \
+  awk '{print $1}' | \
+  while read svc; do
+    cmd=$(systemctl show "$svc" --property=ExecStart --value 2>/dev/null \
+         | grep -oP 'argv\[\]=\K[^;]+' | sed 's/[[:space:]]*$//')
+
+    pid=$(systemctl show "$svc" --property=MainPID --value 2>/dev/null)
+
+    cpu="—"; mem="—"
+    if [[ -n "$pid" && "$pid" != "0" ]]; then
+      read cpu_raw mem_raw <<< $(ps -p "$pid" -o %cpu,rss --no-headers 2>/dev/null)
+      [[ -n "$cpu_raw" ]] && cpu="${cpu_raw}%"
+      if [[ -n "$mem_raw" ]]; then
+        mem_mb=$(awk "BEGIN {printf \"%.0f\", $mem_raw/1024}")
+        if   (( mem_mb >= 500 )); then mem="${RED}${mem_mb}MB${RESET}"
+        elif (( mem_mb >= 100 )); then mem="${YELLOW}${mem_mb}MB${RESET}"
+        else                           mem="${GREEN}${mem_mb}MB${RESET}"
+        fi
+      fi
+    fi
+
+    # Color: user services in cyan, systemd/* in dim, others normal
+    if [[ "$svc" == systemd-* ]]; then
+      svc_color="${DIM}"
+    elif echo "$cmd" | grep -qE '^/home|/usr/bin/python|/usr/bin/node'; then
+      svc_color="${CYAN}"
+    else
+      svc_color="${RESET}"
+    fi
+
+    printf "${svc_color}%-40s${RESET} %6s %10b  ${DIM}%s${RESET}\n" \
+      "$svc" "$cpu" "$mem" "${cmd:-(unknown)}"
+  done
