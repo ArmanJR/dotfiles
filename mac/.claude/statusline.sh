@@ -44,14 +44,29 @@ case "${EMAIL:0:2}" in
     su) ACCT="Pro" ;;
 esac
 
+# Colors
+YELLOW='\033[33m'
+RESET='\033[0m'
+
 # Build output
-OUTPUT="$MACHINE • $DIR$GIT_BRANCH • ${PERCENT_USED}% • $MODEL"
+if [ "$PERCENT_USED" -ge 50 ]; then
+    CTX_PART="${YELLOW}${PERCENT_USED}%${RESET}"
+else
+    CTX_PART="${PERCENT_USED}%"
+fi
+OUTPUT="$MACHINE • $DIR$GIT_BRANCH • $CTX_PART • $MODEL"
 
 # Add lines changed if any
 [ "$LINES_ADDED" -gt 0 ] || [ "$LINES_REMOVED" -gt 0 ] && OUTPUT="$OUTPUT • +${LINES_ADDED}/-${LINES_REMOVED}"
 
 # Add rate limit if available
-[ -n "$RATE_5H" ] && OUTPUT="$OUTPUT • 5h: ${RATE_5H}%"
+if [ -n "$RATE_5H" ]; then
+    if [ "$RATE_5H" -ge 90 ]; then
+        OUTPUT="$OUTPUT • 5h: ${YELLOW}${RATE_5H}%${RESET}"
+    else
+        OUTPUT="$OUTPUT • 5h: ${RATE_5H}%"
+    fi
+fi
 
 # Add account if set
 [ -n "$ACCT" ] && OUTPUT="$OUTPUT • $ACCT"
