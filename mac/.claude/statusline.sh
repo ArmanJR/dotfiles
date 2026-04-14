@@ -59,4 +59,4 @@ OUTPUT="$MACHINE • $DIR$GIT_BRANCH • ${PERCENT_USED}% • $MODEL"
 # TTS indicator
 [ -f ~/.claude/tts-enabled ] && OUTPUT="$OUTPUT • \033[34mTTS Enabled\033[0m"
 
-echo "$OUTPUT"
+printf '%b\n' "$OUTPUT"
