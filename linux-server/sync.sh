@@ -151,7 +151,7 @@ review_changes() {
         --bind 'ctrl-d:deselect-all+execute-silent(: > '"$has_selections"')' \
         --bind 'tab:toggle+execute-silent(echo 1 > '"$has_selections"')' \
         --with-nth=4 \
-        --delimiter='|' \
+        --delimiter='\|' \
         --preview "$preview_cmd" \
         --preview-window='right:65%:wrap' \
         --border=rounded \
