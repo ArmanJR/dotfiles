@@ -12,6 +12,12 @@ RESET='\033[0m'
 printf "${BOLD}%-40s %6s %10s  %s${RESET}\n" "SERVICE" "CPU%" "MEM" "COMMAND"
 printf '%s\n' "$(printf '─%.0s' {1..100})"
 
+# Sample current CPU usage (ps %cpu shows lifetime average, always ~0 for daemons)
+declare -A cpu_by_pid
+while read -r pid cpu_val; do
+  cpu_by_pid[$pid]=$cpu_val
+done < <(top -bn2 -d0.5 -w512 2>/dev/null | awk '/^top /{b++} b==2 && /^ *[0-9]/{print $1, $9}')
+
 systemctl list-units --type=service --state=running --no-pager --no-legend | \
   awk '{print $1}' | \
   while read svc; do
@@ -22,7 +28,8 @@ systemctl list-units --type=service --state=running --no-pager --no-legend | \
 
     cpu="—"; mem="—"
     if [[ -n "$pid" && "$pid" != "0" ]]; then
-      read cpu_raw mem_raw <<< $(ps -p "$pid" -o %cpu,rss --no-headers 2>/dev/null)
+      mem_raw=$(ps -p "$pid" -o rss --no-headers 2>/dev/null | tr -d ' ')
+      cpu_raw=${cpu_by_pid[$pid]}
       [[ -n "$cpu_raw" ]] && cpu="${cpu_raw}%"
       if [[ -n "$mem_raw" ]]; then
         mem_mb=$(awk "BEGIN {printf \"%.0f\", $mem_raw/1024}")
