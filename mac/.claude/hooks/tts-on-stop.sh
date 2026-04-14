@@ -11,7 +11,7 @@ TEXT=$(echo "$INPUT" | jq -r '.last_assistant_message // empty')
 
 curl -s -X POST 'http://127.0.0.1:8855/tts?claude=1' \
   -H 'Content-Type: application/json' \
-  -d "$(jq -n --arg text "$TEXT" '{text: $text}')" \
+  -d "$(jq -n --arg text "$TEXT Over." '{text: $text}')" \
   > /dev/null 2>&1 &
 
 exit 0
