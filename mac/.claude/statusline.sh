@@ -56,4 +56,7 @@ OUTPUT="$MACHINE • $DIR$GIT_BRANCH • ${PERCENT_USED}% • $MODEL"
 # Add account if set
 [ -n "$ACCT" ] && OUTPUT="$OUTPUT • $ACCT"
 
+# TTS indicator
+[ -f ~/.claude/tts-enabled ] && OUTPUT="$OUTPUT • \033[34mTTS Enabled\033[0m"
+
 echo "$OUTPUT"
