@@ -159,6 +159,20 @@
   "promptSuggestionEnabled": false,
   "skipDangerousModePermissionPrompt": true,
   "model": "opus",
+  "hooks": {
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/tts-on-stop.sh",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  },
   "spinnerVerbs": {
     "mode": "replace",
     "verbs": [
