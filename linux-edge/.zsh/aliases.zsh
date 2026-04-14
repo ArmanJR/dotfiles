@@ -313,3 +313,5 @@ alias ezsh="nvim ~/.zshrc"
 
 # Dotfiles sync
 alias dotsync="$HOME/code/dotfiles/linux-edge/sync.sh"
+
+alias parp='arp -a | awk '\''BEGIN { c[1]="\033[38;5;250m"; c[2]="\033[38;5;245m"; } { idx=(NR%2)+1; printf "%s%-30s %-20s %-17s\033[0m\n", c[idx], $1, $2, $4 }'\'''
