@@ -105,22 +105,37 @@ export MANPAGER="sh -c 'col -bx | bat -l man -p'"  # colored man pages
 
 # Tool aliases (eza, fd, rg, bat) are defined in aliases.zsh
 
-# catc (copy into clipboard with the filename)
+# catc (copy file contents into clipboard, optionally with the filename header)
 catc() {
-    if [ -z "$1" ]; then
-        echo "Usage: catc <filename>"
+    local with_path=0
+    local file=""
+
+    for arg in "$@"; do
+        if [ "$arg" = "--with-path" ]; then
+            with_path=1
+        else
+            file="$arg"
+        fi
+    done
+
+    if [ -z "$file" ]; then
+        echo "Usage: catc [--with-path] <filename>"
         return 1
     fi
 
-    if [ ! -f "$1" ]; then
-        echo "Error: File '$1' not found"
+    if [ ! -f "$file" ]; then
+        echo "Error: File '$file' not found"
         return 1
     fi
 
-    {
-        echo "$ cat $1"
-        cat "$1"
-    } | pbcopy
+    if [ "$with_path" -eq 1 ]; then
+        {
+            echo "$ cat $file"
+            cat "$file"
+        } | pbcopy
+    else
+        cat "$file" | pbcopy
+    fi
 }
 
 # catingest (runs gitingest then copy into clipboard)
