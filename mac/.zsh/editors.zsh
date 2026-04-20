@@ -67,6 +67,27 @@ if command -v code >/dev/null 2>&1; then
 fi
 
 # =============================================================================
+# Zed Configuration
+# =============================================================================
+
+if command -v zed >/dev/null 2>&1; then
+    # zedrg (rg but opens all matches in Zed at their line/column)
+    zedrg() {
+        if [ -z "$1" ]; then
+            echo "Usage: zedrg <pattern> [path...]"
+            return 1
+        fi
+        local matches
+        matches=$(rg --vimgrep "$@" | awk -F: '{print $1":"$2":"$3}')
+        if [ -z "$matches" ]; then
+            echo "No matches found"
+            return 1
+        fi
+        echo "$matches" | xargs zed
+    }
+fi
+
+# =============================================================================
 # Font and Color Configuration
 # =============================================================================
 
