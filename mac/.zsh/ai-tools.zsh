@@ -2,6 +2,9 @@
 # AI Tools Configuration
 # =============================================================================
 
+# Alias "ai" acts as a runner for my current main coding agent
+alias ai='codex --dangerously-bypass-approvals-and-sandbox'
+
 # =============================================================================
 # Claude Code
 # =============================================================================

@@ -10,6 +10,7 @@
 #   --zsh         Sync .zsh directory
 #   --zshrc       Sync .zshrc file
 #   --dotfiles    Sync other dotfiles (.zshenv, .zprofile, .gitignore_global, .ripgreprc, ghostty.config)
+#   --codex       Sync .codex directory
 #   --claude      Sync .claude directory
 #   --vscode      Sync VSCode settings
 #   --atuin       Sync Atuin config
@@ -51,6 +52,7 @@ trap 'rm -f "$CHANGES_MANIFEST"' EXIT
 SYNC_ZSH=false
 SYNC_ZSHRC=false
 SYNC_DOTFILES=false
+SYNC_CODEX=false
 SYNC_CLAUDE=false
 SYNC_VSCODE=false
 SYNC_ATUIN=false
@@ -340,6 +342,9 @@ while [[ $# -gt 0 ]]; do
         --dotfiles)
             SYNC_DOTFILES=true
             ;;
+        --codex)
+            SYNC_CODEX=true
+            ;;
         --claude)
             SYNC_CLAUDE=true
             ;;
@@ -362,6 +367,7 @@ while [[ $# -gt 0 ]]; do
             SYNC_ZSH=true
             SYNC_ZSHRC=true
             SYNC_DOTFILES=true
+            SYNC_CODEX=true
             SYNC_CLAUDE=true
             SYNC_VSCODE=true
             SYNC_ATUIN=true
@@ -392,6 +398,7 @@ while [[ $# -gt 0 ]]; do
             echo "  --zsh         Sync .zsh directory"
             echo "  --zshrc       Sync .zshrc file"
             echo "  --dotfiles    Sync other dotfiles (.gitignore_global, .ripgreprc, ghostty.config)"
+            echo "  --codex       Sync .codex directory"
             echo "  --claude      Sync .claude directory"
             echo "  --vscode      Sync VSCode settings"
             echo "  --atuin       Sync Atuin config"
@@ -495,6 +502,10 @@ if [[ "$SYNC_DOTFILES" == true ]]; then
     collect_file_changes "$MAC_DIR/.gitignore_global" "$HOME/.gitignore_global" ".gitignore_global"
     collect_file_changes "$MAC_DIR/.ripgreprc" "$HOME/.ripgreprc" ".ripgreprc"
     collect_file_changes "$MAC_DIR/ghostty.config" "$HOME/.config/ghostty/config" "ghostty.config"
+fi
+
+if [[ "$SYNC_CODEX" == true ]]; then
+    collect_directory_changes "$MAC_DIR/.codex" "$HOME/.codex" ".codex"
 fi
 
 if [[ "$SYNC_CLAUDE" == true ]]; then

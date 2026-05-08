@@ -16,7 +16,7 @@ Zsh-based development environment for macOS Apple Silicon. Managed via `sync.sh`
   cloud-tools.zsh         # AWS, GCP, Terraform, Pulumi
   dev-tools.zsh           # Docker, k8s, SSH, networking
   editors.zsh             # Neovim, VSCode, Zed, fzf integration
-  ai-tools.zsh            # Claude Code aliases
+  ai-tools.zsh            # AI tool aliases (Codex, Claude Code, OpenCode)
   aliases.zsh             # General aliases (eza, fd, rg, bat replacements)
   functions.zsh           # Utility functions, project scaffolding
   .p10k.zsh               # Powerlevel10k theme file
@@ -27,6 +27,7 @@ ghostty.config            # Ghostty terminal config
   atuin/config.toml       # Atuin history config
   prek/                   # Pre-commit hook templates (default, python, go)
   zed/                    # Zed editor settings + keymap
+.codex/                   # Codex CLI config
 .claude/                  # Claude Code settings, statusline, custom commands
 vscode/                   # VSCode settings, keybindings, extensions list
 sync.sh                   # Sync script
@@ -66,7 +67,8 @@ brew install go
 brew install --cask visual-studio-code
 brew install --cask zed
 
-# 10. Claude Code (optional)
+# 10. AI CLIs (optional)
+brew install codex
 npm install -g @anthropic-ai/claude-code
 
 # 11. Clone & sync
@@ -98,13 +100,15 @@ Individual targets:
 | `--zsh` | `~/.zsh/` |
 | `--zshrc` | `~/.zshrc` |
 | `--dotfiles` | `~/.zshenv`, `~/.zprofile`, `~/.gitignore_global`, `~/.ripgreprc`, `ghostty.config` |
+| `--codex` | `~/.codex/` |
 | `--claude` | `~/.claude/` |
 | `--vscode` | `~/Library/Application Support/Code/User/settings.json` |
 | `--atuin` | `~/.config/atuin/config.toml` |
 | `--zed` | `~/.config/zed/` |
 | `--prek` | `~/.config/prek/` |
+| `--tmux` | `~/.tmux.conf` |
 
-Flags can be combined: `sync.sh --zsh --zshrc --dotfiles`.
+Flags can be combined: `sync.sh --zsh --codex --dotfiles`.
 
 ## Notes
 
