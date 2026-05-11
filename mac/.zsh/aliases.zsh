@@ -14,14 +14,8 @@ else
     alias l="ls -lh"
 fi
 
-# fd (find replacement)
-if command -v fd >/dev/null 2>&1; then
-    alias find="fd"
-fi
-
-# ripgrep (grep replacement)
+# ripgrep configuration
 if command -v rg >/dev/null 2>&1; then
-    alias grep="rg"
     export RIPGREP_CONFIG_PATH="$HOME/.ripgreprc"
 fi
 

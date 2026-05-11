@@ -12,6 +12,7 @@
 #   --dotfiles    Sync other dotfiles (.zshenv, .zprofile, .gitignore_global, .ripgreprc, ghostty.config)
 #   --codex       Sync .codex directory
 #   --claude      Sync .claude directory
+#   --opencode    Sync OpenCode config
 #   --vscode      Sync VSCode settings
 #   --nvim        Sync Neovim config
 #   --zed         Sync Zed config
@@ -54,6 +55,7 @@ SYNC_ZSHRC=false
 SYNC_DOTFILES=false
 SYNC_CODEX=false
 SYNC_CLAUDE=false
+SYNC_OPENCODE=false
 SYNC_VSCODE=false
 SYNC_NVIM=false
 SYNC_ZED=false
@@ -348,6 +350,9 @@ while [[ $# -gt 0 ]]; do
         --claude)
             SYNC_CLAUDE=true
             ;;
+        --opencode)
+            SYNC_OPENCODE=true
+            ;;
         --vscode)
             SYNC_VSCODE=true
             ;;
@@ -369,6 +374,7 @@ while [[ $# -gt 0 ]]; do
             SYNC_DOTFILES=true
             SYNC_CODEX=true
             SYNC_CLAUDE=true
+            SYNC_OPENCODE=true
             SYNC_VSCODE=true
             SYNC_NVIM=true
             SYNC_ZED=true
@@ -400,6 +406,7 @@ while [[ $# -gt 0 ]]; do
             echo "  --dotfiles    Sync other dotfiles (.gitignore_global, .ripgreprc, ghostty.config)"
             echo "  --codex       Sync .codex directory"
             echo "  --claude      Sync .claude directory"
+            echo "  --opencode    Sync OpenCode config"
             echo "  --vscode      Sync VSCode settings"
             echo "  --nvim        Sync Neovim config"
             echo "  --zed         Sync Zed config"
@@ -510,6 +517,10 @@ fi
 
 if [[ "$SYNC_CLAUDE" == true ]]; then
     collect_directory_changes "$MAC_DIR/.claude" "$HOME/.claude" ".claude"
+fi
+
+if [[ "$SYNC_OPENCODE" == true ]]; then
+    collect_directory_changes "$MAC_DIR/.config/opencode" "$HOME/.config/opencode" ".config/opencode"
 fi
 
 if [[ "$SYNC_VSCODE" == true ]]; then

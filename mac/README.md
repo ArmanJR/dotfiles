@@ -24,6 +24,7 @@ Zsh-based development environment for macOS Apple Silicon. Managed via `sync.sh`
 ghostty.config            # Ghostty terminal config
 .config/
   nvim/                   # Neovim config
+  opencode/               # OpenCode cloud/local config
   prek/                   # Pre-commit hook templates (default, python, go)
   zed/                    # Zed editor settings + keymap
 .codex/                   # Codex CLI config
@@ -98,6 +99,7 @@ Individual targets:
 | `--dotfiles` | `~/.zshenv`, `~/.zprofile`, `~/.gitignore_global`, `~/.ripgreprc`, `ghostty.config` |
 | `--codex` | `~/.codex/` |
 | `--claude` | `~/.claude/` |
+| `--opencode` | `~/.config/opencode/` |
 | `--vscode` | `~/Library/Application Support/Code/User/settings.json` |
 | `--nvim` | `~/.config/nvim/` |
 | `--zed` | `~/.config/zed/` |
