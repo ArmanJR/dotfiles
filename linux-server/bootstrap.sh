@@ -5,7 +5,7 @@
 # Sets up a Linux server / VM development environment:
 # - Zsh with Powerlevel10k (no Oh My Zsh), autosuggestions, syntax highlighting
 # - Neovim with LazyVim
-# - Modern CLI tools (eza, fd, rg, bat, fzf, zoxide, atuin)
+# - Modern CLI tools (eza, fd, rg, bat, fzf, zoxide)
 # - Languages: Rust, Python (uv), Go, Node.js (fnm)
 # - Cloud tools (AWS, GCP, Terraform)
 # - AI tools (Claude Code)
@@ -461,19 +461,6 @@ install_font() {
     cd - >/dev/null
 }
 
-install_atuin() {
-    log STEP "Installing Atuin (shell history)..."
-
-    if command_exists atuin; then
-        log INFO "Atuin already installed"
-        return
-    fi
-
-    curl --proto '=https' --tlsv1.2 -sSf https://setup.atuin.sh | bash
-
-    log SUCCESS "Atuin installed"
-}
-
 install_github_cli() {
     log STEP "Installing GitHub CLI..."
 
@@ -559,12 +546,7 @@ link_dotfiles() {
     log INFO "Linked .zsh/ modules"
 
     # Config files
-    mkdir -p "$HOME/.config/atuin" "$HOME/.config/prek"
-
-    if [[ -f "$SERVER_DIR/.config/atuin/config.toml" ]]; then
-        ln -sf "$SERVER_DIR/.config/atuin/config.toml" "$HOME/.config/atuin/config.toml"
-        log INFO "Linked atuin config"
-    fi
+    mkdir -p "$HOME/.config/prek"
 
     for file in "$SERVER_DIR/.config/prek/"*; do
         [[ -f "$file" ]] && ln -sf "$file" "$HOME/.config/prek/$(basename "$file")"
@@ -688,7 +670,6 @@ main() {
     # Shell setup
     install_powerlevel10k
     install_zsh_plugins
-    install_atuin
     install_github_cli
 
     # Cloud and AI tools

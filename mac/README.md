@@ -11,7 +11,6 @@ Zsh-based development environment for macOS Apple Silicon. Managed via `sync.sh`
 .zsh/
   homebrew.zsh            # Homebrew paths, env vars
   theme.zsh               # Powerlevel10k config
-  history.zsh             # Atuin shell history
   languages.zsh           # Python (uv/pyenv), Go, Node (fnm), Rust, Bun
   cloud-tools.zsh         # AWS, GCP, Terraform, Pulumi
   dev-tools.zsh           # Docker, k8s, SSH, networking
@@ -24,7 +23,6 @@ Zsh-based development environment for macOS Apple Silicon. Managed via `sync.sh`
 .ripgreprc                # ripgrep defaults
 ghostty.config            # Ghostty terminal config
 .config/
-  atuin/config.toml       # Atuin history config
   prek/                   # Pre-commit hook templates (default, python, go)
   zed/                    # Zed editor settings + keymap
 .codex/                   # Codex CLI config
@@ -51,34 +49,31 @@ brew install --cask font-jetbrains-mono-nerd-font
 # 4. Terminal emulator
 brew install --cask ghostty
 
-# 5. Shell history
-curl --proto '=https' --tlsv1.2 -LsSf https://setup.atuin.sh | sh
-
-# 6. Rust toolchain (needed for cargo binaries, sourced in .zshenv)
+# 5. Rust toolchain (needed for cargo binaries, sourced in .zshenv)
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 
-# 7. Node.js (fnm, preferred over nvm)
+# 6. Node.js (fnm, preferred over nvm)
 brew install fnm
 
-# 8. Go
+# 7. Go
 brew install go
 
-# 9. Editors (optional, install what you use)
+# 8. Editors (optional, install what you use)
 brew install --cask visual-studio-code
 brew install --cask zed
 
-# 10. AI CLIs (optional)
+# 9. AI CLIs (optional)
 brew install codex
 npm install -g @anthropic-ai/claude-code
 
-# 11. Clone & sync
+# 10. Clone & sync
 git clone https://github.com/ArmanJR/dotfiles ~/code/dotfiles
 ~/code/dotfiles/mac/sync.sh --all
 
-# 12. VSCode extensions (optional)
+# 11. VSCode extensions (optional)
 ~/code/dotfiles/mac/vscode/install-extensions.sh
 
-# 13. Reload
+# 12. Reload
 exec zsh
 ```
 
@@ -103,7 +98,6 @@ Individual targets:
 | `--codex` | `~/.codex/` |
 | `--claude` | `~/.claude/` |
 | `--vscode` | `~/Library/Application Support/Code/User/settings.json` |
-| `--atuin` | `~/.config/atuin/config.toml` |
 | `--zed` | `~/.config/zed/` |
 | `--prek` | `~/.config/prek/` |
 | `--tmux` | `~/.tmux.conf` |

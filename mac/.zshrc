@@ -57,7 +57,6 @@ source_if_exists() {
 # Load all configuration modules
 source_if_exists "$ZSH_CONFIG_DIR/homebrew.zsh"
 source_if_exists "$ZSH_CONFIG_DIR/theme.zsh"
-source_if_exists "$ZSH_CONFIG_DIR/history.zsh"
 source_if_exists "$ZSH_CONFIG_DIR/languages.zsh"
 source_if_exists "$ZSH_CONFIG_DIR/cloud-tools.zsh"
 source_if_exists "$ZSH_CONFIG_DIR/dev-tools.zsh"
@@ -73,23 +72,21 @@ source_if_exists "$HOME/.zshrc.local"
 # Zsh Options
 # =============================================================================
 
-# History settings (only if Atuin is not available - Atuin handles history)
-if ! command -v atuin >/dev/null 2>&1; then
-    HISTFILE=~/.zsh_history
-    HISTSIZE=50000
-    SAVEHIST=50000
-    setopt EXTENDED_HISTORY
-    setopt INC_APPEND_HISTORY
-    setopt SHARE_HISTORY
-    setopt HIST_EXPIRE_DUPS_FIRST
-    setopt HIST_IGNORE_DUPS
-    setopt HIST_IGNORE_ALL_DUPS
-    setopt HIST_FIND_NO_DUPS
-    setopt HIST_IGNORE_SPACE
-    setopt HIST_SAVE_NO_DUPS
-    setopt HIST_REDUCE_BLANKS
-    setopt HIST_VERIFY
-fi
+# History settings
+HISTFILE=~/.zsh_history
+HISTSIZE=50000
+SAVEHIST=50000
+setopt EXTENDED_HISTORY
+setopt INC_APPEND_HISTORY
+setopt SHARE_HISTORY
+setopt HIST_EXPIRE_DUPS_FIRST
+setopt HIST_IGNORE_DUPS
+setopt HIST_IGNORE_ALL_DUPS
+setopt HIST_FIND_NO_DUPS
+setopt HIST_IGNORE_SPACE
+setopt HIST_SAVE_NO_DUPS
+setopt HIST_REDUCE_BLANKS
+setopt HIST_VERIFY
 
 # Directory options
 setopt AUTO_PUSHD              # Push directories onto the stack automatically
@@ -115,11 +112,9 @@ setopt GLOB_DOTS               # Include dotfiles in globbing
 # Use emacs key bindings
 bindkey -e
 
-# Better history search (only when Atuin is not managing history)
-if ! command -v atuin >/dev/null 2>&1; then
-    bindkey '^R' history-incremental-search-backward
-    bindkey '^S' history-incremental-search-forward
-fi
+# Better history search
+bindkey '^R' history-incremental-search-backward
+bindkey '^S' history-incremental-search-forward
 bindkey '^P' history-search-backward
 bindkey '^N' history-search-forward
 

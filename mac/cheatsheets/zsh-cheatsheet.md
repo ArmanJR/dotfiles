@@ -201,11 +201,6 @@ vf                     # fzf: fuzzy find and edit file
 gbf                    # fzf: fuzzy checkout git branch
 ```
 
-## Shell History (Atuin)
-```bash
-Ctrl+R                 # Search shell history with Atuin
-```
-
 ## Network & System
 ```bash
 ip                     # Get public IP

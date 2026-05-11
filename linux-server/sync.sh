@@ -10,7 +10,6 @@
 #   --zsh         Sync .zsh directory
 #   --zshrc       Sync .zshrc file
 #   --dotfiles    Sync other dotfiles (.zshenv, .gitignore_global, .ripgreprc)
-#   --atuin       Sync Atuin config
 #   --prek        Sync prek hook templates
 #   --tmux        Sync .tmux.conf
 #   --bin         Sync .local/bin scripts
@@ -50,7 +49,6 @@ trap 'rm -f "$CHANGES_MANIFEST"' EXIT
 SYNC_ZSH=false
 SYNC_ZSHRC=false
 SYNC_DOTFILES=false
-SYNC_ATUIN=false
 SYNC_PREK=false
 SYNC_TMUX=false
 SYNC_BIN=false
@@ -335,9 +333,6 @@ while [[ $# -gt 0 ]]; do
         --dotfiles)
             SYNC_DOTFILES=true
             ;;
-        --atuin)
-            SYNC_ATUIN=true
-            ;;
         --prek)
             SYNC_PREK=true
             ;;
@@ -354,7 +349,6 @@ while [[ $# -gt 0 ]]; do
             SYNC_ZSH=true
             SYNC_ZSHRC=true
             SYNC_DOTFILES=true
-            SYNC_ATUIN=true
             SYNC_PREK=true
             SYNC_TMUX=true
             SYNC_BIN=true
@@ -383,7 +377,6 @@ while [[ $# -gt 0 ]]; do
             echo "  --zsh         Sync .zsh directory"
             echo "  --zshrc       Sync .zshrc file"
             echo "  --dotfiles    Sync other dotfiles (.zshenv, .gitignore_global, .ripgreprc)"
-            echo "  --atuin       Sync Atuin config"
             echo "  --prek        Sync prek hook templates"
             echo "  --tmux        Sync .tmux.conf"
             echo "  --bin         Sync .local/bin scripts"
@@ -473,10 +466,6 @@ if [[ "$SYNC_DOTFILES" == true ]]; then
     collect_file_changes "$SERVER_DIR/.zshenv" "$HOME/.zshenv" ".zshenv"
     collect_file_changes "$SERVER_DIR/.gitignore_global" "$HOME/.gitignore_global" ".gitignore_global"
     collect_file_changes "$SERVER_DIR/.ripgreprc" "$HOME/.ripgreprc" ".ripgreprc"
-fi
-
-if [[ "$SYNC_ATUIN" == true ]]; then
-    collect_file_changes "$SERVER_DIR/.config/atuin/config.toml" "$HOME/.config/atuin/config.toml" "atuin/config.toml"
 fi
 
 if [[ "$SYNC_PREK" == true ]]; then
