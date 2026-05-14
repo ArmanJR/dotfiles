@@ -1,0 +1,146 @@
+name: Dotfiles Benchmarks
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: dotfiles-benchmarks-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  benchmark:
+    name: Benchmark dotfile paths
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    env:
+      BENCHMARK_RUNS: "10"
+      BENCHMARK_WARMUP: "3"
+      BENCHMARK_RESULTS_DIR: benchmark-results
+      CI_HOME: ${{ github.workspace }}/.ci-home
+
+    steps:
+      - name: Check out dotfiles
+        uses: actions/checkout@v4
+
+      - name: Install benchmark dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          log() {
+            printf '[bench:%s] %s\n' "$(date -u +'%Y-%m-%dT%H:%M:%SZ')" "$*"
+          }
+
+          log "Updating apt package indexes"
+          sudo apt-get update
+
+          log "Installing hyperfine and shell/runtime dependencies"
+          sudo apt-get install -y --no-install-recommends \
+            build-essential \
+            ca-certificates \
+            curl \
+            git \
+            jq \
+            ripgrep \
+            unzip \
+            zsh \
+            hyperfine
+
+          log "Installing latest stable Neovim release"
+          curl -fsSL \
+            --retry 3 \
+            --retry-delay 2 \
+            -o /tmp/nvim-linux-x86_64.tar.gz \
+            https://github.com/neovim/neovim/releases/latest/download/nvim-linux-x86_64.tar.gz
+          sudo rm -rf /opt/nvim
+          sudo mkdir -p /opt/nvim
+          sudo tar -xzf /tmp/nvim-linux-x86_64.tar.gz -C /opt/nvim --strip-components=1
+          printf '/opt/nvim/bin\n' >> "$GITHUB_PATH"
+
+          log "hyperfine version: $(hyperfine --version)"
+          log "zsh version: $(zsh --version)"
+          log "Neovim version: $(/opt/nvim/bin/nvim --version | sed -n '1p')"
+
+      - name: Prepare isolated CI home
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          log() {
+            printf '[bench:%s] %s\n' "$(date -u +'%Y-%m-%dT%H:%M:%SZ')" "$*"
+          }
+
+          log "Creating isolated home at $CI_HOME"
+          rm -rf "$CI_HOME"
+          mkdir -p "$CI_HOME/.config" "$CI_HOME/.cache" "$CI_HOME/.local/share" "$CI_HOME/code"
+
+          log "Copying mac shell and Neovim configs into isolated home"
+          cp -R mac/.zsh "$CI_HOME/.zsh"
+          cp mac/.zshrc "$CI_HOME/.zshrc"
+          cp mac/.zshenv "$CI_HOME/.zshenv"
+          cp mac/.zprofile "$CI_HOME/.zprofile"
+          cp -R mac/.config/nvim "$CI_HOME/.config/nvim"
+          ln -s "$GITHUB_WORKSPACE" "$CI_HOME/code/dotfiles"
+
+          log "Prewarming Neovim once so benchmark runs do not include bootstrap cost"
+          HOME="$CI_HOME" \
+          XDG_CONFIG_HOME="$CI_HOME/.config" \
+          XDG_DATA_HOME="$CI_HOME/.local/share" \
+          XDG_CACHE_HOME="$CI_HOME/.cache" \
+            nvim --headless -u "$CI_HOME/.config/nvim/init.lua" '+qa'
+
+          log "Isolated CI home is ready"
+
+      - name: Run hyperfine benchmarks
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          log() {
+            printf '[bench:%s] %s\n' "$(date -u +'%Y-%m-%dT%H:%M:%SZ')" "$*"
+          }
+
+          mkdir -p "$BENCHMARK_RESULTS_DIR"
+
+          log "Running benchmarks with $BENCHMARK_WARMUP warmup run(s) and $BENCHMARK_RUNS measured run(s)"
+          hyperfine \
+            --warmup "$BENCHMARK_WARMUP" \
+            --runs "$BENCHMARK_RUNS" \
+            --command-name "mac zsh startup" \
+            'HOME="$CI_HOME" ZDOTDIR="$CI_HOME" zsh -i -c exit >/dev/null 2>&1' \
+            --command-name "mac sync help" \
+            'bash mac/sync.sh --help >/dev/null' \
+            --command-name "mac Neovim headless startup" \
+            'HOME="$CI_HOME" XDG_CONFIG_HOME="$CI_HOME/.config" XDG_DATA_HOME="$CI_HOME/.local/share" XDG_CACHE_HOME="$CI_HOME/.cache" nvim --headless -u "$CI_HOME/.config/nvim/init.lua" "+qa"' \
+            --command-name "mac tracked file scan" \
+            'rg --files mac >/dev/null' \
+            --export-markdown "$BENCHMARK_RESULTS_DIR/summary.md" \
+            --export-json "$BENCHMARK_RESULTS_DIR/results.json"
+
+          log "Benchmark results written to $BENCHMARK_RESULTS_DIR"
+
+      - name: Publish benchmark summary
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          log() {
+            printf '[bench:%s] %s\n' "$(date -u +'%Y-%m-%dT%H:%M:%SZ')" "$*"
+          }
+
+          log "Publishing benchmark summary"
+          {
+            printf '## Dotfiles Benchmarks\n\n'
+            printf 'Runner: `%s`\n\n' "$RUNNER_OS"
+            cat "$BENCHMARK_RESULTS_DIR/summary.md"
+            printf '\n\n<details>\n<summary>Raw JSON</summary>\n\n'
+            printf '```json\n'
+            cat "$BENCHMARK_RESULTS_DIR/results.json"
+            printf '\n```\n\n</details>\n'
+          } >> "$GITHUB_STEP_SUMMARY"
