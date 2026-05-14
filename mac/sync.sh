@@ -13,6 +13,7 @@
 #   --codex       Sync .codex directory
 #   --claude      Sync .claude directory
 #   --vscode      Sync VSCode settings
+#   --nvim        Sync Neovim config
 #   --zed         Sync Zed config
 #   --prek        Sync prek hook templates
 #   --tmux        Sync .tmux.conf
@@ -54,6 +55,7 @@ SYNC_DOTFILES=false
 SYNC_CODEX=false
 SYNC_CLAUDE=false
 SYNC_VSCODE=false
+SYNC_NVIM=false
 SYNC_ZED=false
 SYNC_PREK=false
 SYNC_TMUX=false
@@ -349,6 +351,9 @@ while [[ $# -gt 0 ]]; do
         --vscode)
             SYNC_VSCODE=true
             ;;
+        --nvim)
+            SYNC_NVIM=true
+            ;;
         --zed)
             SYNC_ZED=true
             ;;
@@ -365,6 +370,7 @@ while [[ $# -gt 0 ]]; do
             SYNC_CODEX=true
             SYNC_CLAUDE=true
             SYNC_VSCODE=true
+            SYNC_NVIM=true
             SYNC_ZED=true
             SYNC_PREK=true
             SYNC_TMUX=true
@@ -395,6 +401,7 @@ while [[ $# -gt 0 ]]; do
             echo "  --codex       Sync .codex directory"
             echo "  --claude      Sync .claude directory"
             echo "  --vscode      Sync VSCode settings"
+            echo "  --nvim        Sync Neovim config"
             echo "  --zed         Sync Zed config"
             echo "  --prek        Sync prek hook templates"
             echo "  --tmux        Sync .tmux.conf"
@@ -508,6 +515,10 @@ fi
 if [[ "$SYNC_VSCODE" == true ]]; then
     VSCODE_TARGET="$HOME/Library/Application Support/Code/User"
     collect_file_changes "$MAC_DIR/vscode/settings.json" "$VSCODE_TARGET/settings.json" "vscode/settings.json"
+fi
+
+if [[ "$SYNC_NVIM" == true ]]; then
+    collect_directory_changes "$MAC_DIR/.config/nvim" "$HOME/.config/nvim" ".config/nvim"
 fi
 
 if [[ "$SYNC_ZED" == true ]]; then

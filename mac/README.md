@@ -23,6 +23,7 @@ Zsh-based development environment for macOS Apple Silicon. Managed via `sync.sh`
 .ripgreprc                # ripgrep defaults
 ghostty.config            # Ghostty terminal config
 .config/
+  nvim/                   # Neovim config
   prek/                   # Pre-commit hook templates (default, python, go)
   zed/                    # Zed editor settings + keymap
 .codex/                   # Codex CLI config
@@ -98,6 +99,7 @@ Individual targets:
 | `--codex` | `~/.codex/` |
 | `--claude` | `~/.claude/` |
 | `--vscode` | `~/Library/Application Support/Code/User/settings.json` |
+| `--nvim` | `~/.config/nvim/` |
 | `--zed` | `~/.config/zed/` |
 | `--prek` | `~/.config/prek/` |
 | `--tmux` | `~/.tmux.conf` |

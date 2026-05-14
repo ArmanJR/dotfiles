@@ -1,6 +1,6 @@
 # =============================================================================
 # Editor and Terminal Configuration
-# Neovim (LazyVim), VSCode, and Terminal Tools
+# Neovim, VSCode, and Terminal Tools
 # =============================================================================
 
 # =============================================================================
@@ -12,10 +12,6 @@ alias v="nvim"
 alias vi="nvim"
 alias vim="nvim"
 alias nv="nvim"
-
-# LazyVim specific aliases
-alias lv="nvim"
-alias lvim="nvim"
 
 # Neovim functions
 nvim-config() {
