@@ -217,7 +217,7 @@ parp                   # Pretty ARP table
 ```bash
 cpu                    # Top processes by CPU
 mem                    # Top processes by memory
-df                     # Disk space
+df                     # Disk space (duf if installed)
 usage /path            # Disk usage analyzer (ncdu/dust/du)
 sysinfo                # System profiler info
 cleanup                # Clean system caches (interactive)

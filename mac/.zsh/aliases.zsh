@@ -31,6 +31,13 @@ if command -v bat >/dev/null 2>&1; then
     alias catt="bat --paging=always"
 fi
 
+# duf (df replacement)
+if command -v duf >/dev/null 2>&1; then
+    alias df="duf"
+else
+    alias df="df -h"
+fi
+
 # =============================================================================
 # System Navigation
 # =============================================================================
@@ -76,7 +83,6 @@ alias tf="tail -f"
 # System monitoring
 alias cpu="top -o cpu"
 alias mem="top -o mem"
-alias df="df -h"
 alias du="du -h"
 alias free="vm_stat"
 

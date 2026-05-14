@@ -41,7 +41,7 @@ eval "$(/opt/homebrew/bin/brew shellenv)"
 
 # 2. Core CLI tools
 brew install git jq
-brew install fd ripgrep bat eza fzf zoxide nvim uv
+brew install fd ripgrep bat eza fzf zoxide duf nvim uv
 
 # 3. Shell theme & font
 brew install romkatv/powerlevel10k/powerlevel10k
