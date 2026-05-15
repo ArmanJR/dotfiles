@@ -5,6 +5,7 @@ Zsh-based development environment for macOS Apple Silicon. Managed via `sync.sh`
 ## Structure
 
 ```
+Brewfile                 # Homebrew bundle for new-device package setup
 .zshrc                    # Entry point — loads modules from .zsh/
 .zshenv                   # Cargo env (sourced before .zshrc)
 .zprofile                 # Homebrew shellenv
@@ -16,7 +17,7 @@ Zsh-based development environment for macOS Apple Silicon. Managed via `sync.sh`
   dev-tools.zsh           # Docker, k8s, SSH, networking
   editors.zsh             # Neovim, VSCode, Zed, fzf integration
   ai-tools.zsh            # AI tool aliases (Codex, Claude Code, OpenCode)
-  aliases.zsh             # General aliases (eza, fd, rg, bat replacements)
+  aliases.zsh             # General aliases and shell utilities
   functions.zsh           # Utility functions, project scaffolding
   .p10k.zsh               # Powerlevel10k theme file
 .gitignore_global         # Global gitignore
@@ -40,42 +41,35 @@ sync.sh                   # Sync script
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 eval "$(/opt/homebrew/bin/brew shellenv)"
 
+<<<<<<< HEAD
 # 2. Core CLI tools
 brew install git jq
 brew install fd ripgrep bat eza fzf zoxide duf nvim uv
+=======
+# 2. Clone dotfiles
+git clone https://github.com/ArmanJR/dotfiles ~/code/dotfiles
+>>>>>>> 0354593 (chore: add brew bundle setup)
 
-# 3. Shell theme & font
-brew install romkatv/powerlevel10k/powerlevel10k
-brew install --cask font-jetbrains-mono-nerd-font
+# 3. Homebrew packages
+brew bundle --file ~/code/dotfiles/mac/Brewfile
 
-# 4. Terminal emulator
-brew install --cask ghostty
-
-# 5. Rust toolchain (needed for cargo binaries, sourced in .zshenv)
+# 4. Rust toolchain (needed for cargo binaries, sourced in .zshenv)
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 
-# 6. Node.js (fnm, preferred over nvm)
-brew install fnm
-
-# 7. Go
-brew install go
-
-# 8. Editors (optional, install what you use)
-brew install --cask visual-studio-code
-brew install --cask zed
-
-# 9. AI CLIs (optional)
-brew install codex
+# 5. Claude Code (optional)
+eval "$(fnm env --shell zsh)"
+fnm install --lts
+fnm default lts-latest
+fnm use lts-latest
 npm install -g @anthropic-ai/claude-code
 
-# 10. Clone & sync
-git clone https://github.com/ArmanJR/dotfiles ~/code/dotfiles
+# 6. Sync configs
 ~/code/dotfiles/mac/sync.sh --all
 
-# 11. VSCode extensions (optional)
+# 7. VSCode extensions (optional)
 ~/code/dotfiles/mac/vscode/install-extensions.sh
 
-# 12. Reload
+# 8. Reload
 exec zsh
 ```
 
