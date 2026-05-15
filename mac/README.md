@@ -41,14 +41,8 @@ sync.sh                   # Sync script
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 eval "$(/opt/homebrew/bin/brew shellenv)"
 
-<<<<<<< HEAD
-# 2. Core CLI tools
-brew install git jq
-brew install fd ripgrep bat eza fzf zoxide duf nvim uv
-=======
 # 2. Clone dotfiles
 git clone https://github.com/ArmanJR/dotfiles ~/code/dotfiles
->>>>>>> 0354593 (chore: add brew bundle setup)
 
 # 3. Homebrew packages
 brew bundle --file ~/code/dotfiles/mac/Brewfile
