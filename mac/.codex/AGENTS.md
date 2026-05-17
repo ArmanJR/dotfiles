@@ -17,7 +17,7 @@ Before committing your work to git, check if (1) project has a `README.md` file 
 
 When committing, summarize the changes and use a clear, scoped message; leave minor, exploratory, or incomplete edits uncommitted unless explicitly asked. Commit messages should follow Conventional Commits format.
 
-### Other notes
+## Other notes
 
 - Think Before Coding: Don't assume. Don't hide confusion. Surface tradeoffs. If something is unclear, stop. Name what's confusing. Ask.
 - Respect the existing codebase: Before changing code, inspect the surrounding files, patterns, naming conventions, architecture, and tests; make changes that fit the project rather than imposing a new style.
