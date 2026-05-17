@@ -98,6 +98,6 @@ Flags can be combined: `sync.sh --zsh --codex --dotfiles`.
 
 ## Notes
 
-- Codex config is generated from synced `~/.codex/config.base.toml` plus machine-local `~/.codex/config.local.toml`. The `ai` and `codexskip` aliases run `~/.codex/merge-config.py` before launching Codex, replacing `~/.codex/config.toml` with the merged result.
+- Codex config is generated from synced `~/.codex/config.base.toml` plus machine-local `~/.codex/config.local.toml`. The `ai` and `codexskip` aliases run `~/.codex/merge-config.py` before launching Codex, preserving target-only settings from `~/.codex/config.toml` into `config.local.toml` before replacing `config.toml` with the merged result.
 - Shell scripts synced via `--claude` (e.g. `statusline.sh`) must be executable in git. Fix with: `git update-index --chmod=+x <file>`.
 - `--all` syncs everything. Use `--dry-run` first to preview changes on a fresh machine.
