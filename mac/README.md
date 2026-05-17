@@ -28,7 +28,7 @@ ghostty.config            # Ghostty terminal config
   opencode/               # OpenCode cloud/local config
   prek/                   # Pre-commit hook templates (default, python, go)
   zed/                    # Zed editor settings + keymap
-.codex/                   # Codex CLI config
+.codex/                   # Codex CLI base config + merge script
 .claude/                  # Claude Code settings, statusline, custom commands
 vscode/                   # VSCode settings, keybindings, extensions list
 sync.sh                   # Sync script
@@ -85,7 +85,7 @@ Individual targets:
 | `--zsh` | `~/.zsh/` |
 | `--zshrc` | `~/.zshrc` |
 | `--dotfiles` | `~/.zshenv`, `~/.zprofile`, `~/.gitignore_global`, `~/.ripgreprc`, `ghostty.config` |
-| `--codex` | `~/.codex/` |
+| `--codex` | Codex base config + merge script in `~/.codex/` |
 | `--claude` | `~/.claude/` |
 | `--opencode` | `~/.config/opencode/` |
 | `--vscode` | `~/Library/Application Support/Code/User/settings.json` |
@@ -98,5 +98,6 @@ Flags can be combined: `sync.sh --zsh --codex --dotfiles`.
 
 ## Notes
 
+- Codex config is generated from synced `~/.codex/config.base.toml` plus machine-local `~/.codex/config.local.toml`. The `ai` and `codexskip` aliases run `~/.codex/merge-config.py` before launching Codex, replacing `~/.codex/config.toml` with the merged result.
 - Shell scripts synced via `--claude` (e.g. `statusline.sh`) must be executable in git. Fix with: `git update-index --chmod=+x <file>`.
 - `--all` syncs everything. Use `--dry-run` first to preview changes on a fresh machine.

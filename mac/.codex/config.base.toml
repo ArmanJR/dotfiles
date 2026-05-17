@@ -1,10 +1,3 @@
-# Initial Install:
-# --- safety net ---
-# 1. Run `codex plugin marketplace add kenryu42/cc-marketplace`
-# 2. `/plugins` => select `cc-marketplace` => `/hooks` => trust
-# --- context7 ---
-# npx ctx7 setup --codex
-
 model = "gpt-5.5"
 model_reasoning_effort = "xhigh"
 plan_mode_reasoning_effort = "xhigh"
