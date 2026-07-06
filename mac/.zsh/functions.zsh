@@ -262,6 +262,51 @@ resources() {
     uptime
 }
 
+portwho() {
+  local port="${1:-8080}"
+
+  echo "Processes listening on port $port:"
+  lsof -nP -iTCP:"$port" -sTCP:LISTEN
+
+  echo
+  echo "With working directories:"
+  lsof -nP -iTCP:"$port" -sTCP:LISTEN -t | while read -r pid; do
+    echo "PID: $pid"
+    ps -p "$pid" -o pid,ppid,user,command
+    echo "CWD: $(lsof -a -p "$pid" -d cwd -Fn 2>/dev/null | sed 's/^n//')"
+    echo
+  done
+}
+
+portkill() {
+  local port="${1:-8080}"
+  local pids
+  pids=$(lsof -nP -iTCP:"$port" -sTCP:LISTEN -t)
+
+  if [[ -z "$pids" ]]; then
+    echo "No process listening on port $port"
+    return 0
+  fi
+
+  echo "Killing process(es) on port $port:"
+  echo "$pids"
+  kill $pids
+}
+
+portnuke() {
+  local port="${1:-8080}"
+  portwho "$port"
+
+  echo -n "Kill process(es) listening on port $port? [y/N] "
+  read -r confirm
+
+  if [[ "$confirm" == "y" || "$confirm" == "Y" ]]; then
+    lsof -nP -iTCP:"$port" -sTCP:LISTEN -t | xargs kill
+  else
+    echo "Not killing anything."
+  fi
+}
+
 # =============================================================================
 # Docker and Container Functions
 # =============================================================================
