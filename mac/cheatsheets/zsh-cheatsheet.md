@@ -312,7 +312,7 @@ hidefiles              # Hide hidden files in Finder
 dotsync --all          # Sync all dotfiles
 dotsync --dry-run      # Preview changes
 dotsync --zsh          # Sync .zsh/ only
-dotsync --codex        # Sync Codex config
+dotsync --codex        # Sync global Codex instructions
 dotsync --agentic      # AI agent mode (JSON output)
 reload                 # Reload .zshrc
 ```

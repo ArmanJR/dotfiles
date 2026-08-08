@@ -10,7 +10,7 @@
 #   --zsh         Sync .zsh directory
 #   --zshrc       Sync .zshrc file
 #   --dotfiles    Sync other dotfiles (.zshenv, .zprofile, .gitignore_global, .ripgreprc, ghostty.config)
-#   --codex       Sync .codex directory
+#   --codex       Sync global Codex instructions
 #   --claude      Sync .claude directory
 #   --opencode    Sync OpenCode config
 #   --vscode      Sync VSCode settings
@@ -404,7 +404,7 @@ while [[ $# -gt 0 ]]; do
             echo "  --zsh         Sync .zsh directory"
             echo "  --zshrc       Sync .zshrc file"
             echo "  --dotfiles    Sync other dotfiles (.gitignore_global, .ripgreprc, ghostty.config)"
-            echo "  --codex       Sync .codex directory"
+            echo "  --codex       Sync global Codex instructions"
             echo "  --claude      Sync .claude directory"
             echo "  --opencode    Sync OpenCode config"
             echo "  --vscode      Sync VSCode settings"

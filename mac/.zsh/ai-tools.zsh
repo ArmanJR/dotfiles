@@ -2,10 +2,8 @@
 # AI Tools Configuration
 # =============================================================================
 
-CODEX_CONFIG_MERGE_SCRIPT="$HOME/.codex/merge-config.py"
-
 # Alias "ai" acts as a runner for my current main coding agent
-alias ai='"$CODEX_CONFIG_MERGE_SCRIPT" && codex --dangerously-bypass-approvals-and-sandbox'
+alias ai='codex --dangerously-bypass-approvals-and-sandbox'
 
 # =============================================================================
 # Claude Code
@@ -44,7 +42,7 @@ ccmcp() {
 # =============================================================================
 
 # Skip approvals and sandbox (use with caution)
-alias codexskip='"$CODEX_CONFIG_MERGE_SCRIPT" && codex --dangerously-bypass-approvals-and-sandbox'
+alias codexskip='codex --dangerously-bypass-approvals-and-sandbox'
 
 # =============================================================================
 # OpenCode
