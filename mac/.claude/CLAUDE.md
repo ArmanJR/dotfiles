@@ -16,10 +16,11 @@
 - Prefer ephemeral execution over global installs: `uvx` / `npx --yes` for one-off tools. Do not install system or global packages, or otherwise mutate machine state, unless explicitly required by the task.
 - Prefer `rg` over `grep` and `fd` over `find` when available; fall back to the POSIX tools otherwise. When scripting `find`, use `-print0 | xargs -0` to stay safe on unusual filenames.
 - Use absolute paths or scope directory changes to a subshell (`(cd dir && cmd)`); don't rely on `cd` persisting across commands.
+- Do not use any built-in or interactive browser tooling. For browser-based or visual QA, use Chrome DevTools MCP only if it is available in the current toolset. If Chrome DevTools MCP is unavailable, do not install, launch, or substitute another browser or browser-automation tool; continue without visual QA and clearly report that it could not be performed.
 
 ## Before and on git commit
 
-Before committing your work to git, check if (1) project has a `README.md` file AND (2) your changes would make it --outdated--. If both conditions are met, update the `README.md` file accordingly. Otherwise, skip.
+Before committing your work to git, check if (1) project has a `README.md` file AND (2) your changes would make it **outdated**. If both conditions are met, update the `README.md` file accordingly. Otherwise, skip.
 
 When committing, summarize the changes and use a clear, scoped message; leave minor, exploratory, or incomplete edits uncommitted unless explicitly asked. Commit messages should follow Conventional Commits format. NO co-author or other attributions.
 
@@ -36,7 +37,7 @@ When committing, summarize the changes and use a clear, scoped message; leave mi
 - Think Before Coding: Don't assume. Don't hide confusion. Surface tradeoffs. If something is unclear, stop. Name what's confusing. Ask.
 - Respect the existing codebase: Before changing code, inspect the surrounding files, patterns, naming conventions, architecture, and tests; make changes that fit the project rather than imposing a new style.
 - Keep changes focused: Implement only what was requested or clearly required for the task. Avoid unrelated refactors, formatting churn, dependency changes, or speculative improvements; if you encounter something genuinely worth rethinking or improving, call it out separately so the user can decide whether to address it.
-- Ask when blocked: Make reasonable assumptions when the intent is clear, but ask for clarification when a decision would materially affect behavior, architecture, data safety, or user-facing output.
+- Ask when blocked: Make reasonable, low-risk assumptions when intent is clear. Ask for clarification when ambiguity would materially affect behavior, architecture, data safety, or user-facing output.
 - Prefer simple, maintainable solutions: Choose clear, readable code over clever abstractions; optimize for future maintainers, not just passing the immediate task. Ask yourself "Would a senior engineer say this is overcomplicated?" If yes, simplify.
 - Validate the work: If present, run relevant tests, type checks, linters, builds, or targeted manual checks whenever practical; report what was run and what passed or failed.
 - Handle errors intentionally: Do not silently swallow failures; add appropriate validation, error messages, logging, and edge-case handling consistent with the project.
@@ -44,5 +45,6 @@ When committing, summarize the changes and use a clear, scoped message; leave mi
 - Use dependencies carefully: Do not add or upgrade packages unless clearly justified; prefer existing project utilities and libraries before introducing new ones.
 - Do not alter or weaken tests merely to make them pass unless the expected behavior has intentionally changed.
 - Prefer official documentation, release notes, source repositories, and primary references. The Context7 MCP tools may be used for current package documentation.
+- Don't use Context7 for every package usage. Only check it when: (1) starting a greenfield project and picking/initializing a dependency — confirm the latest stable version; or (2) a library behaves unexpectedly (missing API, contradicting error, wrong signature) — check before guessing.
 - Do not copy an example from documentation without adapting it to the project's version, architecture, error handling, and security requirements.
 - Report clearly and concisely at the end: Brief the user about what changed, why it changed, how it was verified, any known limitations, and any follow-up work that remains.
