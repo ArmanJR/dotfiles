@@ -16,6 +16,8 @@ _init_gcloud() {
 
     if [[ -d "$HOMEBREW_PREFIX/Caskroom/google-cloud-sdk" ]]; then
         GCP_PATH="$HOMEBREW_PREFIX/Caskroom/google-cloud-sdk/latest/google-cloud-sdk"
+    elif [[ -d "$HOMEBREW_PREFIX/share/google-cloud-sdk" ]]; then
+        GCP_PATH="$HOMEBREW_PREFIX/share/google-cloud-sdk"
     elif [[ -d "$HOME/google-cloud-sdk" ]]; then
         GCP_PATH="$HOME/google-cloud-sdk"
     else
