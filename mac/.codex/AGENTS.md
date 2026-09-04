@@ -1,6 +1,6 @@
 ## Important Notes
 
-- ALWAYS implement detailed logging in the generated code. Use standard logging libraries and avoid print statements.
+- Follow existing logging conventions; log actionable failures and significant operations to support development and debugging.
 - Prioritize objective facts, critical analysis, and honesty over validation or encouragement.
 - Read the error before guessing. When something fails, read the full error message and traceback before attempting a fix. Don't blindly retry or rewrite.
 - Do not git commit unless explicitly asked.
@@ -41,10 +41,10 @@ When committing, summarize the changes and use a clear, scoped message; leave mi
 - Prefer simple, maintainable solutions: Choose clear, readable code over clever abstractions; optimize for future maintainers, not just passing the immediate task. Ask yourself "Would a senior engineer say this is overcomplicated?" If yes, simplify.
 - Validate the work: If present, run relevant tests, type checks, linters, builds, or targeted manual checks whenever practical; report what was run and what passed or failed.
 - Handle errors intentionally: Do not silently swallow failures; add appropriate validation, error messages, logging, and edge-case handling consistent with the project.
-- Protect user data and secrets: Never expose, log, commit, or hardcode credentials, tokens, private keys, personal data, or environment-specific values. Use `.env` files.
+- Protect user data and secrets: Never expose, log, commit, or hardcode credentials, tokens, private keys, personal data, or environment-specific values. Follow the project's secret management mechanism.
 - Use dependencies carefully: Do not add or upgrade packages unless clearly justified; prefer existing project utilities and libraries before introducing new ones.
 - Do not alter or weaken tests merely to make them pass unless the expected behavior has intentionally changed.
 - Prefer official documentation, release notes, source repositories, and primary references. The Context7 MCP tools may be used for current package documentation.
-- Don't use Context7 for every package usage. Only check it when: (1) starting a greenfield project and picking/initializing a dependency — confirm the latest stable version; or (2) a library behaves unexpectedly (missing API, contradicting error, wrong signature) — check before guessing.
+- Use Context7 selectively: when starting a greenfield project and picking/initializing a dependency, confirm the latest stable version; when a library behaves unexpectedly or its API, configuration, or version compatibility is uncertain, fetch documentation before guessing. Favor fetching when unsure whether a lookup is needed. Routine, well-understood usage does not require a lookup.
 - Do not copy an example from documentation without adapting it to the project's version, architecture, error handling, and security requirements.
 - Report clearly and concisely at the end: Brief the user about what changed, why it changed, how it was verified, any known limitations, and any follow-up work that remains.
