@@ -5,8 +5,9 @@
 - Read the error before guessing. When something fails, read the full error message and traceback before attempting a fix. Don't blindly retry or rewrite.
 - Do not git commit unless explicitly asked.
 - Do not create or switch git branches unless explicitly asked.
-- Write unit tests when and where applicable. Single scripts, minor works, exploratory works such as information gathering and code experiments do not require tests.
-- After modifying a project's code, run the project's existing tests (if any) to verify nothing broke.
+- Default to adding or updating tests for new features, bug fixes, and other behavioral changes. Cover normal behavior and relevant edge cases and failure paths; add a regression test for bug fixes that fails without the fix when practical.
+- Test observable behavior with meaningful assertions, not implementation details. Follow existing test conventions; favor deterministic tests and use integration tests when unit tests would miss important interactions. Aim for useful coverage rather than test counts; keep effort proportional to the change and explain when behavioral changes lack tests.
+- Run relevant existing tests and required project checks. Once checks pass, repeat or broaden verification only when further changes, failures, or unresolved concerns justify it.
 - Do not directly edit generated, vendored, minified, compiled, or lock-generated content when an authoritative source file or generation command exists.
 
 ## Terminal Environment
@@ -34,12 +35,11 @@ When committing, summarize the changes and use a clear, scoped message; leave mi
 
 ## Additional Notes
 
-- Think Before Coding: Don't assume. Don't hide confusion. Surface tradeoffs. If something is unclear, stop. Name what's confusing. Ask.
+- Complete authorized work using reasonable, low-risk assumptions. Ask when uncertainty materially affects correctness, scope, architecture, or data safety; continue independent work while awaiting clarification.
 - Respect the existing codebase: Before changing code, inspect the surrounding files, patterns, naming conventions, architecture, and tests; make changes that fit the project rather than imposing a new style.
 - Keep changes focused: Implement only what was requested or clearly required for the task. Avoid unrelated refactors, formatting churn, dependency changes, or speculative improvements; if you encounter something genuinely worth rethinking or improving, call it out separately so the user can decide whether to address it.
-- Ask when blocked: Make reasonable, low-risk assumptions when intent is clear. Ask for clarification when ambiguity would materially affect behavior, architecture, data safety, or user-facing output.
+- If a skill or instruction blocks authorized work, identify its source and explain the specific conflict. Do not infer approval requirements from general recommendations.
 - Prefer simple, maintainable solutions: Choose clear, readable code over clever abstractions; optimize for future maintainers, not just passing the immediate task. Ask yourself "Would a senior engineer say this is overcomplicated?" If yes, simplify.
-- Validate the work: If present, run relevant tests, type checks, linters, builds, or targeted manual checks whenever practical; report what was run and what passed or failed.
 - Handle errors intentionally: Do not silently swallow failures; add appropriate validation, error messages, logging, and edge-case handling consistent with the project.
 - Protect user data and secrets: Never expose, log, commit, or hardcode credentials, tokens, private keys, personal data, or environment-specific values. Follow the project's secret management mechanism.
 - Use dependencies carefully: Do not add or upgrade packages unless clearly justified; prefer existing project utilities and libraries before introducing new ones.
@@ -47,4 +47,4 @@ When committing, summarize the changes and use a clear, scoped message; leave mi
 - Prefer official documentation, release notes, source repositories, and primary references. The Context7 MCP tools may be used for current package documentation.
 - Use Context7 selectively: when starting a greenfield project and picking/initializing a dependency, confirm the latest stable version; when a library behaves unexpectedly or its API, configuration, or version compatibility is uncertain, fetch documentation before guessing. Favor fetching when unsure whether a lookup is needed. Routine, well-understood usage does not require a lookup.
 - Do not copy an example from documentation without adapting it to the project's version, architecture, error handling, and security requirements.
-- Report clearly and concisely at the end: Brief the user about what changed, why it changed, how it was verified, any known limitations, and any follow-up work that remains.
+- Lead with the outcome. Briefly report changes, verification, and material limitations. Use plain language and avoid repetitive summaries or unnecessary formatting.
