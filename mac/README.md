@@ -96,6 +96,30 @@ Individual targets:
 
 Flags can be combined: `sync.sh --zsh --codex --dotfiles`.
 
+## Codex permissions
+
+Add to `~/.codex/config.toml` before the first table header. Allows workspace/Git writes and network access, blocks `.agentignore` everywhere, and disables approval prompts.
+
+```toml
+default_permissions = "protected-workspace"
+approval_policy = "never"
+
+[permissions.protected-workspace]
+extends = ":workspace"
+
+[permissions.protected-workspace.filesystem]
+"/**/.agentignore" = "deny"
+"/**/.agentignore/**" = "deny"
+
+[permissions.protected-workspace.filesystem.":workspace_roots"]
+".git" = "write"
+
+[permissions.protected-workspace.network]
+enabled = true
+```
+
+Remove legacy `sandbox_mode` / `sandbox_workspace_write` settings, then start a new session with `codex` or `ai`. Keep CC Safety Net enabled. `codexskip` bypasses these protections. [Permission reference](https://learn.chatgpt.com/docs/permissions).
+
 ## Notes
 
 - `~/.codex/config.toml` is the authoritative, machine-local Codex configuration and is intentionally not managed by this repository. The `--codex` target syncs only global instructions.

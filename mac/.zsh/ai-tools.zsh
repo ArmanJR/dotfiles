@@ -2,8 +2,8 @@
 # AI Tools Configuration
 # =============================================================================
 
-# Alias "ai" acts as a runner for my current main coding agent
-alias ai='codex --dangerously-bypass-approvals-and-sandbox'
+# Use the permissions and approval policy in ~/.codex/config.toml.
+alias ai='codex'
 
 # =============================================================================
 # Claude Code
@@ -41,7 +41,7 @@ ccmcp() {
 # Codex
 # =============================================================================
 
-# Skip approvals and sandbox (use with caution)
+# Explicit full-access override; disables the configured .agentignore protection.
 alias codexskip='codex --dangerously-bypass-approvals-and-sandbox'
 
 # =============================================================================

@@ -163,11 +163,11 @@ zshconfig              # Edit .zsh/ dir in nvim
 
 ## AI Tools
 ```bash
-ai                     # Codex (bypass approvals)
+ai                     # Codex (configured sandbox, no approval prompts)
 cc                     # Claude Code
 ccx                    # Claude Code (skip permissions)
 ccmcp c7 <key>         # Install Context7 MCP tool
-codexskip              # Codex (bypass approvals)
+codexskip              # Codex full access (disables sandbox and .agentignore protection)
 ```
 
 ## File Operations & Navigation
