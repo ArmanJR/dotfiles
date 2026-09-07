@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # ============================================================================
-# Linux Edge Device Development Environment Bootstrap Script
+# Supercomputer Development Environment Bootstrap Script
 #
-# Sets up an edge device (Raspberry Pi, Jetson, etc.) development environment:
+# Sets up a supercomputer development environment:
 # - Zsh with Powerlevel10k (no Oh My Zsh), autosuggestions, syntax highlighting
 # - Neovim with LazyVim
 # - Modern CLI tools (eza, fd, rg, bat, fzf, zoxide)
@@ -37,7 +37,7 @@ readonly ARCH="$(uname -m)"
 readonly DISTRO="$(lsb_release -si 2>/dev/null || echo "Unknown")"
 
 readonly DOTFILES_DIR="${DOTFILES_DIR:-$HOME/code/dotfiles}"
-readonly EDGE_DIR="$DOTFILES_DIR/linux-edge"
+readonly SUPERCOMPUTER_DIR="$DOTFILES_DIR/linux-edge/supercomputer"
 readonly BACKUP_DIR="$HOME/.bootstrap-backup-$(date +%Y%m%d-%H%M%S)"
 readonly TEMP_DIR="/tmp/bootstrap-$$"
 readonly LOCAL_BIN="$HOME/.local/bin"
@@ -522,8 +522,8 @@ install_docker() {
 link_dotfiles() {
     log STEP "Setting up dotfiles..."
 
-    if [[ ! -d "$EDGE_DIR" ]]; then
-        log WARNING "Dotfiles directory not found at $EDGE_DIR"
+    if [[ ! -d "$SUPERCOMPUTER_DIR" ]]; then
+        log WARNING "Dotfiles directory not found at $SUPERCOMPUTER_DIR"
         log INFO "Clone your dotfiles repo to $DOTFILES_DIR first"
         return
     fi
@@ -531,15 +531,15 @@ link_dotfiles() {
     # Shell config files
     local shell_files=(".zshrc" ".zshenv" ".gitignore_global" ".ripgreprc")
     for file in "${shell_files[@]}"; do
-        if [[ -f "$EDGE_DIR/$file" ]]; then
-            ln -sf "$EDGE_DIR/$file" "$HOME/$file"
+        if [[ -f "$SUPERCOMPUTER_DIR/$file" ]]; then
+            ln -sf "$SUPERCOMPUTER_DIR/$file" "$HOME/$file"
             log INFO "Linked $file"
         fi
     done
 
     # .zsh directory (symlink individual files to allow local overrides)
     mkdir -p "$HOME/.zsh"
-    for file in "$EDGE_DIR/.zsh/"*; do
+    for file in "$SUPERCOMPUTER_DIR/.zsh/"*; do
         [[ -f "$file" ]] && ln -sf "$file" "$HOME/.zsh/$(basename "$file")"
     done
     log INFO "Linked .zsh/ modules"
@@ -547,20 +547,20 @@ link_dotfiles() {
     # Config files
     mkdir -p "$HOME/.config/prek"
 
-    for file in "$EDGE_DIR/.config/prek/"*; do
+    for file in "$SUPERCOMPUTER_DIR/.config/prek/"*; do
         [[ -f "$file" ]] && ln -sf "$file" "$HOME/.config/prek/$(basename "$file")"
     done
     log INFO "Linked prek templates"
 
     # Claude Code configuration
-    if [[ -d "$EDGE_DIR/.claude" ]]; then
+    if [[ -d "$SUPERCOMPUTER_DIR/.claude" ]]; then
         mkdir -p "$HOME/.claude"
-        for file in "$EDGE_DIR/.claude/"*; do
+        for file in "$SUPERCOMPUTER_DIR/.claude/"*; do
             [[ -f "$file" ]] && ln -sf "$file" "$HOME/.claude/$(basename "$file")"
         done
-        if [[ -d "$EDGE_DIR/.claude/commands" ]]; then
+        if [[ -d "$SUPERCOMPUTER_DIR/.claude/commands" ]]; then
             mkdir -p "$HOME/.claude/commands"
-            for file in "$EDGE_DIR/.claude/commands/"*; do
+            for file in "$SUPERCOMPUTER_DIR/.claude/commands/"*; do
                 [[ -f "$file" ]] && ln -sf "$file" "$HOME/.claude/commands/$(basename "$file")"
             done
         fi
@@ -612,7 +612,7 @@ parse_arguments() {
 
 show_help() {
     cat << 'EOF'
-Linux Edge Device Development Environment Bootstrap
+Supercomputer Development Environment Bootstrap
 
 Usage: ./bootstrap.sh [options]
 
@@ -639,7 +639,7 @@ main() {
 
     echo -e "${CYAN}"
     echo "============================================="
-    echo "   Linux Edge Dev Environment Bootstrap"
+    echo "   Supercomputer Dev Environment Bootstrap"
     echo "============================================="
     echo -e "${NC}"
 

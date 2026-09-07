@@ -6,8 +6,8 @@ if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]
 fi
 
 # =============================================================================
-# Linux Edge Device .zshrc Configuration
-# Modular shell config for edge devices (RPi, Jetson, etc.)
+# Supercomputer .zshrc Configuration
+# Modular shell config for supercomputers
 # =============================================================================
 
 # Performance monitoring (uncomment to debug startup time)

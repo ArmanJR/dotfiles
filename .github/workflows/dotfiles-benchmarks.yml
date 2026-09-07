@@ -13,6 +13,28 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  sbc:
+    name: Check SBC shell profile
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check out dotfiles
+        uses: actions/checkout@v4
+      - name: Install shell check dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends zsh shellcheck
+      - name: Check shell syntax and lint
+        run: |
+          bash -n linux-edge/sbc/bootstrap.sh
+          bash -n linux-edge/sbc/sync.sh
+          bash -n tests/sbc.sh
+          zsh -n linux-edge/sbc/.zshenv
+          zsh -n linux-edge/sbc/.zshrc
+          shellcheck linux-edge/sbc/bootstrap.sh linux-edge/sbc/sync.sh tests/sbc.sh
+      - name: Test SBC startup and installation
+        run: bash tests/sbc.sh
+
   benchmark:
     name: Benchmark dotfile paths
     runs-on: ubuntu-latest

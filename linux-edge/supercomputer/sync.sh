@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Dotfiles sync script (Linux Edge)
+# Dotfiles sync script (Supercomputer)
 # Pulls latest dotfiles from GitHub and syncs them to the local system
 #
 # Usage:
@@ -36,7 +36,7 @@ MAGENTA='\033[0;35m'
 NC='\033[0m'
 
 DOTFILES_DIR="$HOME/code/dotfiles"
-EDGE_DIR="$DOTFILES_DIR/linux-edge"
+SUPERCOMPUTER_DIR="$DOTFILES_DIR/linux-edge/supercomputer"
 BACKUP_BASE="$HOME/.dotfiles.backups"
 BACKUP_DIR="$BACKUP_BASE/sync-$(date +%Y%m%d-%H%M%S)"
 BACKUP_CREATED=false
@@ -369,7 +369,7 @@ while [[ $# -gt 0 ]]; do
             DRY_RUN=true
             ;;
         --help)
-            echo "Dotfiles sync script (Linux Edge)"
+            echo "Dotfiles sync script (Supercomputer)"
             echo ""
             echo "Usage: sync.sh [options]"
             echo ""
@@ -455,33 +455,33 @@ log_info "${BLUE}=== Checking for changes ===${NC}"
 log_info ""
 
 if [[ "$SYNC_ZSH" == true ]]; then
-    collect_directory_changes "$EDGE_DIR/.zsh" "$HOME/.zsh" ".zsh"
+    collect_directory_changes "$SUPERCOMPUTER_DIR/.zsh" "$HOME/.zsh" ".zsh"
 fi
 
 if [[ "$SYNC_ZSHRC" == true ]]; then
-    collect_file_changes "$EDGE_DIR/.zshrc" "$HOME/.zshrc" ".zshrc"
+    collect_file_changes "$SUPERCOMPUTER_DIR/.zshrc" "$HOME/.zshrc" ".zshrc"
 fi
 
 if [[ "$SYNC_DOTFILES" == true ]]; then
-    collect_file_changes "$EDGE_DIR/.zshenv" "$HOME/.zshenv" ".zshenv"
-    collect_file_changes "$EDGE_DIR/.gitignore_global" "$HOME/.gitignore_global" ".gitignore_global"
-    collect_file_changes "$EDGE_DIR/.ripgreprc" "$HOME/.ripgreprc" ".ripgreprc"
+    collect_file_changes "$SUPERCOMPUTER_DIR/.zshenv" "$HOME/.zshenv" ".zshenv"
+    collect_file_changes "$SUPERCOMPUTER_DIR/.gitignore_global" "$HOME/.gitignore_global" ".gitignore_global"
+    collect_file_changes "$SUPERCOMPUTER_DIR/.ripgreprc" "$HOME/.ripgreprc" ".ripgreprc"
 fi
 
 if [[ "$SYNC_PREK" == true ]]; then
-    collect_directory_changes "$EDGE_DIR/.config/prek" "$HOME/.config/prek" ".config/prek"
+    collect_directory_changes "$SUPERCOMPUTER_DIR/.config/prek" "$HOME/.config/prek" ".config/prek"
 fi
 
 if [[ "$SYNC_TMUX" == true ]]; then
-    collect_file_changes "$EDGE_DIR/.tmux.conf" "$HOME/.tmux.conf" ".tmux.conf"
+    collect_file_changes "$SUPERCOMPUTER_DIR/.tmux.conf" "$HOME/.tmux.conf" ".tmux.conf"
 fi
 
 if [[ "$SYNC_BIN" == true ]]; then
-    collect_directory_changes "$EDGE_DIR/.local/bin" "$HOME/.local/bin" ".local/bin"
+    collect_directory_changes "$SUPERCOMPUTER_DIR/.local/bin" "$HOME/.local/bin" ".local/bin"
 fi
 
 if [[ "$SYNC_CLAUDE" == true ]]; then
-    collect_directory_changes "$EDGE_DIR/.claude" "$HOME/.claude" ".claude"
+    collect_directory_changes "$SUPERCOMPUTER_DIR/.claude" "$HOME/.claude" ".claude"
 fi
 
 # Check if there are any changes
