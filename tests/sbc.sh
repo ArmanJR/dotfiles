@@ -12,6 +12,14 @@ mkdir -p "$TEST_HOME"
 ZSH_BIN=$(command -v zsh)
 
 fail() { printf 'FAIL: %s\n' "$*" >&2; exit 1; }
+fail_interactive_shell() {
+    printf 'FAIL: %s\n' "$*" >&2
+    printf '%s\n' '--- interactive shell stdout ---' >&2
+    cat "$TEST_DIR/shell.out" >&2
+    printf '\n%s\n' '--- interactive shell stderr ---' >&2
+    cat "$TEST_DIR/shell.err" >&2
+    exit 1
+}
 sync_sbc() { HOME="$TEST_HOME" bash "$REPO_DIR/linux-edge/sbc/sync.sh" "$@"; }
 run_zsh() {
     env -i HOME="$TEST_HOME" ZDOTDIR="$TEST_HOME" PATH=/usr/bin:/bin TERM=xterm-256color \
@@ -64,8 +72,8 @@ run_zsh -i -c '
     [[ $rendered == *"1"* ]] || exit 12
     print -s -- "sbc-history-marker"
     print -r -- OK
-' >"$TEST_DIR/shell.out" 2>"$TEST_DIR/shell.err" || fail "interactive shell failed: $(<"$TEST_DIR/shell.err")"
-[[ $(<"$TEST_DIR/shell.out") == OK && ! -s "$TEST_DIR/shell.err" ]] || fail 'noisy shell startup'
+' >"$TEST_DIR/shell.out" 2>"$TEST_DIR/shell.err" || fail_interactive_shell "interactive shell failed (exit $?)"
+[[ $(<"$TEST_DIR/shell.out") == OK && ! -s "$TEST_DIR/shell.err" ]] || fail_interactive_shell 'noisy shell startup'
 [[ -f "$TEST_HOME/.zcompdump" ]] || fail 'completion cache missing'
 [[ $(<"$TEST_HOME/.zsh_history") == *sbc-history-marker* ]] || fail 'history was not saved'
 run_zsh -i -c 'exit' >"$TEST_DIR/warm.out" 2>&1
