@@ -16,7 +16,7 @@ Brewfile                 # Homebrew bundle for new-device package setup
   cloud-tools.zsh         # AWS, GCP, Terraform, Pulumi
   dev-tools.zsh           # Docker, k8s, SSH, networking
   editors.zsh             # Neovim, VSCode, Zed, fzf integration
-  ai-tools.zsh            # AI tool aliases (Codex, Claude Code, OpenCode)
+  ai-tools.zsh            # Codex runner and AI tool aliases
   aliases.zsh             # General aliases and shell utilities
   functions.zsh           # Utility functions, project scaffolding
   .p10k.zsh               # Powerlevel10k theme file
@@ -101,6 +101,7 @@ Flags can be combined: `sync.sh --zsh --codex --dotfiles`.
 Add to `~/.codex/config.toml` before the first table header. Allows workspace/Git writes and network access, blocks `.agentignore` everywhere, and disables approval prompts.
 
 ```toml
+model_reasoning_effort = "medium"
 default_permissions = "protected-workspace"
 approval_policy = "never"
 
@@ -119,6 +120,33 @@ enabled = true
 ```
 
 Remove legacy `sandbox_mode` / `sandbox_workspace_write` settings, then start a new session with `codex` or `ai`. Keep CC Safety Net enabled. `codexskip` bypasses these protections. [Permission reference](https://learn.chatgpt.com/docs/permissions).
+
+## Codex MCP selection
+
+`ai` enables only Context7 among configured custom MCP servers by default. It requires `jq` and a server named `context7` in your local Codex configuration. Plugin-provided tools are managed separately.
+
+```sh
+ai                              # Context7 only
+ai --mcp chrome                 # Connect to your running Chrome
+ai --mcp chrome-anon            # Launch Chrome with a temporary profile
+ai --mcp another-server         # Enable a configured MCP by its server name
+ai --mcp chrome --mcp another-server
+```
+
+`chrome` and `chrome-anon` select the same `chrome-devtools` server and cannot be combined. Edit `AI_MCP_SERVERS`, `AI_MCP_COMMANDS`, and `AI_MCP_ARGS` in `.zsh/ai-tools.zsh` to add aliases and command overrides. Other Codex arguments pass through; use `--` before a prompt containing literal `--mcp`.
+
+For `chrome`, start Chrome 144+ and enable remote debugging at `chrome://inspect/#remote-debugging`, then allow the connection in Chrome. `chrome-anon` uses `--isolated` and does not reuse your signed-in profile.
+
+Add or update this section in `~/.codex/config.toml` to approve Chrome MCP tool calls automatically, including when `approval_policy = "never"`:
+
+```toml
+[mcp_servers.chrome-devtools]
+command = "npx"
+args = ["-y", "chrome-devtools-mcp@latest"]
+default_tools_approval_mode = "approve"
+```
+
+Reload shell changes with `source ~/.zsh/ai-tools.zsh`. Start a new Codex session after changing its configuration.
 
 ## Notes
 
