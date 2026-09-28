@@ -98,17 +98,20 @@ Flags can be combined: `sync.sh --zsh --codex --dotfiles`.
 
 ## Codex permissions
 
-Add to `~/.codex/config.toml` before the first table header. Allows workspace/Git writes and network access, blocks `.agentignore` everywhere, and disables approval prompts.
+Add to `~/.codex/config.toml` before the first table header. Allows workspace/Git writes, development cache writes, and network access; blocks `.agentignore` everywhere; and lets the agent request approval for exceptions.
 
 ```toml
 model_reasoning_effort = "medium"
 default_permissions = "protected-workspace"
-approval_policy = "never"
+approval_policy = "on-request"
 
 [permissions.protected-workspace]
 extends = ":workspace"
 
 [permissions.protected-workspace.filesystem]
+"/Users/arman/.cache/uv" = "write"
+"/Users/arman/.cache/go-mod" = "write"
+"/Users/arman/Library/Caches/go-build" = "write"
 "/**/.agentignore" = "deny"
 "/**/.agentignore/**" = "deny"
 
