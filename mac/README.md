@@ -109,11 +109,9 @@ approval_policy = "on-request"
 extends = ":workspace"
 
 [permissions.protected-workspace.filesystem]
-"/Users/arman/.cache/uv" = "write"
-"/Users/arman/.cache/go-mod" = "write"
+"/Users/arman/.cache" = "write"
 "/Users/arman/Library/Caches/go-build" = "write"
 "/**/.agentignore" = "deny"
-"/**/.agentignore/**" = "deny"
 
 [permissions.protected-workspace.filesystem.":workspace_roots"]
 ".git" = "write"
