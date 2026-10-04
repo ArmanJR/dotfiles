@@ -77,7 +77,22 @@ function ai {
       return 1
     fi
     key=$server
-    overrides+=(-c "mcp_servers.${key}.enabled=false")
+    # Plugin servers may have no mcp_servers entry. An enabled-only override
+    # creates an invalid transport, so preserve the discovered transport too.
+    if ! value=$(print -r -- "$listing" | command jq -er --arg name "$server" '
+      def toml:
+        if type == "object" then
+          "{" + (to_entries | map((.key | tojson) + "=" + (.value | toml)) | join(",")) + "}"
+        elif type == "array" then
+          "[" + (map(toml) | join(",")) + "]"
+        else tojson end;
+      .[] | select(.name == $name) |
+      ((.transport | del(.type) | with_entries(select(.value != null))) + {enabled: false} | toml)
+    '); then
+      print -u2 "ai: could not preserve MCP transport for '$server'."
+      return 1
+    fi
+    overrides+=(-c "mcp_servers.${key}=$value")
   done
   for server in context7; do
     if (( ! ${servers[(Ie)$server]} )); then
