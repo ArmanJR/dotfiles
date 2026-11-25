@@ -1,6 +1,6 @@
 # My agentic coding setup
 
-*last update: Oct 2, 2026*
+*last update: Nov 25, 2026*
 
 I code on a Mac. I used Claude Code before moving to Codex a few months ago; both configurations live here. This is a walkthrough of the settings that shape how I work.
 
@@ -24,7 +24,7 @@ I use “YOLO mode” in both Claude Code (`--dangerously-skip-permissions`) and
 
 For terminal sessions, I wrote my own way of enabling MCP servers in [`.zsh/ai-tools.zsh`](.zsh/ai-tools.zsh). I wanted to choose which servers the agent gets for each session and pass the right arguments for the task. That way, I don't flood its context with MCP tools it won't use, and I don't have to manually change the server configuration every time I need a different browser setup.
 
-The command I use is `ai`, my terminal shortcut for whichever coding agent I'm currently using. It used to point to `claude`; after I migrated, I changed it to launch `codex`. Today it's a shell function that wraps Codex and handles the MCP selection. Context7 stays enabled by default, and I opt into other configured MCP servers with `--mcp`.
+The command I use is `ai`, my terminal shortcut for whichever coding agent I'm currently using. It has pointed to both `claude` and `codex` over time. Today it's a shell function that wraps Claude Code in YOLO mode and handles the MCP selection. Context7 stays enabled by default, and I opt into other MCP servers with `--mcp`. Everything else, including plugin servers and claude.ai connectors, stays off for that session.
 
 For example, if the agent has built a webpage and needs to do visual QA, it usually doesn't need my personal Chrome profile or any of my signed-in accounts. I launch it with:
 
@@ -32,7 +32,7 @@ For example, if the agent has built a webpage and needs to do visual QA, it usua
 ai --mcp chrome-anon
 ```
 
-This opens Codex with Chrome DevTools MCP configured to use `--isolated`. Chrome gets a temporary profile without my existing logins, which is enough for checking the page and verifying the agent's work. This provides the fresh browser session I want for QA; technically, it uses a temporary profile rather than Chrome's Incognito mode.
+This opens Claude Code with Chrome DevTools MCP configured to use `--isolated`. Chrome gets a temporary profile without my existing logins, which is enough for checking the page and verifying the agent's work. This provides the fresh browser session I want for QA; technically, it uses a temporary profile rather than Chrome's Incognito mode.
 
 If I want the agent to do something on my behalf that needs my login, such as opening a LinkedIn profile using my account, I launch it with:
 
@@ -40,7 +40,7 @@ If I want the agent to do something on my behalf that needs my login, such as op
 ai --mcp chrome
 ```
 
-This opens Codex with the same Chrome DevTools MCP server, but passes `--autoConnect` so it connects to my already running Chrome session. The agent can then use the websites I'm already signed into. Both commands select the same MCP server; the wrapper chooses the browser arguments for the workflow.
+This opens Claude Code with the same Chrome DevTools MCP server, but passes `--autoConnect` so it connects to my already running Chrome session. The agent can then use the websites I'm already signed into. Both commands select the same MCP server; the wrapper chooses the browser arguments for the workflow.
 
 ## Claude Code
 
