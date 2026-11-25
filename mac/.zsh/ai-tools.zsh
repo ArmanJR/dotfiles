@@ -4,31 +4,38 @@
 
 # MCP aliases: name -> configured server, with optional command/argument overrides.
 # Other configured MCP server names can be passed directly to --mcp.
-typeset -gA AI_MCP_SERVERS=(chrome chrome-devtools chrome-anon chrome-devtools)
-typeset -gA AI_MCP_COMMANDS=(chrome npx chrome-anon npx)
+typeset -gA AI_MCP_SERVERS=(chrome chrome-devtools chrome-anon chrome-devtools blender blender)
+typeset -gA AI_MCP_COMMANDS=(chrome npx chrome-anon npx blender uvx)
+# blender: needs the MCP for Blender addon running in Blender (socket on localhost:9876).
 typeset -gA AI_MCP_ARGS=(
   chrome '["-y", "chrome-devtools-mcp@latest", "--autoConnect"]'
   chrome-anon '["-y", "chrome-devtools-mcp@latest", "--isolated"]'
+  blender '["mcp-for-blender@latest"]'
 )
 
-# Usage: ai [--mcp NAME]... [Codex arguments]
-# Context7 stays enabled.
-# Use -- before a prompt containing literal --mcp.
+# Usage: ai [--mcp NAME]... [Claude Code arguments]
+# Runs Claude Code with permission checks skipped (YOLO mode).
+# Only the default servers (Context7) and those picked with --mcp are loaded;
+# all other configured servers, plugin servers and claude.ai connectors stay off.
+# Use -- before a prompt containing literal --mcp. Set AI_DEBUG=1 for diagnostics.
+typeset -ga AI_MCP_DEFAULTS=(context7)
 if (( ${+aliases[ai]} )); then
   unalias ai
 fi
 function ai {
   emulate -L zsh
   setopt localoptions pipefail
-  local -a selected forwarded discovery overrides servers
-  local name server key listing value
+  local claude_bin=$HOME/.local/bin/claude
+  local user_config=$HOME/.claude.json project_config=$PWD/.mcp.json
+  local -a selected forwarded servers sources
+  local name server listing value spec config
   local -A chosen
 
   while (( $# )); do
     case "$1" in
       --mcp)
         if (( $# < 2 )) || [[ -z "$2" || "$2" == -* ]]; then
-          print -u2 'ai: --mcp requires a server name (e.g. chrome or chrome-anon).'
+          print -u2 'ai: --mcp requires a server name (e.g. chrome, chrome-anon or blender).'
           return 2
         fi
         selected+=("$2")
@@ -42,64 +49,38 @@ function ai {
         forwarded+=("$@")
         break
         ;;
-      -C|--cd|-p|--profile|-c|--config)
-        if (( $# < 2 )); then
-          print -u2 "ai: $1 requires a value."
-          return 2
-        fi
-        discovery+=("$1" "$2")
-        forwarded+=("$1" "$2")
-        shift 2
-        ;;
-      --cd=*|--profile=*|--config=*)
-        discovery+=("$1")
-        forwarded+=("$1")
-        shift
-        ;;
       *) forwarded+=("$1"); shift ;;
     esac
   done
 
-  # Discover effective configuration, including trusted project overrides.
+  # Discover configured servers with Claude's scope precedence:
+  # user (~/.claude.json) < project (./.mcp.json) < local (~/.claude.json, this dir).
   # Never print the JSON: it may contain MCP credentials.
-  if ! listing=$(command codex "${discovery[@]}" mcp list --json); then
-    print -u2 'ai: could not read Codex MCP configuration.'
+  if [[ ! -r $user_config ]]; then
+    print -u2 "ai: cannot read Claude configuration at $user_config."
     return 1
   fi
-  if ! value=$(print -r -- "$listing" | command jq -er 'map(.name) | .[]'); then
-    print -u2 'ai: could not read MCP server names; check that jq and Context7 are configured.'
+  sources=("$user_config")
+  [[ -r $project_config ]] && sources+=("$project_config")
+  if ! listing=$(command jq -cen --arg cwd "$PWD" '
+    [inputs] as [$user, $project] |
+    ($user.mcpServers // {}) + ($project.mcpServers // {}) + ($user.projects[$cwd].mcpServers // {})
+  ' "${sources[@]}"); then
+    print -u2 'ai: could not read Claude MCP configuration; check that jq is installed.'
     return 1
   fi
+  value=$(print -r -- "$listing" | command jq -r 'keys[]') || return 1
   servers=("${(@f)value}")
-  for server in "${servers[@]}"; do
-    if [[ "$server" == *[^a-zA-Z0-9_-]* ]]; then
-      print -u2 "ai: unsupported MCP server name '$server'. Use letters, numbers, underscores, or hyphens."
-      return 1
-    fi
-    key=$server
-    # Plugin servers may have no mcp_servers entry. An enabled-only override
-    # creates an invalid transport, so preserve the discovered transport too.
-    if ! value=$(print -r -- "$listing" | command jq -er --arg name "$server" '
-      def toml:
-        if type == "object" then
-          "{" + (to_entries | map((.key | tojson) + "=" + (.value | toml)) | join(",")) + "}"
-        elif type == "array" then
-          "[" + (map(toml) | join(",")) + "]"
-        else tojson end;
-      .[] | select(.name == $name) |
-      ((.transport | del(.type) | with_entries(select(.value != null))) + {enabled: false} | toml)
-    '); then
-      print -u2 "ai: could not preserve MCP transport for '$server'."
-      return 1
-    fi
-    overrides+=(-c "mcp_servers.${key}=$value")
-  done
-  for server in context7; do
+  [[ -n $AI_DEBUG ]] && print -u2 "ai: configured MCP servers (${(j:, :)sources}): ${(j:, :)servers}"
+
+  # Spec of servers to enable: [{name, command?, args?}]. Holds no secrets.
+  spec='[]'
+  for server in "${AI_MCP_DEFAULTS[@]}"; do
     if (( ! ${servers[(Ie)$server]} )); then
-      print -u2 "ai: default MCP '$server' is not configured in Codex."
+      print -u2 "ai: default MCP '$server' is not configured in Claude Code (see ccmcp)."
       return 1
     fi
-    overrides+=(-c "mcp_servers.${server}.enabled=true")
+    spec=$(command jq -cn --argjson spec "$spec" --arg name "$server" '$spec + [{name: $name}]') || return 1
   done
 
   for name in "${selected[@]}"; do
@@ -117,21 +98,38 @@ function ai {
       return 2
     fi
     chosen[$server]=$name
-    if [[ "$server" == *[^a-zA-Z0-9_-]* ]]; then
-      print -u2 "ai: unsupported MCP server name '$server'."
-      return 2
-    fi
-    key=$server
-    overrides+=(-c "mcp_servers.${key}.enabled=true")
-    if [[ -n ${AI_MCP_COMMANDS[$name]} ]]; then
-      value=$(print -rn -- "${AI_MCP_COMMANDS[$name]}" | command jq -Rs .) || return 1
-      overrides+=(-c "mcp_servers.${key}.command=$value")
-    fi
-    if [[ -n ${AI_MCP_ARGS[$name]} ]]; then
-      overrides+=(-c "mcp_servers.${key}.args=${AI_MCP_ARGS[$name]}")
+    if ! spec=$(command jq -cn --argjson spec "$spec" --arg name "$server" \
+        --arg command "${AI_MCP_COMMANDS[$name]}" --argjson args "${AI_MCP_ARGS[$name]:-null}" '
+      $spec + [{name: $name}
+        + (if $command != "" then {command: $command} else {} end)
+        + (if $args != null then {args: $args} else {} end)]
+    '); then
+      print -u2 "ai: invalid AI_MCP_ARGS for '$name' (must be a JSON array)."
+      return 1
     fi
   done
-  command codex "${overrides[@]}" "${forwarded[@]}"
+
+  # A command override turns the entry into a stdio server, keeping only its env.
+  if ! config=$(print -r -- "$listing" | command jq -ce --argjson spec "$spec" '
+    . as $all | {mcpServers: (reduce $spec[] as $s ({}; .[$s.name] = (
+      ($all[$s.name] // {}) as $base |
+      if $s.command then
+        {type: "stdio", command: $s.command, args: ($s.args // $base.args // [])}
+          + (if $base.env then {env: $base.env} else {} end)
+      elif $s.args then $base + {args: $s.args}
+      else $base end
+    )))}
+  '); then
+    print -u2 'ai: could not build the MCP configuration.'
+    return 1
+  fi
+  [[ -n $AI_DEBUG ]] && print -u2 "ai: enabled MCP servers: $(command jq -cn --argjson spec "$spec" '$spec')"
+
+  # =(...) is a private (0600) temp file, removed when Claude exits; this keeps
+  # credentials out of the process list. --mcp-config is variadic, so another
+  # option must follow it before any forwarded prompt.
+  command "$claude_bin" --mcp-config =(print -r -- "$config") --strict-mcp-config \
+    --dangerously-skip-permissions "${forwarded[@]}"
 }
 
 # =============================================================================
@@ -170,8 +168,8 @@ ccmcp() {
 # Codex
 # =============================================================================
 
-# Explicit full-access override; disables the configured .agentignore protection.
-alias codexskip='codex --dangerously-bypass-approvals-and-sandbox'
+# Skip approvals and sandbox (use with caution)
+alias codexskip="codex --dangerously-bypass-approvals-and-sandbox"
 
 # =============================================================================
 # OpenCode
